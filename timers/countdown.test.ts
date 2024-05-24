@@ -32,8 +32,9 @@ Deno.test('start, pause, stop', () => {
     countdown.start()
     time.tick(1000)
     countdown.stop()
+    countdown.reset()
 
-    assertSpyCalls(listener, 1104) // 1100 for time, 4 for start/pauses/stop
+    assertSpyCalls(listener, 1105) // 1100 for time, 4 for start/pauses/stop
     assertEquals(listener.calls[261].args[0], {
       display: '0:27.3',
       elapsed: 2610,
@@ -63,8 +64,8 @@ Deno.test('start, pause, stop', () => {
       total: 30000,
     }])
 
-    // Timer stopped
-    assertEquals(listener.calls[1103].args, [{
+    // Timer stopped and reset
+    assertEquals(listener.calls[1104].args, [{
       display: '0:30.0',
       elapsed: 0,
       isPaused: false,
@@ -91,9 +92,9 @@ Deno.test('countdown reaches zero', () => {
     assertEquals(countdown.state.remaining, 500)
 
     time.tick(500)
-    assertEquals(countdown.state.remaining, 1000)
+    assertEquals(countdown.state.remaining, 0)
     assertEquals(countdown.state.isStarted, false)
-    assertEquals(countdown.state.display, '0:01.0')
+    assertEquals(countdown.state.display, '0:00.0')
 
     // 99 for time, 1 for start and finish
     // Not 100, because 100th tick is the "stop" tick

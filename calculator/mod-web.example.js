@@ -12,7 +12,7 @@ class CalculatorComponent extends HTMLElement {
       subtract: (value) => this.calculator.subtract(value),
       multiply: (value) => this.calculator.multiply(value),
       divide: (value) => this.calculator.divide(value),
-      clear: (value) => this.calculator.clear(value),
+      reset: (value) => this.calculator.reset(value),
     }
   }
 
@@ -24,7 +24,7 @@ class CalculatorComponent extends HTMLElement {
   operate(type) {
     const valueInput = this.querySelector('#value')
     const value = parseFloat(valueInput.value)
-    if (!isNaN(value) || type === 'clear') {
+    if (!isNaN(value) || type === 'reset') {
       this.operators[type](value)
       valueInput.value = ''
     }
@@ -47,9 +47,9 @@ class CalculatorComponent extends HTMLElement {
       'click',
       () => this.operate('divide'),
     )
-    this.querySelector('#clear').addEventListener(
+    this.querySelector('#reset').addEventListener(
       'click',
-      () => this.operate('clear'),
+      () => this.operate('reset'),
     )
   }
 
@@ -85,7 +85,7 @@ class CalculatorComponent extends HTMLElement {
           <button id="subtract">Subtract</button>
           <button id="multiply">Multiply</button>
           <button id="divide">Divide</button>
-          <button id="clear">Clear</button>
+          <button id="reset">Clear</button>
         </div>
       </div>
     `

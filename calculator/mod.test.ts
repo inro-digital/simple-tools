@@ -23,15 +23,15 @@ Deno.test('operators', () => {
   assertEquals(calculator.state.value, 4)
   calculator.divide(5)
   assertEquals(calculator.state.value, 0.8)
-  calculator.clear()
+  calculator.reset()
   assertEquals(calculator.state.value, 0)
-  calculator.clear(3)
+  calculator.reset(3)
   assertEquals(calculator.state.value, 3)
 })
 
 Deno.test('history', () => {
   const calculator = new Calculator()
-  calculator.clear(1)
+  calculator.reset(1)
   calculator.add(5)
   calculator.subtract(3)
   calculator.multiply(2)
@@ -43,7 +43,7 @@ Deno.test('history', () => {
     { operator: Multiply, value: 2 },
     { operator: Divide, value: 5 },
   ])
-  calculator.clear()
+  calculator.reset()
   assertEquals(calculator.state.history, [{ operator: Initial, value: 0 }])
 })
 
@@ -54,7 +54,7 @@ Deno.test('display', () => {
   calculator.multiply(2)
   calculator.divide(5)
   assertEquals(calculator.state.display, '0 + 5 - 3 × 2 ÷ 5 =')
-  calculator.clear()
+  calculator.reset()
   assertEquals(calculator.state.display, '0')
 })
 
@@ -77,7 +77,7 @@ Deno.test('events', () => {
   calculator.subtract(3)
   calculator.multiply(2)
   calculator.divide(5)
-  calculator.clear(2)
+  calculator.reset(2)
 
   assertSpyCalls(listener, 5)
 })

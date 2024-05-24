@@ -16,7 +16,10 @@ class StopwatchComponent extends HTMLElement {
 
     this.startButton.addEventListener('click', () => this.stopwatch.start())
     this.pauseButton.addEventListener('click', () => this.stopwatch.pause())
-    this.stopButton.addEventListener('click', () => this.stopwatch.stop())
+    this.stopButton.addEventListener('click', () => {
+      this.stopwatch.stop()
+      this.stopwatch.reset()
+    })
     this.lapButton.addEventListener('click', () => this.stopwatch.lap())
   }
 

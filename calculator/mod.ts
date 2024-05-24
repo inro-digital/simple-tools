@@ -47,12 +47,9 @@ export default class Calculator extends State<CalculatorState> {
     this.notify()
   }
 
-  clear(initialValue?: number) {
-    this.state.history = [{
-      operator: Operator.Initial,
-      value: initialValue || 0,
-    }]
-    this.state.value = initialValue || 0
+  subtract(value: number) {
+    this.state.history.push({ operator: Operator.Subtract, value })
+    this.state.value = this.state.value - value
     this.state.display = getDisplay(this.state.history)
     this.notify()
   }
@@ -71,9 +68,12 @@ export default class Calculator extends State<CalculatorState> {
     this.notify()
   }
 
-  subtract(value: number) {
-    this.state.history.push({ operator: Operator.Subtract, value })
-    this.state.value = this.state.value - value
+  reset(initialValue?: number) {
+    this.state.history = [{
+      operator: Operator.Initial,
+      value: initialValue || 0,
+    }]
+    this.state.value = initialValue || 0
     this.state.display = getDisplay(this.state.history)
     this.notify()
   }

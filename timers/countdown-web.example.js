@@ -31,7 +31,10 @@ class CountdownComponent extends HTMLElement {
 
     this.startButton.addEventListener('click', () => this.countdown.start())
     this.pauseButton.addEventListener('click', () => this.countdown.pause())
-    this.stopButton.addEventListener('click', () => this.countdown.stop())
+    this.stopButton.addEventListener('click', () => {
+      this.countdown.stop()
+      this.countdown.reset()
+    })
   }
 
   update() {

@@ -21,20 +21,22 @@ export interface StopwatchOptions {
 
 export default class Stopwatch extends State<StopwatchState> {
   #elapsedBeforePauseMS: number
+  #initialMS: number
   #interval: number | undefined
   #resolutionMS: number | undefined
   #startMS: number | undefined
 
-  constructor(options?: StopwatchOptions) {
+  constructor({ initialMS = 0, resolutionMS = 10 }: StopwatchOptions = {}) {
     super({
-      display: formatDisplayTime(options?.initialMS ?? 0),
-      elapsed: options?.initialMS ?? 0,
+      display: formatDisplayTime(initialMS),
+      elapsed: initialMS,
       isPaused: false,
       isStarted: false,
       laps: [],
     })
     this.#elapsedBeforePauseMS = 0
-    this.#resolutionMS = options?.resolutionMS ?? 10
+    this.#initialMS = initialMS
+    this.#resolutionMS = resolutionMS
   }
 
   start() {
@@ -87,9 +89,20 @@ export default class Stopwatch extends State<StopwatchState> {
 
     this.state.isPaused = false
     this.state.isStarted = false
-    this.state.elapsed = 0
-    this.state.display = formatDisplayTime(this.state.elapsed)
+
+    this.notify()
+  }
+
+  reset(options: StopwatchOptions = {}) {
+    this.#elapsedBeforePauseMS = 0
+    this.#initialMS = options.initialMS ?? this.#initialMS
+    this.#resolutionMS = options.resolutionMS ?? this.#resolutionMS
+
+    this.state.elapsed = this.#initialMS
+    this.state.isPaused = false
+    this.state.isStarted = false
     this.state.laps = []
+    this.state.display = formatDisplayTime(this.state.elapsed)
 
     this.notify()
   }

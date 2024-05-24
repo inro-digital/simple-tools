@@ -31,8 +31,9 @@ Deno.test('start, pause, stop', () => {
     stopwatch.start()
     time.tick(1000)
     stopwatch.stop()
+    stopwatch.reset()
 
-    assertSpyCalls(listener, 1104) // 1100 for time, 4 for start/pauses/stop
+    assertSpyCalls(listener, 1105) // 1100 for time, 4 for start/pauses/stop
     assertEquals(listener.calls[261].args, [{
       display: '0:02.6',
       elapsed: 2610,
@@ -59,8 +60,8 @@ Deno.test('start, pause, stop', () => {
       laps: [],
     }])
 
-    // Timer stopped
-    assertEquals(listener.calls[1103].args, [{
+    // Timer stopped and reset
+    assertEquals(listener.calls[1104].args, [{
       display: '0:00.0',
       elapsed: 0,
       isPaused: false,

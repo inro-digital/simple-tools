@@ -17,21 +17,23 @@ export interface CountdownOptions {
 
 export default class Countdown extends State<CountdownState> {
   #elapsedBeforePauseMS: number
+  #initialMS: number
   #interval: number | undefined
   #resolutionMS: number | undefined
   #startMS: number | undefined
 
-  constructor(options?: CountdownOptions) {
+  constructor({ initialMS = 0, resolutionMS = 10 }: CountdownOptions = {}) {
     super({
-      display: formatDisplayTime(options?.initialMS ?? 0),
+      display: formatDisplayTime(initialMS),
       elapsed: 0,
       isPaused: false,
       isStarted: false,
-      remaining: options?.initialMS ?? 0,
-      total: options?.initialMS ?? 0,
+      remaining: initialMS,
+      total: initialMS,
     })
     this.#elapsedBeforePauseMS = 0
-    this.#resolutionMS = options?.resolutionMS ?? 10
+    this.#initialMS = initialMS
+    this.#resolutionMS = resolutionMS
   }
 
   start() {
@@ -88,15 +90,27 @@ export default class Countdown extends State<CountdownState> {
 
     this.state.isPaused = false
     this.state.isStarted = false
-    this.state.elapsed = 0
-    this.state.remaining = this.state.total
-    this.state.display = formatDisplayTime(this.state.remaining)
   }
 
   stop() {
     if (!this.state.isStarted) return
-
     this.#stop()
+    this.notify()
+  }
+
+  reset(options: CountdownOptions = {}) {
+    this.#elapsedBeforePauseMS = 0
+    this.#initialMS = options?.initialMS ?? this.#initialMS
+    this.#resolutionMS = options?.resolutionMS ?? this.#resolutionMS
+
+    this.state.elapsed = 0
+    this.state.isPaused = false
+    this.state.isStarted = false
+    this.state.remaining = this.#initialMS
+    this.state.total = this.#initialMS
+
+    this.state.display = formatDisplayTime(this.state.remaining)
+
     this.notify()
   }
 }

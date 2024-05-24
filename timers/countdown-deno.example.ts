@@ -22,7 +22,10 @@ for await (const keypress of readKeypress()) {
     else countdown.start()
   }
 
-  if (keypress.key === 'return') countdown.stop()
+  if (keypress.key === 'return') {
+    countdown.stop()
+    countdown.reset()
+  }
 
   if (keypress.ctrlKey && keypress.key === 'c') {
     Deno.exit(0)

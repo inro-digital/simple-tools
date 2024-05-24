@@ -23,7 +23,10 @@ for await (const keypress of readKeypress()) {
     else stopwatch.start()
   }
 
-  if (keypress.key === 'return') stopwatch.stop()
+  if (keypress.key === 'return') {
+    stopwatch.stop()
+    stopwatch.reset()
+  }
 
   if (isStarted && keypress.key === 'l') {
     stopwatch.lap()
