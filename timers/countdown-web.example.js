@@ -37,7 +37,7 @@ class CountdownComponent extends HTMLElement {
 
   update() {
     const display = this.shadowRoot.querySelector('.display')
-    display.textContent = this.countdown.state.display
+    if (display) display.textContent = this.countdown.state.display
   }
 
   render() {

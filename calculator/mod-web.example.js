@@ -1,4 +1,4 @@
-import Calculator from 'https://esm.sh/jsr/@inro/simple-tools/countdown'
+import Calculator from 'https://esm.sh/jsr/@inro/simple-tools/calculator'
 
 class CalculatorComponent extends HTMLElement {
   constructor() {
@@ -20,6 +20,15 @@ class CalculatorComponent extends HTMLElement {
   connectedCallback() {
     this.render()
     this.bindEvents()
+  }
+
+  operate(type) {
+    const valueInput = this.shadowRoot.querySelector('#value')
+    const value = parseFloat(valueInput.value)
+    if (!isNaN(value) || type === 'clear') {
+      this.operators[type](value)
+      valueInput.value = ''
+    }
   }
 
   bindEvents() {
@@ -45,18 +54,10 @@ class CalculatorComponent extends HTMLElement {
     )
   }
 
-  operate(type) {
-    const valueInput = this.shadowRoot.querySelector('#value')
-    const value = parseFloat(valueInput.value)
-    if (!isNaN(value) || type === 'clear') {
-      this.operators[type](value)
-      valueInput.value = ''
-    }
-  }
-
   update() {
     const display = this.shadowRoot.querySelector('.display')
-    display.textContent = this.calculator.state.display
+    const state = this.calculator.state
+    display.textContent = state.display + ' ' + +state.value.toFixed(2)
   }
 
   render() {
