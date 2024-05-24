@@ -1,27 +1,3 @@
-/**
- * @module
- * A timer that counts up from a given number. All public methods trigger
- * event listeners. Additionally, if the timer is running, event listeners
- * will trigger every `resolutionMS` interval.
- *
- * @example Basic Usage
- * ```ts
- * import Stopwatch, { StopwatchState } from '@inro/simple-tools/stopwatch'
- * const timer = new Stopwatch()
- * timer.addEventListener((state: CountdownState) => {
- *   console.log(state.display) // "0:00.0"
- *   console.log(state.elapsed) // 0
- *   console.log(state.laps) // []
- * })
- *
- * document.getElementById('#start').onclick = () => timer.start()
- * document.getElementById('#pause').onclick = () => timer.pause()
- * document.getElementById('#stop').onclick = () => timer.stop()
- * document.getElementById('#reset').onclick = () => timer.reset()
- * document.getElementById('#lap').onclick = () => timer.lap()
- * ```
- */
-
 import State from '../utils/state.ts'
 import { formatDisplayTime } from './utils.ts'
 
@@ -57,6 +33,29 @@ export interface StopwatchOptions {
   resolutionMS?: number
 }
 
+/**
+ * @module
+ * A timer that counts up from a given number. All public methods trigger
+ * event listeners. Additionally, if the timer is running, event listeners
+ * will trigger every `resolutionMS` interval.
+ *
+ * @example Basic Usage
+ * ```ts
+ * import Stopwatch, { StopwatchState } from '@inro/simple-tools/stopwatch'
+ * const timer = new Stopwatch()
+ * timer.addEventListener((state: CountdownState) => {
+ *   console.log(state.display) // "0:00.0"
+ *   console.log(state.elapsed) // 0
+ *   console.log(state.laps) // []
+ * })
+ *
+ * document.getElementById('#start').onclick = () => timer.start()
+ * document.getElementById('#pause').onclick = () => timer.pause()
+ * document.getElementById('#stop').onclick = () => timer.stop()
+ * document.getElementById('#reset').onclick = () => timer.reset()
+ * document.getElementById('#lap').onclick = () => timer.lap()
+ * ```
+ */
 export default class Stopwatch extends State<StopwatchState> {
   #elapsedBeforePauseMS: number
   #initialMS: number

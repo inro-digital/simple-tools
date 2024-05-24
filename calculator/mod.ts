@@ -1,30 +1,3 @@
-/**
- * @module
- * A simple calculator that stores history. All public methods trigger the
- * calculator event listener
- *
- * @example Basic math
- * ```ts
- * import Calculator from '@inro/simple-tools/calculator'
- * const calc = new Calculator()
- * calc.add(5)
- * calc.add(6)
- * console.log(calc.state.value) // 11
- * console.log(calc.state.display) // "5 + 6 ="
- * console.log(calc.state.history) // history of diffs
- * ```
- *
- * @example Using event listener
- * ```ts
- * import Calculator, { CalculatorState } from '@inro/simple-tools/calculator'
- * const calc = new Calculator()
- * calc.addEventListener((state: CalculatorState) => {
- *   // function that returns the current state
- * })
- * calc.subtract(5) // triggers the event listener
- * ```
- */
-
 import State from '../utils/state.ts'
 
 /* The names of the operations that Calculator supports */
@@ -62,6 +35,32 @@ export interface CalculatorState {
   value: number
 }
 
+/**
+ * @module
+ * A simple calculator that stores history. All public methods trigger the
+ * calculator event listener
+ *
+ * @example Basic math
+ * ```ts
+ * import Calculator from '@inro/simple-tools/calculator'
+ * const calc = new Calculator()
+ * calc.add(5)
+ * calc.add(6)
+ * console.log(calc.state.value) // 11
+ * console.log(calc.state.display) // "5 + 6 ="
+ * console.log(calc.state.history) // history of diffs
+ * ```
+ *
+ * @example Using event listener
+ * ```ts
+ * import Calculator, { CalculatorState } from '@inro/simple-tools/calculator'
+ * const calc = new Calculator()
+ * calc.addEventListener((state: CalculatorState) => {
+ *   // function that returns the current state
+ * })
+ * calc.subtract(5) // triggers the event listener
+ * ```
+ */
 export default class Calculator extends State<CalculatorState> {
   #initialValue: number
 

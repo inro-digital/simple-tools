@@ -1,3 +1,20 @@
+import State from '../utils/state.ts'
+
+/**
+ * An individual todo with pretty generic values
+ * @todo allow adding arbitrary values. Also add scheduling/reminder data.
+ */
+export interface Todo {
+  name: string
+  description: string
+  isDone: boolean
+}
+
+/** State returned via `todolist.state` or `todolist.addEventListener` */
+export interface TodolistState {
+  todos: Todo[]
+}
+
 /**
  * @module
  * A simple todolist. All public methods trigger event listeners
@@ -23,24 +40,6 @@
  * console.log(list.state.todos) // []
  * ```
  */
-
-import State from '../utils/state.ts'
-
-/**
- * An individual todo with pretty generic values
- * @todo allow adding arbitrary values. Also add scheduling/reminder data.
- */
-export interface Todo {
-  name: string
-  description: string
-  isDone: boolean
-}
-
-/** State returned via `todolist.state` or `todolist.addEventListener` */
-export interface TodolistState {
-  todos: Todo[]
-}
-
 export default class Todolist extends State<TodolistState> {
   #initialTodos: Todo[]
 
