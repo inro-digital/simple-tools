@@ -6,7 +6,12 @@ export interface StopwatchState {
   elapsed: number
   isPaused: boolean
   isStarted: boolean
-  laps: Array<{ split: number; total: number }>
+  laps: Array<{
+    split: number
+    splitDisplay: string
+    total: number
+    totalDisplay: string
+  }>
 }
 
 export interface StopwatchOptions {
@@ -33,6 +38,9 @@ export default class Stopwatch extends State<StopwatchState> {
   }
 
   start() {
+    // Prevent #startMS update and additional setInterval if already running
+    if (this.state.isStarted && !this.state.isPaused) return
+
     this.#startMS = Date.now()
     this.state.isPaused = false
     this.state.isStarted = true
@@ -53,7 +61,7 @@ export default class Stopwatch extends State<StopwatchState> {
   }
 
   pause() {
-    if (!this.state.isStarted) return
+    if (!this.state.isStarted || this.state.isPaused) return
     if (!this.#startMS) throw new Error('unexpected no start time')
 
     clearInterval(this.#interval)
@@ -70,6 +78,8 @@ export default class Stopwatch extends State<StopwatchState> {
   }
 
   stop() {
+    if (!this.state.isStarted) return
+
     clearInterval(this.#interval)
     this.#elapsedBeforePauseMS = 0
     this.#interval = undefined
@@ -84,7 +94,13 @@ export default class Stopwatch extends State<StopwatchState> {
   lap() {
     const total = this.state.elapsed
     const prevTime = this.state.laps[0]?.total ?? 0
-    this.state.laps.push({ split: total - prevTime, total })
+    const split = total - prevTime
+    this.state.laps.push({
+      split,
+      splitDisplay: formatDisplayTime(split),
+      total,
+      totalDisplay: formatDisplayTime(total),
+    })
     this.notify()
   }
 }

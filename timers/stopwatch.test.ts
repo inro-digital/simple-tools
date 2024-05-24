@@ -88,9 +88,24 @@ Deno.test('laps', () => {
     stopwatch.pause()
 
     assertEquals(stopwatch.state.laps, [
-      { split: 1000, total: 1000 },
-      { split: 1100, total: 2100 },
-      { split: 2300, total: 3300 },
+      {
+        split: 1000,
+        splitDisplay: '0:01.0',
+        total: 1000,
+        totalDisplay: '0:01.0',
+      },
+      {
+        split: 1100,
+        splitDisplay: '0:01.1',
+        total: 2100,
+        totalDisplay: '0:02.1',
+      },
+      {
+        split: 2300,
+        splitDisplay: '0:02.3',
+        total: 3300,
+        totalDisplay: '0:03.3',
+      },
     ])
   } finally {
     time.restore()

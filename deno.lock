@@ -11,6 +11,7 @@
       "jsr:@std/internal@^0.224.0": "jsr:@std/internal@0.224.0",
       "jsr:@std/internal@^0.225.1": "jsr:@std/internal@0.225.1",
       "jsr:@std/internal@^1.0.0": "jsr:@std/internal@1.0.0",
+      "jsr:@std/io": "jsr:@std/io@0.217.0",
       "jsr:@std/testing": "jsr:@std/testing@0.224.0",
       "jsr:@std/testing@^0.224.0": "jsr:@std/testing@0.224.0"
     },
@@ -52,6 +53,9 @@
       "@std/internal@1.0.0": {
         "integrity": "ac6a6dfebf838582c4b4f61a6907374e27e05bedb6ce276e0f1608fe84e7cd9a"
       },
+      "@std/io@0.217.0": {
+        "integrity": "08d3dd7c10956d1433be95306ec15179cdebe49a0ce5a74238fabf140bb74382"
+      },
       "@std/testing@0.224.0": {
         "integrity": "371b8a929aa7132240d5dd766a439be8f780ef5c176ab194e0bcab72370c761e",
         "dependencies": [
@@ -62,7 +66,9 @@
       }
     }
   },
-  "remote": {},
+  "remote": {
+    "https://deno.land/x/keypress@0.0.11/mod.ts": "22fe0ea62136f3015149c639f891076a5b2312c0b8974c4a2bd8acaaded61c61"
+  },
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@^0.225.3",
