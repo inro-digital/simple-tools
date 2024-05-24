@@ -50,7 +50,7 @@ class CountdownComponent extends HTMLElement {
         .countdown .display {
           margin: 20px;
         }
-        .controls {
+        .countdown .controls {
           display: flex;
           gap: 10px;
         }

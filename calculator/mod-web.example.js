@@ -54,7 +54,7 @@ class CalculatorComponent extends HTMLElement {
   }
 
   update() {
-    const display = this.querySelector('.display')
+    const display = this.querySelector('.calculator .display')
     const state = this.calculator.state
     if (state.display === '0') display.textContent = state.display
     else display.textContent = state.display + ' ' + +state.value.toFixed(2)
@@ -72,7 +72,7 @@ class CalculatorComponent extends HTMLElement {
           max-width: 200px;
           margin: 20px;
         }
-        .controls {
+        .calculator .controls {
           display: flex;
           gap: 10px;
         }

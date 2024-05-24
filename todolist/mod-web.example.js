@@ -36,13 +36,15 @@ class TodolistComponent extends HTMLElement {
   }
 
   update() {
-    const todoListElement = this.querySelector('.todo-list')
+    const todoListElement = this.querySelector('.todolist .list')
     todoListElement.innerHTML = this.todolist.state.todos.map((todo, index) => `
       <div class="todo">
         <input type="checkbox" class="toggle" data-index="${index}" ${
       todo.isDone ? 'checked' : ''
     }>
-        <span>${todo.name}: ${todo.description}</span>
+        <span>${todo.name}${
+      todo.description ? (': ' + todo.description) : ''
+    }</span>
         <button class="remove" data-index="${index}">Remove</button>
       </div>
     `).join('')
@@ -56,15 +58,13 @@ class TodolistComponent extends HTMLElement {
           flex-direction: column;
           align-items: center;
         }
-        .controls {
-          display: flex;
-          gap: 10px;
+        .todolist .controls {
           margin-bottom: 10px;
         }
-        .todo-list {
+        .todolist .list {
           width: 100%;
         }
-        .todo {
+        .todolist .todo {
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -73,11 +73,11 @@ class TodolistComponent extends HTMLElement {
       </style>
       <div class="todolist">
         <div class="controls">
-          <input id="name" type="text" placeholder="Task name" required />
-          <input id="description" type="text" placeholder="Task description" required />
-          <button id="add">Add Task</button>
+          <input id="name" type="text" placeholder="name" />
+          <input id="description" type="text" placeholder="description" />
+          <button id="add">Add</button>
         </div>
-        <div class="todo-list"></div>
+        <div class="list"></div>
       </div>
     `
   }

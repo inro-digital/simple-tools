@@ -41,7 +41,7 @@ class StopwatchComponent extends HTMLElement {
         .stopwatch .display {
           margin: 20px;
         }
-        .controls {
+        .stopwatch .controls {
           display: flex;
           gap: 10px;
         }
