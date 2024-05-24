@@ -1,4 +1,5 @@
 /**
+ * @module
  * Generic state and listener class used by all the simple-tools. This helps us:
  * 1. Get event listening for free in all of our tools for UI hookin
  * 2. Help define a structure for public state

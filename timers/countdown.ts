@@ -1,3 +1,25 @@
+/**
+ * @module
+ * A timer that counts down from a given number. All public methods trigger
+ * event listeners. Additionally, if the timer is running, event listeners
+ * will trigger every `resolutionMS` interval.
+ *
+ * @example Basic Usage
+ * ```ts
+ * import Countdown, { CountdownState } from '@inro/simple-tools/countdown'
+ * const timer = new Countdown({ initialMS: 70_000 }) // 70s timer
+ * timer.addEventListener((state: CountdownState) => {
+ *   console.log(state.display) // "1:10.0"
+ *   console.log(state.remaining) // 70000
+ * })
+ *
+ * document.getElementById('#start').onclick = () => timer.start()
+ * document.getElementById('#pause').onclick = () => timer.pause()
+ * document.getElementById('#stop').onclick = () => timer.stop()
+ * document.getElementById('#reset').onclick = () => timer.reset()
+ * ```
+ */
+
 import State from '../utils/state.ts'
 import { formatDisplayTime } from './utils.ts'
 
@@ -24,26 +46,6 @@ export interface CountdownOptions {
   resolutionMS?: number
 }
 
-/**
- * A timer that counts down from a given number. All public methods trigger
- * event listeners. Additionally, if the timer is running, event listeners
- * will trigger every `resolutionMS` interval.
- *
- * @example Basic Usage
- * ```ts
- * import Countdown, { CountdownState } from '@inro/simple-tools/countdown'
- * const timer = new Countdown({ initialMS: 70_000 }) // 70s timer
- * timer.addEventListener((state: CountdownState) => {
- *   console.log(state.display) // "1:10.0"
- *   console.log(state.remaining) // 70000
- * })
- *
- * document.getElementById('#start').onclick = () => timer.start()
- * document.getElementById('#pause').onclick = () => timer.pause()
- * document.getElementById('#stop').onclick = () => timer.stop()
- * document.getElementById('#reset').onclick = () => timer.reset()
- * ```
- */
 export default class Countdown extends State<CountdownState> {
   #elapsedBeforePauseMS: number
   #initialMS: number
