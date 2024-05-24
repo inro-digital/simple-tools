@@ -27,15 +27,20 @@ Here's an example of our `Countdown` timer:
 ```ts
 import Countdown, { CountdownState } from '@inro/simple-tools/countdown'
 const timer = new Countdown({ initialMS: 30_000 })
+
 timer.addListener((state: CountdownState) => {
   console.log(state.display) // "0:30.0"
   console.log(state.remaining) // 30000
 })
+
 timer.start()
+
 setTimeout(() => {
   timer.pause()
+
   const endState: CountdownState = timer.state
   console.log(endState.remaining) // 29000
+
   timer.stop()
   timer.reset()
 }, 1000)
@@ -48,10 +53,12 @@ The `.state` accessor, and the `.addEventListener` that returns state is availab
 ```js
 import Calculator from '@inro/simple-tools/calculator'
 const calc = new Calculator()
+
 calc.add(5)
 calc.subtract(3)
 calc.multiply(2)
 calc.divide(5)
+
 console.log(calc.state.value) // 0.8
 console.log(calc.state.display) // "0 + 5 - 3 * 2 / 5"
 console.log(calc.state.history)
@@ -71,23 +78,27 @@ console.log(calc.state.history)
 ```ts
 import Stopwatch, { StopwatchState } from '@inro/simple-tools/stopwatch'
 const stopwatch = new Stopwatch()
+
 stopwatch.addListener((state: StopwatchState) => {
   console.log(state.display) // "0:00.0"
   console.log(state.remaining) // 0
-  console.log(state.laps) // []
 })
+
 stopwatch.start()
-stopwatch.lap()
-stopwatch.pause()
-stopwatch.stop()
-stopwatch.reset()
-const endState: StopwatchState = stopwatch.state
+
+setTimeout(() => {
+  stopwatch.lap()
+  stopwatch.pause()
+  console.log(state.state.laps)
+  stopwatch.stop()
+}, 5000)
 ```
 
 #### Todolist
 
 ```js
 import Todolist from '@inro/simple-tools/todolist'
+
 const list = new Todolist({
   todos: [{
     name: 'Task 1',
@@ -95,6 +106,7 @@ const list = new Todolist({
     isDone: false,
   }],
 })
+
 list.edit(0, { name: 'Updated Task 1', isDone: true })
 list.add('Task 2', 'desc')
 list.remove(0)
