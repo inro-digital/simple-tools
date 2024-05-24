@@ -1,0 +1,14 @@
+{
+  "fmt": {
+    "proseWrap": "preserve",
+    "semiColons": false,
+    "singleQuote": true
+  },
+  "tasks": {
+    "dev": "deno run --watch main.ts",
+    "test": "deno fmt && deno task test:check && deno lint && deno task test:unit",
+    "test:check": "deno check ./mod.ts",
+    "test:unit": "deno test -A ./",
+    "test:update": "deno test -A -- --update source"
+  }
+}
