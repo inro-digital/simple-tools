@@ -1,6 +1,6 @@
-import Countdown from '../countdown.ts'
-import { readKeypress } from 'https://deno.land/x/keypress@0.0.11/mod.ts'
 import { writeAll } from 'jsr:@std/io/write_all'
+import { readKeypress } from 'https://deno.land/x/keypress@0.0.11/mod.ts'
+import Countdown from 'jsr:@inro/simple-tools/countdown.ts'
 
 const countdown = new Countdown({ initialMS: 30_000 })
 

@@ -1,8 +1,9 @@
 {
   "name": "@inro/simple-tools",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "exports": {
     "./calculator": "./calculator/mod.ts",
+    "./countdown": "./timers/countdown.ts",
     "./stopwatch": "./timers/stopwatch.ts",
     "./state": "./utils/state.ts"
   },

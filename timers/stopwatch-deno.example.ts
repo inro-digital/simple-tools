@@ -1,6 +1,6 @@
-import Stopwatch from '../stopwatch.ts'
-import { readKeypress } from 'https://deno.land/x/keypress@0.0.11/mod.ts'
 import { writeAll } from 'jsr:@std/io/write_all'
+import { readKeypress } from 'https://deno.land/x/keypress@0.0.11/mod.ts'
+import Stopwatch from 'jsr:@inro/simple-tools/stopwatch.ts'
 
 const stopwatch = new Stopwatch()
 
