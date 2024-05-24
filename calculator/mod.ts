@@ -34,9 +34,9 @@ export default class Calculator extends State<CalculatorState> {
       display: '0',
       history: [{
         operator: Operator.Initial,
-        value: initialValue || 0
+        value: initialValue || 0,
       }],
-      value: 0
+      value: 0,
     })
   }
 
@@ -50,7 +50,7 @@ export default class Calculator extends State<CalculatorState> {
   clear(initialValue?: number) {
     this.state.history = [{
       operator: Operator.Initial,
-      value: initialValue || 0
+      value: initialValue || 0,
     }]
     this.state.value = initialValue || 0
     this.state.display = getDisplay(this.state.history)

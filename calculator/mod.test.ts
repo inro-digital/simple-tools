@@ -1,5 +1,5 @@
 import { assertEquals } from 'jsr:@std/assert/assert-equals'
-import { assertSpyCall, assertSpyCalls, spy } from "jsr:@std/testing/mock";
+import { assertSpyCall, assertSpyCalls, spy } from 'jsr:@std/testing/mock'
 import Calculator, { Operator } from './mod.ts'
 
 const { Add, Divide, Initial, Multiply, Subtract } = Operator
@@ -53,9 +53,9 @@ Deno.test('display', () => {
   calculator.subtract(3)
   calculator.multiply(2)
   calculator.divide(5)
-  assertEquals(calculator.state.display,"0 + 5 - 3 × 2 ÷ 5 =")
+  assertEquals(calculator.state.display, '0 + 5 - 3 × 2 ÷ 5 =')
   calculator.clear()
-  assertEquals(calculator.state.display, "0")
+  assertEquals(calculator.state.display, '0')
 })
 
 Deno.test('events', () => {
@@ -68,10 +68,10 @@ Deno.test('events', () => {
       display: '0 + 5 =',
       history: [
         { operator: Initial, value: 0 },
-        { operator: Add, value: 5 }
+        { operator: Add, value: 5 },
       ],
       value: 5,
-    }]
+    }],
   })
 
   calculator.subtract(3)

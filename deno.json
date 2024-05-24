@@ -6,9 +6,8 @@
   },
   "tasks": {
     "dev": "deno run --watch main.ts",
-    "test": "deno fmt && deno task test:check && deno lint && deno task test:unit",
-    "test:check": "deno check ./mod.ts",
-    "test:unit": "deno test -A ./",
+    "test": "deno fmt && deno lint && deno task test:unit",
+    "test:unit": "deno test --check=all ./",
     "test:update": "deno test -A -- --update source"
   }
 }
