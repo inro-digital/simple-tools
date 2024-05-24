@@ -16,7 +16,7 @@
     "@std/testing": "jsr:@std/testing@^0.224.0"
   },
   "publish": {
-    "exclude": ["**/*.test.ts", "**/*.example.ts"]
+    "exclude": ["**/*.test.ts", "**/*.example.(js|ts)"]
   },
   "tasks": {
     "dev": "deno run --watch main.ts",
