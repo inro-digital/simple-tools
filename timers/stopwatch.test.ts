@@ -1,6 +1,6 @@
-import { assertEquals } from 'jsr:@std/assert/assert-equals'
-import { assertSpyCalls, spy } from 'jsr:@std/testing/mock'
-import { FakeTime } from 'jsr:@std/testing/time'
+import { assertEquals } from '@std/assert/assert-equals'
+import { assertSpyCalls, spy } from '@std/testing/mock'
+import { FakeTime } from '@std/testing/time'
 import Stopwatch from './stopwatch.ts'
 
 Deno.test('initializes', () => {

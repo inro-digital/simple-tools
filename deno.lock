@@ -4,13 +4,15 @@
     "specifiers": {
       "jsr:@std/assert": "jsr:@std/assert@0.225.3",
       "jsr:@std/assert@^0.224.0": "jsr:@std/assert@0.224.0",
+      "jsr:@std/assert@^0.225.3": "jsr:@std/assert@0.225.3",
       "jsr:@std/async@^0.224.0": "jsr:@std/async@0.224.1",
       "jsr:@std/data-structures@^0.224.0": "jsr:@std/data-structures@0.224.1",
       "jsr:@std/fmt@^0.224.0": "jsr:@std/fmt@0.224.0",
       "jsr:@std/internal@^0.224.0": "jsr:@std/internal@0.224.0",
       "jsr:@std/internal@^0.225.1": "jsr:@std/internal@0.225.1",
       "jsr:@std/internal@^1.0.0": "jsr:@std/internal@1.0.0",
-      "jsr:@std/testing": "jsr:@std/testing@0.224.0"
+      "jsr:@std/testing": "jsr:@std/testing@0.224.0",
+      "jsr:@std/testing@^0.224.0": "jsr:@std/testing@0.224.0"
     },
     "jsr": {
       "@std/assert@0.224.0": {
@@ -60,5 +62,11 @@
       }
     }
   },
-  "remote": {}
+  "remote": {},
+  "workspace": {
+    "dependencies": [
+      "jsr:@std/assert@^0.225.3",
+      "jsr:@std/testing@^0.224.0"
+    ]
+  }
 }

@@ -1,4 +1,5 @@
 import State from '../utils/state.ts'
+import { formatDisplayTime } from './utils.ts'
 
 export interface StopwatchState {
   display: string
@@ -86,12 +87,4 @@ export default class Stopwatch extends State<StopwatchState> {
     this.state.laps.push({ split: total - prevTime, total })
     this.notify()
   }
-}
-
-function formatDisplayTime(ms: number) {
-  // Convert ms to a displayable format, e.g., MM:SS.t
-  const minutes = Math.floor(ms / 60000)
-  const seconds = Math.floor((ms % 60000) / 1000)
-  const tenths = Math.floor((ms % 1000) / 100)
-  return minutes + ':' + (seconds < 10 ? '0' : '') + seconds + '.' + tenths
 }

@@ -1,5 +1,5 @@
-import { assertEquals } from 'jsr:@std/assert/assert-equals'
-import { assertSpyCall, assertSpyCalls, spy } from 'jsr:@std/testing/mock'
+import { assertEquals } from '@std/assert/assert-equals'
+import { assertSpyCall, assertSpyCalls, spy } from '@std/testing/mock'
 import Calculator, { Operator } from './mod.ts'
 
 const { Add, Divide, Initial, Multiply, Subtract } = Operator
