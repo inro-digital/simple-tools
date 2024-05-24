@@ -1,3 +1,8 @@
+/**
+ * @module
+ * A simple calculator that stores history. All public methods trigger the
+ * calculator event listener
+ */
 import State from '../utils/state.ts'
 
 /* The names of the operations that Calculator supports */
@@ -36,11 +41,8 @@ export interface CalculatorState {
 }
 
 /**
- * @module
- * A simple calculator that stores history. All public methods trigger the
- * calculator event listener
- *
- * @example Basic math
+ * Calculator Class
+ * @example Basic Usage
  * ```ts
  * import Calculator from '@inro/simple-tools/calculator'
  * const calc = new Calculator()

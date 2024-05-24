@@ -1,3 +1,10 @@
+/**
+ * @module
+ * A timer that counts up from a given number. All public methods trigger
+ * event listeners. Additionally, if the timer is running, event listeners
+ * will trigger every `resolutionMS` interval.
+ */
+
 import State from '../utils/state.ts'
 import { formatDisplayTime } from './utils.ts'
 
@@ -34,11 +41,7 @@ export interface StopwatchOptions {
 }
 
 /**
- * @module
- * A timer that counts up from a given number. All public methods trigger
- * event listeners. Additionally, if the timer is running, event listeners
- * will trigger every `resolutionMS` interval.
- *
+ * Stopwatch Class
  * @example Basic Usage
  * ```ts
  * import Stopwatch, { StopwatchState } from '@inro/simple-tools/stopwatch'

@@ -1,3 +1,8 @@
+/**
+ * @module
+ * A simple todolist. All public methods trigger event listeners
+ */
+
 import State from '../utils/state.ts'
 
 /**
@@ -16,9 +21,7 @@ export interface TodolistState {
 }
 
 /**
- * @module
- * A simple todolist. All public methods trigger event listeners
- *
+ * Todolist Class
  * @example Basic list
  * ```ts
  * import Todolist, { TodolistState } from '@inro/simple-tools/todolist'

@@ -1,3 +1,10 @@
+/**
+ * @module
+ * A timer that counts down from a given number. All public methods trigger
+ * event listeners. Additionally, if the timer is running, event listeners
+ * will trigger every `resolutionMS` interval.
+ */
+
 import State from '../utils/state.ts'
 import { formatDisplayTime } from './utils.ts'
 
@@ -25,11 +32,7 @@ export interface CountdownOptions {
 }
 
 /**
- * @module
- * A timer that counts down from a given number. All public methods trigger
- * event listeners. Additionally, if the timer is running, event listeners
- * will trigger every `resolutionMS` interval.
- *
+ * Countdown Class
  * @example Basic Usage
  * ```ts
  * import Countdown, { CountdownState } from '@inro/simple-tools/countdown'
