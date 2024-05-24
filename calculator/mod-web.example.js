@@ -56,8 +56,7 @@ class CalculatorComponent extends HTMLElement {
   update() {
     const display = this.querySelector('.calculator .display')
     const state = this.calculator.state
-    if (state.display === '0') display.textContent = state.display
-    else display.textContent = state.display + ' ' + +state.value.toFixed(2)
+    display.textContent = state.display + ' = ' + +state.value.toFixed(2)
   }
 
   render() {

@@ -53,7 +53,7 @@ Deno.test('display', () => {
   calculator.subtract(3)
   calculator.multiply(2)
   calculator.divide(5)
-  assertEquals(calculator.state.display, '0 + 5 - 3 × 2 ÷ 5 =')
+  assertEquals(calculator.state.display, '0 + 5 - 3 × 2 ÷ 5')
   calculator.reset()
   assertEquals(calculator.state.display, '0')
 })
@@ -65,7 +65,7 @@ Deno.test('events', () => {
   calculator.add(5)
   assertSpyCall(listener, 0, {
     args: [{
-      display: '0 + 5 =',
+      display: '0 + 5',
       history: [
         { operator: Initial, value: 0 },
         { operator: Add, value: 5 },
