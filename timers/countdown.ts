@@ -54,7 +54,9 @@ export default class Countdown extends State<CountdownState> {
         this.state.elapsed = this.#elapsedBeforePauseMS + elapsedSincePauseMS
         this.state.remaining = this.state.total - this.state.elapsed
 
+        // Countdown is complete
         if (this.state.remaining <= 0) {
+          this.state.elapsed = this.state.total
           this.state.remaining = 0
           this.#stop()
         }
@@ -99,7 +101,7 @@ export default class Countdown extends State<CountdownState> {
   }
 
   reset(options: CountdownOptions = {}) {
-    this.#elapsedBeforePauseMS = 0
+    this.#stop()
     this.#initialMS = options?.initialMS ?? this.#initialMS
     this.#resolutionMS = options?.resolutionMS ?? this.#resolutionMS
 

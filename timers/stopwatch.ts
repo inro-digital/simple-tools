@@ -79,7 +79,7 @@ export default class Stopwatch extends State<StopwatchState> {
     this.notify()
   }
 
-  stop() {
+  #stop() {
     if (!this.state.isStarted) return
 
     clearInterval(this.#interval)
@@ -89,12 +89,15 @@ export default class Stopwatch extends State<StopwatchState> {
 
     this.state.isPaused = false
     this.state.isStarted = false
+  }
 
+  stop() {
+    this.#stop()
     this.notify()
   }
 
   reset(options: StopwatchOptions = {}) {
-    this.#elapsedBeforePauseMS = 0
+    this.#stop()
     this.#initialMS = options.initialMS ?? this.#initialMS
     this.#resolutionMS = options.resolutionMS ?? this.#resolutionMS
 
