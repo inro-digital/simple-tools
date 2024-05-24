@@ -1,37 +1,34 @@
 import State from '../utils/state.ts'
 import { formatDisplayTime } from './utils.ts'
 
-export interface StopwatchState {
+export interface CountdownState {
   display: string
   elapsed: number
   isPaused: boolean
   isStarted: boolean
-  laps: Array<{
-    split: number
-    splitDisplay: string
-    total: number
-    totalDisplay: string
-  }>
+  remaining: number
+  total: number
 }
 
-export interface StopwatchOptions {
+export interface CountdownOptions {
   initialMS?: number
   resolutionMS?: number // How often listeners should get called, in ms
 }
 
-export default class Stopwatch extends State<StopwatchState> {
+export default class Countdown extends State<CountdownState> {
   #elapsedBeforePauseMS: number
   #interval: number | undefined
   #resolutionMS: number | undefined
   #startMS: number | undefined
 
-  constructor(options?: StopwatchOptions) {
+  constructor(options?: CountdownOptions) {
     super({
       display: formatDisplayTime(options?.initialMS ?? 0),
-      elapsed: options?.initialMS ?? 0,
+      elapsed: 0,
       isPaused: false,
       isStarted: false,
-      laps: [],
+      remaining: options?.initialMS ?? 0,
+      total: options?.initialMS ?? 0,
     })
     this.#elapsedBeforePauseMS = 0
     this.#resolutionMS = options?.resolutionMS ?? 10
@@ -53,8 +50,14 @@ export default class Stopwatch extends State<StopwatchState> {
 
         const elapsedSincePauseMS = Date.now() - this.#startMS
         this.state.elapsed = this.#elapsedBeforePauseMS + elapsedSincePauseMS
-        this.state.display = formatDisplayTime(this.state.elapsed)
+        this.state.remaining = this.state.total - this.state.elapsed
 
+        if (this.state.remaining <= 0) {
+          this.state.remaining = 0
+          this.#stop()
+        }
+
+        this.state.display = formatDisplayTime(this.state.remaining)
         this.notify()
       }, this.#resolutionMS)
     }
@@ -77,9 +80,7 @@ export default class Stopwatch extends State<StopwatchState> {
     this.notify()
   }
 
-  stop() {
-    if (!this.state.isStarted) return
-
+  #stop() {
     clearInterval(this.#interval)
     this.#elapsedBeforePauseMS = 0
     this.#interval = undefined
@@ -88,22 +89,14 @@ export default class Stopwatch extends State<StopwatchState> {
     this.state.isPaused = false
     this.state.isStarted = false
     this.state.elapsed = 0
-    this.state.display = formatDisplayTime(this.state.elapsed)
-    this.state.laps = []
-
-    this.notify()
+    this.state.remaining = this.state.total
+    this.state.display = formatDisplayTime(this.state.remaining)
   }
 
-  lap() {
-    const total = this.state.elapsed
-    const prevTime = this.state.laps[0]?.total ?? 0
-    const split = total - prevTime
-    this.state.laps.push({
-      split,
-      splitDisplay: formatDisplayTime(split),
-      total,
-      totalDisplay: formatDisplayTime(total),
-    })
+  stop() {
+    if (!this.state.isStarted) return
+
+    this.#stop()
     this.notify()
   }
 }
