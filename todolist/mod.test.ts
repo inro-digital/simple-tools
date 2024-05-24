@@ -16,11 +16,13 @@ Deno.test('add', () => {
 })
 
 Deno.test('edit', () => {
-  const todolist = new Todolist([{
-    name: 'Task 1',
-    description: 'Description 1',
-    isDone: false,
-  }])
+  const todolist = new Todolist({
+    todos: [{
+      name: 'Task 1',
+      description: 'Description 1',
+      isDone: false,
+    }],
+  })
   todolist.edit(0, { name: 'Updated Task 1', isDone: true })
   assertEquals(todolist.state.todos[0], {
     name: 'Updated Task 1',
@@ -30,21 +32,25 @@ Deno.test('edit', () => {
 })
 
 Deno.test('remove', () => {
-  const todolist = new Todolist([{
-    name: 'Task 1',
-    description: 'Description 1',
-    isDone: false,
-  }])
+  const todolist = new Todolist({
+    todos: [{
+      name: 'Task 1',
+      description: 'Description 1',
+      isDone: false,
+    }],
+  })
   todolist.remove(0)
   assertEquals(todolist.state.todos, [])
 })
 
 Deno.test('toggle', () => {
-  const todolist = new Todolist([{
-    name: 'Task 1',
-    description: 'Description 1',
-    isDone: false,
-  }])
+  const todolist = new Todolist({
+    todos: [{
+      name: 'Task 1',
+      description: 'Description 1',
+      isDone: false,
+    }],
+  })
   todolist.toggle(0)
   assertEquals(todolist.state.todos[0].isDone, true)
   todolist.toggle(0)
