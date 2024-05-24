@@ -3,17 +3,16 @@ import Stopwatch from 'https://esm.sh/jsr/@inro/simple-tools/stopwatch'
 class StopwatchComponent extends HTMLElement {
   constructor() {
     super()
-    this.attachShadow({ mode: 'open' })
     this.stopwatch = new Stopwatch()
     this.stopwatch.addEventListener(() => this.update())
   }
 
   connectedCallback() {
     this.render()
-    this.startButton = this.shadowRoot.querySelector('#start')
-    this.pauseButton = this.shadowRoot.querySelector('#pause')
-    this.stopButton = this.shadowRoot.querySelector('#stop')
-    this.lapButton = this.shadowRoot.querySelector('#lap')
+    this.startButton = this.querySelector('#start')
+    this.pauseButton = this.querySelector('#pause')
+    this.stopButton = this.querySelector('#stop')
+    this.lapButton = this.querySelector('#lap')
 
     this.startButton.addEventListener('click', () => this.stopwatch.start())
     this.pauseButton.addEventListener('click', () => this.stopwatch.pause())
@@ -22,8 +21,8 @@ class StopwatchComponent extends HTMLElement {
   }
 
   update() {
-    const display = this.shadowRoot.querySelector('.display')
-    const laps = this.shadowRoot.querySelector('.laps')
+    const display = this.querySelector('.display')
+    const laps = this.querySelector('.laps')
     display.textContent = this.stopwatch.state.display
     laps.innerHTML = this.stopwatch.state.laps.map(
       (lap) =>
@@ -32,12 +31,15 @@ class StopwatchComponent extends HTMLElement {
   }
 
   render() {
-    this.shadowRoot.innerHTML = `
+    this.innerHTML = `
       <style>
         .stopwatch {
           display: flex;
           flex-direction: column;
           align-items: center;
+        }
+        .stopwatch .display {
+          margin: 20px;
         }
         .controls {
           display: flex;

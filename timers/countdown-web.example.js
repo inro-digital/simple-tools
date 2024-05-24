@@ -3,7 +3,6 @@ import Countdown from 'https://esm.sh/jsr/@inro/simple-tools/countdown'
 class CountdownComponent extends HTMLElement {
   constructor() {
     super()
-    this.attachShadow({ mode: 'open' })
     this._initialMS = 60000
 
     this.countdown = new Countdown({ initialMS: this._initialMS })
@@ -26,9 +25,9 @@ class CountdownComponent extends HTMLElement {
 
   connectedCallback() {
     this.render()
-    this.startButton = this.shadowRoot.querySelector('#start')
-    this.pauseButton = this.shadowRoot.querySelector('#pause')
-    this.stopButton = this.shadowRoot.querySelector('#stop')
+    this.startButton = this.querySelector('#start')
+    this.pauseButton = this.querySelector('#pause')
+    this.stopButton = this.querySelector('#stop')
 
     this.startButton.addEventListener('click', () => this.countdown.start())
     this.pauseButton.addEventListener('click', () => this.countdown.pause())
@@ -36,17 +35,20 @@ class CountdownComponent extends HTMLElement {
   }
 
   update() {
-    const display = this.shadowRoot.querySelector('.display')
+    const display = this.querySelector('.display')
     if (display) display.textContent = this.countdown.state.display
   }
 
   render() {
-    this.shadowRoot.innerHTML = `
+    this.innerHTML = `
       <style>
         .countdown {
           display: flex;
           flex-direction: column;
           align-items: center;
+        }
+        .countdown .display {
+          margin: 20px;
         }
         .controls {
           display: flex;

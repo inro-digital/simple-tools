@@ -3,7 +3,6 @@ import Calculator from 'https://esm.sh/jsr/@inro/simple-tools/calculator'
 class CalculatorComponent extends HTMLElement {
   constructor() {
     super()
-    this.attachShadow({ mode: 'open' })
 
     this.calculator = new Calculator()
     this.calculator.addEventListener(() => this.update())
@@ -23,7 +22,7 @@ class CalculatorComponent extends HTMLElement {
   }
 
   operate(type) {
-    const valueInput = this.shadowRoot.querySelector('#value')
+    const valueInput = this.querySelector('#value')
     const value = parseFloat(valueInput.value)
     if (!isNaN(value) || type === 'clear') {
       this.operators[type](value)
@@ -32,41 +31,46 @@ class CalculatorComponent extends HTMLElement {
   }
 
   bindEvents() {
-    this.shadowRoot.querySelector('#add').addEventListener(
+    this.querySelector('#add').addEventListener(
       'click',
       () => this.operate('add'),
     )
-    this.shadowRoot.querySelector('#subtract').addEventListener(
+    this.querySelector('#subtract').addEventListener(
       'click',
       () => this.operate('subtract'),
     )
-    this.shadowRoot.querySelector('#multiply').addEventListener(
+    this.querySelector('#multiply').addEventListener(
       'click',
       () => this.operate('multiply'),
     )
-    this.shadowRoot.querySelector('#divide').addEventListener(
+    this.querySelector('#divide').addEventListener(
       'click',
       () => this.operate('divide'),
     )
-    this.shadowRoot.querySelector('#clear').addEventListener(
+    this.querySelector('#clear').addEventListener(
       'click',
       () => this.operate('clear'),
     )
   }
 
   update() {
-    const display = this.shadowRoot.querySelector('.display')
+    const display = this.querySelector('.display')
     const state = this.calculator.state
-    display.textContent = state.display + ' ' + +state.value.toFixed(2)
+    if (state.display === '0') display.textContent = state.display
+    else display.textContent = state.display + ' ' + +state.value.toFixed(2)
   }
 
   render() {
-    this.shadowRoot.innerHTML = `
+    this.innerHTML = `
       <style>
         .calculator {
           display: flex;
           flex-direction: column;
           align-items: center;
+        }
+        .calculator input {
+          max-width: 200px;
+          margin: 20px;
         }
         .controls {
           display: flex;

@@ -6,15 +6,67 @@
   <script type="module" src="./calculator/mod-web.example.js"></script>
   <script type="module" src="./timers/countdown-web.example.js"></script>
   <script type="module" src="./timers/stopwatch-web.example.js"></script>
+  <link rel="stylesheet" href="https://matcha.mizu.sh/matcha.css">
 </head>
 <body>
-  <h1>Calculator</h1>
-  <calculator-component initial-ms="120000"></calculator-component>
+  <style>
+    main {
+      max-width: 700px;
+      margin: 20px auto 20px auto;
+    }
+  </style>
+  <main>
 
-  <h1>Countdown</h1>
-  <countdown-component initial-ms="120000"></countdown-component>
+    <section>
+      <h1>Simple Tools</h1>
 
-  <h1>Stopwatch</h1>
-  <stopwatch-component></stopwatch-component>
+      <p>
+      Javascript versions of the basic apps you expect to find built into your OS. The intention is that these utilities have simple state management that gives you the tools to power UI apps for common tasks.</p>
+    </section>
+
+    <section>
+      <article>
+        <header><h3>Calculator</h3></header>
+        <p>
+          <calculator-component initial-ms="120000"></calculator-component>
+        </p>
+        <footer>
+          <a href="https://jsr.io/@inro/simple-tools/doc/calculator/~">jsr</a>
+          ,
+          <a href="https://github.com/inro-digital/simple-tools/tree/main/calculator">
+            Github
+          </a>
+        </footer>
+      </article>
+
+      <article>
+        <header><h3>Countdown</h3></header>
+        <p>
+          <countdown-component initial-ms="120000"></countdown-component>
+        </p>
+        <footer>
+          <a href="https://jsr.io/@inro/simple-tools/doc/countdown/~">jsr</a>
+          ,
+          <a href="https://github.com/inro-digital/simple-tools/tree/main/timers">
+            Github
+          </a>
+        </footer>
+      </article>
+
+      <article>
+        <header><h3>Stopwatch</h3></header>
+        <p>
+          <stopwatch-component></stopwatch-component>
+        </p>
+        <footer>
+          <a href="https://jsr.io/@inro/simple-tools/doc/stopwatch/~">jsr</a>
+          ,
+          <a href="https://github.com/inro-digital/simple-tools/tree/main/timers">
+            Github
+          </a>
+        </footer>
+      </article>
+    </section>
+  </main>
 </body>
 </html>
