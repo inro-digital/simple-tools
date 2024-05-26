@@ -6,7 +6,7 @@
  */
 
 import State from '../utils/state.ts'
-import { formatDisplayTime } from './utils.ts'
+import { formatDisplayTime as defaultTimeFormatter } from './utils.ts'
 
 /** State returned via `countdown.state` or `countdown.addEventListener` */
 export interface CountdownState {
@@ -29,6 +29,8 @@ export interface CountdownOptions {
   initialMS?: number
   /* Frequency that listeners are called while the timer is counting */
   resolutionMS?: number
+  /* For custom formatting for `state.display` */
+  formatDisplayTime?: (remaining: number) => string
 }
 
 /**
@@ -50,13 +52,19 @@ export interface CountdownOptions {
  */
 export default class Countdown extends State<CountdownState> {
   #elapsedBeforePauseMS: number
+  #formatDisplayTime: (elapsed: number) => string
   #initialMS: number
   #interval: number | undefined
   #resolutionMS: number | undefined
   #startMS: number | undefined
 
   /* Timer resolution defaults to 10ms */
-  constructor({ initialMS = 0, resolutionMS = 10 }: CountdownOptions = {}) {
+  constructor(options: CountdownOptions = {}) {
+    const {
+      initialMS = 0,
+      resolutionMS = 10,
+      formatDisplayTime = defaultTimeFormatter,
+    } = options
     super({
       display: formatDisplayTime(initialMS),
       elapsed: 0,
@@ -68,6 +76,7 @@ export default class Countdown extends State<CountdownState> {
     this.#elapsedBeforePauseMS = 0
     this.#initialMS = initialMS
     this.#resolutionMS = resolutionMS
+    this.#formatDisplayTime = formatDisplayTime
   }
 
   /**
@@ -101,7 +110,7 @@ export default class Countdown extends State<CountdownState> {
           this.#stop()
         }
 
-        this.state.display = formatDisplayTime(this.state.remaining)
+        this.state.display = this.#formatDisplayTime(this.state.remaining)
         this.notify()
       }, this.#resolutionMS)
     }
@@ -147,9 +156,12 @@ export default class Countdown extends State<CountdownState> {
    * initial settings
    */
   reset(options: CountdownOptions = {}) {
+    const { initialMS, resolutionMS, formatDisplayTime } = options
+
     this.#stop()
-    this.#initialMS = options?.initialMS ?? this.#initialMS
-    this.#resolutionMS = options?.resolutionMS ?? this.#resolutionMS
+    this.#formatDisplayTime = formatDisplayTime ?? this.#formatDisplayTime
+    this.#initialMS = initialMS ?? this.#initialMS
+    this.#resolutionMS = resolutionMS ?? this.#resolutionMS
 
     this.state.elapsed = 0
     this.state.isPaused = false
@@ -157,7 +169,7 @@ export default class Countdown extends State<CountdownState> {
     this.state.remaining = this.#initialMS
     this.state.total = this.#initialMS
 
-    this.state.display = formatDisplayTime(this.state.remaining)
+    this.state.display = this.#formatDisplayTime(this.state.remaining)
 
     this.notify()
   }

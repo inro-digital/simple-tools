@@ -112,3 +112,19 @@ Deno.test('laps', () => {
     time.restore()
   }
 })
+
+Deno.test('custom displayTime formatter', () => {
+  const time = new FakeTime()
+
+  try {
+    const stopwatch = new Stopwatch({
+      formatDisplayTime: (remaining) => String(remaining),
+    })
+
+    stopwatch.start()
+    time.tick(500)
+    assertEquals(stopwatch.state.display, '500')
+  } finally {
+    time.restore()
+  }
+})

@@ -6,7 +6,7 @@
  */
 
 import State from '../utils/state.ts'
-import { formatDisplayTime } from './utils.ts'
+import { formatDisplayTime as defaultTimeFormatter } from './utils.ts'
 
 /** Lap data that is saved as a history. It is deleted on `reset` */
 export interface Lap {
@@ -38,6 +38,8 @@ export interface StopwatchOptions {
   initialMS?: number
   /* Frequency that listeners are called while the timer is counting */
   resolutionMS?: number
+  /* For custom formatting for `state.display` */
+  formatDisplayTime?: (elapsed: number) => string
 }
 
 /**
@@ -61,13 +63,20 @@ export interface StopwatchOptions {
  */
 export default class Stopwatch extends State<StopwatchState> {
   #elapsedBeforePauseMS: number
+  #formatDisplayTime: (elapsed: number) => string
   #initialMS: number
   #interval: number | undefined
   #resolutionMS: number | undefined
   #startMS: number | undefined
 
   /* Timer resolution defaults to 10ms */
-  constructor({ initialMS = 0, resolutionMS = 10 }: StopwatchOptions = {}) {
+  constructor(options: StopwatchOptions = {}) {
+    const {
+      initialMS = 0,
+      resolutionMS = 10,
+      formatDisplayTime = defaultTimeFormatter,
+    } = options
+
     super({
       display: formatDisplayTime(initialMS),
       elapsed: initialMS,
@@ -78,6 +87,7 @@ export default class Stopwatch extends State<StopwatchState> {
     this.#elapsedBeforePauseMS = 0
     this.#initialMS = initialMS
     this.#resolutionMS = resolutionMS
+    this.#formatDisplayTime = formatDisplayTime
   }
 
   /**
@@ -100,7 +110,7 @@ export default class Stopwatch extends State<StopwatchState> {
 
         const elapsedSincePauseMS = Date.now() - this.#startMS
         this.state.elapsed = this.#elapsedBeforePauseMS + elapsedSincePauseMS
-        this.state.display = formatDisplayTime(this.state.elapsed)
+        this.state.display = this.#formatDisplayTime(this.state.elapsed)
 
         this.notify()
       }, this.#resolutionMS)
@@ -148,15 +158,18 @@ export default class Stopwatch extends State<StopwatchState> {
    * initial settings
    */
   reset(options: StopwatchOptions = {}) {
+    const { initialMS, resolutionMS, formatDisplayTime } = options
+
     this.#stop()
-    this.#initialMS = options.initialMS ?? this.#initialMS
-    this.#resolutionMS = options.resolutionMS ?? this.#resolutionMS
+    this.#formatDisplayTime = formatDisplayTime ?? this.#formatDisplayTime
+    this.#initialMS = initialMS ?? this.#initialMS
+    this.#resolutionMS = resolutionMS ?? this.#resolutionMS
 
     this.state.elapsed = this.#initialMS
     this.state.isPaused = false
     this.state.isStarted = false
     this.state.laps = []
-    this.state.display = formatDisplayTime(this.state.elapsed)
+    this.state.display = this.#formatDisplayTime(this.state.elapsed)
 
     this.notify()
   }
@@ -168,9 +181,9 @@ export default class Stopwatch extends State<StopwatchState> {
     const split = total - prevTime
     this.state.laps.push({
       split,
-      splitDisplay: formatDisplayTime(split),
+      splitDisplay: this.#formatDisplayTime(split),
       total,
-      totalDisplay: formatDisplayTime(total),
+      totalDisplay: this.#formatDisplayTime(total),
     })
     this.notify()
   }

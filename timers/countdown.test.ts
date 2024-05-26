@@ -103,3 +103,20 @@ Deno.test('countdown reaches zero', () => {
     time.restore()
   }
 })
+
+Deno.test('custom displayTime formatter', () => {
+  const time = new FakeTime()
+
+  try {
+    const countdown = new Countdown({
+      initialMS: 1000,
+      formatDisplayTime: (remaining) => String(remaining),
+    })
+
+    countdown.start()
+    time.tick(500)
+    assertEquals(countdown.state.display, '500')
+  } finally {
+    time.restore()
+  }
+})

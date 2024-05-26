@@ -9,7 +9,7 @@
  * State Class
  * @example Basic Usage (See more in state.test.ts)
  * ```ts
- * import State from '@inro/simple-tools/countdown'
+ * import State from '@inro/simple-tools/state'
  *
  * class Counter extends State<{ count: number }> {
  *   constructor(count: number = 0) {
