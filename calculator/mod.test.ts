@@ -1,4 +1,4 @@
-import { assertEquals } from '@std/assert/assert-equals'
+import { assertEquals } from '@std/assert/equals'
 import { assertSpyCall, assertSpyCalls, spy } from '@std/testing/mock'
 import Calculator, { Operator } from './mod.ts'
 

@@ -1,4 +1,4 @@
-import { assertEquals } from 'jsr:@std/assert/assert-equals'
+import { assertEquals } from 'jsr:@std/assert/equals'
 import { assertSpyCall, assertSpyCalls, spy } from 'jsr:@std/testing/mock'
 import State from './state.ts'
 

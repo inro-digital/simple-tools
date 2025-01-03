@@ -1,4 +1,4 @@
-import { assertEquals } from '@std/assert/assert-equals'
+import { assertEquals } from '@std/assert/equals'
 import { assertSpyCalls, spy } from '@std/testing/mock'
 import { FakeTime } from '@std/testing/time'
 import Countdown from './countdown.ts'
