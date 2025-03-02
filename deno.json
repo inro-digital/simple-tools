@@ -24,7 +24,6 @@
     "dev": "deno run --watch main.ts",
     "test": "deno fmt && deno lint && deno task test:unit && deno publish --dry-run --allow-dirty",
     "test:unit": "deno test --check=all ./",
-    "test:update": "deno test -A -- --update source",
-    "update": "deno run -A jsr:@molt/cli"
+    "test:update": "deno test -A -- --update source"
   }
 }
