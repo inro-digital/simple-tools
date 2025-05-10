@@ -35,11 +35,11 @@ export interface StopwatchState {
 
 export interface StopwatchOptions {
   /* Number that we count up from */
-  initialMS?: number
+  initialMS: number
   /* Frequency that listeners are called while the timer is counting */
-  resolutionMS?: number
+  resolutionMS: number
   /* For custom formatting for `state.display` */
-  formatDisplayTime?: (elapsed: number) => string
+  formatDisplayTime: (elapsed: number) => string
 }
 
 /**
@@ -70,7 +70,7 @@ export default class Stopwatch extends State<StopwatchState> {
   #startMS: number | undefined
 
   /* Timer resolution defaults to 10ms */
-  constructor(options: StopwatchOptions = {}) {
+  constructor(options: Partial<StopwatchOptions> = {}) {
     const {
       initialMS = 0,
       resolutionMS = 10,
@@ -149,6 +149,7 @@ export default class Stopwatch extends State<StopwatchState> {
 
   /** Stops the timer, and clears the interval. It does not reset time. */
   stop() {
+    if (!this.state.isStarted) return
     this.#stop()
     this.notify()
   }
@@ -157,7 +158,7 @@ export default class Stopwatch extends State<StopwatchState> {
    * Resets to initial state. If provided options, it will override the
    * initial settings
    */
-  reset(options: StopwatchOptions = {}) {
+  reset(options: Partial<StopwatchOptions> = {}) {
     const { initialMS, resolutionMS, formatDisplayTime } = options
 
     this.#stop()

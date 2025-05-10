@@ -1,6 +1,8 @@
-import { writeAll } from 'jsr:@std/io/write_all'
+import Stopwatch from 'jsr:@inro/simple-tools/stopwatch'
 import { readKeypress } from 'https://deno.land/x/keypress@0.0.11/mod.ts'
-import Stopwatch from 'jsr:@inro/simple-tools/stopwatch.ts'
+
+const encoder = new TextEncoder()
+const LINE_CLEAR = encoder.encode('\r\u001b[K')
 
 const stopwatch = new Stopwatch()
 
@@ -9,9 +11,12 @@ console.log('- Press "spacebar" to pause/resume')
 console.log('- Press "L" to log a lap')
 console.log('- Press "return" to reset the timer\n')
 
-stopwatch.addEventListener(async (state: StopwatchState) => {
-  const text = `${state.display}`
-  await writeAll(Deno.stdout, new TextEncoder().encode(text + '\r'))
+stopwatch.addEventListener((state) => {
+  const frame = encoder.encode(state.display)
+  const writeData = new Uint8Array(LINE_CLEAR.length + frame.length)
+  writeData.set(LINE_CLEAR)
+  writeData.set(frame, LINE_CLEAR.length)
+  Deno.stdout.writeSync(writeData)
 })
 
 stopwatch.start()
@@ -32,7 +37,7 @@ for await (const keypress of readKeypress()) {
     stopwatch.lap()
     const idx = stopwatch.state.laps.length - 1
     const { splitDisplay, totalDisplay } = stopwatch.state.laps[idx]
-    console.log(`lap ${idx + 1}: ${splitDisplay} / ${totalDisplay}`)
+    console.log(` - lap ${idx + 1}: ${splitDisplay}  ${totalDisplay}`)
   }
 
   if (keypress.ctrlKey && keypress.key === 'c') {

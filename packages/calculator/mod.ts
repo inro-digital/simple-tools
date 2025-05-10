@@ -14,14 +14,15 @@ export enum Operator {
   Multiply = 'multiply',
   Subtract = 'subtract',
 }
+const { Add, Divide, Equals, Initial, Multiply, Subtract } = Operator
 
 /* Operator strings used for rendering state.history as a string */
 const OperatorSymbols: { [name: string]: string } = Object.freeze({
-  [Operator.Add]: '+',
-  [Operator.Subtract]: '-',
-  [Operator.Multiply]: '×',
-  [Operator.Divide]: '÷',
-  [Operator.Equals]: '=',
+  [Add]: '+',
+  [Subtract]: '-',
+  [Multiply]: '×',
+  [Divide]: '÷',
+  [Equals]: '=',
 })
 
 /** Describes a change in calculator value */
@@ -69,45 +70,46 @@ export default class Calculator extends State<CalculatorState> {
   constructor(value: number = 0) {
     super({
       display: '0',
-      history: [{
-        operator: Operator.Initial,
-        value,
-      }],
+      history: [{ operator: Initial, value }],
       value,
-    })
+    }, { isReactive: true })
     this.#initialValue = value
   }
 
   /* Add a number to the current calculator value */
   add(value: number) {
-    this.state.history.push({ operator: Operator.Add, value })
-    this.state.value += value
-    this.state.display = getDisplay(this.state.history)
-    this.notify()
+    this.batch(() => {
+      this.state.history.push({ operator: Add, value })
+      this.state.value += value
+      this.state.display = getDisplay(this.state.history)
+    })
   }
 
   /* Subtract a number from the current calculator value */
   subtract(value: number) {
-    this.state.history.push({ operator: Operator.Subtract, value })
-    this.state.value = this.state.value - value
-    this.state.display = getDisplay(this.state.history)
-    this.notify()
+    this.batch(() => {
+      this.state.history.push({ operator: Subtract, value })
+      this.state.value -= value
+      this.state.display = getDisplay(this.state.history)
+    })
   }
 
   /* Divide a number from the current calculator value */
   divide(value: number) {
-    this.state.history.push({ operator: Operator.Divide, value })
-    this.state.value = this.state.value / value
-    this.state.display = getDisplay(this.state.history)
-    this.notify()
+    this.batch(() => {
+      this.state.history.push({ operator: Divide, value })
+      this.state.value /= value
+      this.state.display = getDisplay(this.state.history)
+    })
   }
 
   /* Multiply the current calculator value by a number */
   multiply(value: number) {
-    this.state.history.push({ operator: Operator.Multiply, value })
-    this.state.value = this.state.value * value
-    this.state.display = getDisplay(this.state.history)
-    this.notify()
+    this.batch(() => {
+      this.state.history.push({ operator: Multiply, value })
+      this.state.value *= value
+      this.state.display = getDisplay(this.state.history)
+    })
   }
 
   /**
@@ -115,10 +117,11 @@ export default class Calculator extends State<CalculatorState> {
    * @param initialValue can be used to set the starting calculator value. It
    */
   reset(value: number = this.#initialValue) {
-    this.state.value = value
-    this.state.history = [{ operator: Operator.Initial, value }]
-    this.state.display = getDisplay(this.state.history)
-    this.notify()
+    this.batch(() => {
+      this.state.value = value
+      this.state.history = [{ operator: Initial, value }]
+      this.state.display = getDisplay(this.state.history)
+    })
   }
 }
 
@@ -126,7 +129,7 @@ function getDisplay(history: Diff[]) {
   let display = ''
 
   history.forEach((diff) => {
-    if (diff.operator === Operator.Initial) {
+    if (diff.operator === Initial) {
       display += String(diff.value)
     } else {
       display += ` ${OperatorSymbols[diff.operator]} ${diff.value}`

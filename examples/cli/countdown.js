@@ -1,16 +1,24 @@
-import { writeAll } from 'jsr:@std/io/write_all'
+import Countdown from 'jsr:@inro/simple-tools/countdown'
+import { parseArgs } from 'jsr:@std/cli/parse-args'
 import { readKeypress } from 'https://deno.land/x/keypress@0.0.11/mod.ts'
-import Countdown from 'jsr:@inro/simple-tools/countdown.ts'
 
-const countdown = new Countdown({ initialMS: 30_000 })
+const encoder = new TextEncoder()
+const LINE_CLEAR = encoder.encode('\r\u001b[K')
+
+const { s = 30 } = parseArgs(Deno.args)
+const initialMS = s * 1000
+const countdown = new Countdown({ initialMS })
 
 console.log('Countdown Example\n')
 console.log('- Press "spacebar" to pause/resume')
 console.log('- Press "return" to reset the timer\n')
 
-countdown.addEventListener(async (state: CountdownState) => {
-  const text = `${state.display}`
-  await writeAll(Deno.stdout, new TextEncoder().encode(text + '\r'))
+countdown.addEventListener((state) => {
+  const frame = encoder.encode(state.display)
+  const writeData = new Uint8Array(LINE_CLEAR.length + frame.length)
+  writeData.set(LINE_CLEAR)
+  writeData.set(frame, LINE_CLEAR.length)
+  Deno.stdout.writeSync(writeData)
 })
 
 countdown.start()

@@ -26,11 +26,11 @@ export interface CountdownState {
 
 export interface CountdownOptions {
   /* Number that we count down from */
-  initialMS?: number
+  initialMS: number
   /* Frequency that listeners are called while the timer is counting */
-  resolutionMS?: number
+  resolutionMS: number
   /* For custom formatting for `state.display` */
-  formatDisplayTime?: (remaining: number) => string
+  formatDisplayTime: (remaining: number) => string
 }
 
 /**
@@ -55,11 +55,11 @@ export default class Countdown extends State<CountdownState> {
   #formatDisplayTime: (elapsed: number) => string
   #initialMS: number
   #interval: number | undefined
-  #resolutionMS: number | undefined
+  #resolutionMS: number
   #startMS: number | undefined
 
   /* Timer resolution defaults to 10ms */
-  constructor(options: CountdownOptions = {}) {
+  constructor(options: Partial<CountdownOptions> = {}) {
     const {
       initialMS = 0,
       resolutionMS = 10,
@@ -75,7 +75,7 @@ export default class Countdown extends State<CountdownState> {
     })
     this.#elapsedBeforePauseMS = 0
     this.#initialMS = initialMS
-    this.#resolutionMS = resolutionMS
+    this.#resolutionMS = Math.max(resolutionMS, 1)
     this.#formatDisplayTime = formatDisplayTime
   }
 
@@ -95,25 +95,23 @@ export default class Countdown extends State<CountdownState> {
 
     this.notify()
 
-    if (this.#resolutionMS) {
-      this.#interval = setInterval(() => {
-        if (!this.#startMS) throw new Error('unexpected no start time')
+    this.#interval = setInterval(() => {
+      if (!this.#startMS) throw new Error('unexpected no start time')
 
-        const elapsedSincePauseMS = Date.now() - this.#startMS
-        this.state.elapsed = this.#elapsedBeforePauseMS + elapsedSincePauseMS
-        this.state.remaining = this.state.total - this.state.elapsed
+      const elapsedSincePauseMS = Date.now() - this.#startMS
+      this.state.elapsed = this.#elapsedBeforePauseMS + elapsedSincePauseMS
+      this.state.remaining = this.state.total - this.state.elapsed
 
-        // Countdown is complete
-        if (this.state.remaining <= 0) {
-          this.state.elapsed = this.state.total
-          this.state.remaining = 0
-          this.#stop()
-        }
+      // Countdown is complete
+      if (this.state.remaining <= 0) {
+        this.state.elapsed = this.state.total
+        this.state.remaining = 0
+        this.#stop()
+      }
 
-        this.state.display = this.#formatDisplayTime(this.state.remaining)
-        this.notify()
-      }, this.#resolutionMS)
-    }
+      this.state.display = this.#formatDisplayTime(this.state.remaining)
+      this.notify()
+    }, this.#resolutionMS)
   }
 
   /** Pauses the timer, and clears the interval */
@@ -147,6 +145,7 @@ export default class Countdown extends State<CountdownState> {
 
   /** Stops the timer, and clears the interval. It does not reset time. */
   stop() {
+    if (!this.state.isStarted) return
     this.#stop()
     this.notify()
   }
@@ -155,13 +154,12 @@ export default class Countdown extends State<CountdownState> {
    * Resets to initial state. If provided options, it will override the
    * initial settings
    */
-  reset(options: CountdownOptions = {}) {
+  reset(options: Partial<CountdownOptions> = {}) {
     const { initialMS, resolutionMS, formatDisplayTime } = options
-
     this.#stop()
     this.#formatDisplayTime = formatDisplayTime ?? this.#formatDisplayTime
     this.#initialMS = initialMS ?? this.#initialMS
-    this.#resolutionMS = resolutionMS ?? this.#resolutionMS
+    this.#resolutionMS = Math.max(resolutionMS || this.#resolutionMS, 1)
 
     this.state.elapsed = 0
     this.state.isPaused = false

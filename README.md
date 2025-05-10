@@ -114,3 +114,15 @@ list.remove(0)
 // [{ name: Task 2, description: "desc", isDone: false}]
 console.log(list.state.todos)
 ```
+
+## TODO
+
+In no particular order:
+
+- Audio/Podcast Player
+- Flashcards
+- Notepad
+- Workout Timer
+- Extend utils/state for async
+- Add utils/cache
+- Make www into fully-fledged pwa

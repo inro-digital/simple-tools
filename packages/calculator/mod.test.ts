@@ -16,17 +16,17 @@ Deno.test('initializes', () => {
 Deno.test('operators', () => {
   const calculator = new Calculator()
   calculator.add(5)
-  assertEquals(calculator.state.value, 5)
+  assertEquals(calculator.state.value, 5, 'adds')
   calculator.subtract(3)
-  assertEquals(calculator.state.value, 2)
+  assertEquals(calculator.state.value, 2, 'subtracts')
   calculator.multiply(2)
-  assertEquals(calculator.state.value, 4)
+  assertEquals(calculator.state.value, 4, 'multiplies')
   calculator.divide(5)
-  assertEquals(calculator.state.value, 0.8)
+  assertEquals(calculator.state.value, 0.8, 'divides')
   calculator.reset()
-  assertEquals(calculator.state.value, 0)
+  assertEquals(calculator.state.value, 0, 'resets')
   calculator.reset(3)
-  assertEquals(calculator.state.value, 3)
+  assertEquals(calculator.state.value, 3, 'resets to number')
 })
 
 Deno.test('history', () => {
@@ -78,6 +78,5 @@ Deno.test('events', () => {
   calculator.multiply(2)
   calculator.divide(5)
   calculator.reset(2)
-
   assertSpyCalls(listener, 5)
 })
