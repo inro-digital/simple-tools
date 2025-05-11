@@ -9,11 +9,23 @@ const stopwatch = new Stopwatch()
 stopwatch.addEventListener(() => m.redraw())
 
 export default {
-  view: function () {
+  view: () => {
     const laps = stopwatch.state.laps.map(
       (lap) =>
         m('div', `Lap: ${lap.totalDisplay} (Split: ${lap.splitDisplay})`),
     )
+    const startPause = (stopwatch.state.isStarted && !stopwatch.state.isPaused)
+      ? m('button', { onclick: () => stopwatch.pause() }, 'pause')
+      : m('button', { onclick: () => stopwatch.start() }, 'start')
+
+    const reset = (stopwatch.state.isStarted && stopwatch.state.isPaused)
+      ? m('button', {
+        onclick: () => {
+          stopwatch.stop()
+          stopwatch.reset()
+        },
+      }, 'reset')
+      : undefined
 
     return m('main', [
       m('header', [
@@ -24,26 +36,11 @@ export default {
         ]),
       ]),
       m('article', [
-        m('div', { class: 'display' }, stopwatch.state.display),
+        m('h1', { class: 'display' }, stopwatch.state.display),
         m('div', { class: 'controls' }, [
-          m(
-            'button',
-            { id: 'start', onclick: () => stopwatch.start() },
-            'start',
-          ),
-          m(
-            'button',
-            { id: 'pause', onclick: () => stopwatch.pause() },
-            'pause',
-          ),
+          startPause,
           m('button', { id: 'lap', onclick: () => stopwatch.lap() }, 'lap'),
-          m('button', {
-            id: 'stop',
-            onclick: () => {
-              stopwatch.stop()
-              stopwatch.reset()
-            },
-          }, 'stop'),
+          reset,
         ]),
         m('div', { class: 'laps' }, laps),
       ]),

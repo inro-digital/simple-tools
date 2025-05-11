@@ -9,7 +9,7 @@ let name = ''
 let description = ''
 
 export default {
-  view: function () {
+  view: () => {
     const items = list.state.todos.map((todo, index) =>
       m('div', { class: 'todo' }, [
         m('input', {

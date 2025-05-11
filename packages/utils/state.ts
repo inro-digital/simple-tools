@@ -3,13 +3,21 @@
  * Generic state and listener class used by all the simple-tools. This helps us:
  * 1. Get event listening for free in all of our tools for UI hookin
  * 2. Help define a structure for public state
+ *
+ * State is meant to be extended into Classes, and used with an Object state
  */
 
 export interface Options {
+  /** `.notify` should be triggered on any state change */
   isReactive: boolean
 }
 
+/**
+ * Default options for State. Add these during state construction:
+ * `super(defaultState, options)`
+ */
 export const DefaultOptions: Options = {
+  /** Handle notifies manually by default */
   isReactive: false,
 }
 

@@ -3,13 +3,38 @@ import Countdown from 'https://esm.sh/jsr/@inro/simple-tools/countdown'
 const jsrLink = 'https://jsr.io/@inro/simple-tools/doc/countdown/~'
 const codeLink = 'https://git.sr.ht/~inro/simple-tools/tree/main/item/timers'
 
-const countdown = new Countdown({ initialMS: 60000 })
+let initialMS = 60_000
+const countdown = new Countdown({ initialMS })
 
 // @todo: demonstrate watching vars + drawing with requestAnimationFrame
 countdown.addEventListener(() => m.redraw())
 
 export default {
-  view: function () {
+  view: () => {
+    const startPause = (countdown.state.isStarted && !countdown.state.isPaused)
+      ? m('button', { onclick: () => countdown.pause() }, 'pause')
+      : m('button', { onclick: () => countdown.start() }, 'start')
+
+    const reset = (countdown.state.isStarted && countdown.state.isPaused)
+      ? m('button', {
+        onclick: () => {
+          countdown.stop()
+          countdown.reset({ initialMS })
+        },
+      }, 'reset')
+      : undefined
+    const input = (!countdown.state.isStarted)
+      ? m('input', {
+        type: 'number',
+        value: initialMS / 1000,
+        onchange: (e) => {
+          initialMS = parseInt(e.target.value) * 1000
+          console.log(initialMS)
+          countdown.reset({ initialMS })
+        },
+      })
+      : undefined
+
     return m('main', [
       m('header', [
         m('h1', [m('a', { onclick: () => history.back() }, '<'), 'Countdown']),
@@ -20,26 +45,9 @@ export default {
         ]),
       ]),
       m('article', [
-        m('div', { class: 'display' }, countdown.state.display),
-        m('div', { class: 'controls' }, [
-          m(
-            'button',
-            { id: 'start', onclick: () => countdown.start() },
-            'start',
-          ),
-          m(
-            'button',
-            { id: 'pause', onclick: () => countdown.pause() },
-            'pause',
-          ),
-          m('button', {
-            id: 'stop',
-            onclick: () => {
-              countdown.stop()
-              countdown.reset()
-            },
-          }, 'stop'),
-        ]),
+        m('h1', { class: 'display' }, countdown.state.display),
+        input,
+        m('div', { class: 'controls' }, [startPause, reset]),
       ]),
     ])
   },
