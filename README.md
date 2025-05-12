@@ -1,10 +1,11 @@
 # Simple Tools
 
 [![JSR Badge](https://jsr.io/badges/@inro/simple-tools)](https://jsr.io/@inro/simple-tools)
-[source](https://git.sr.ht/~inro/simple-tools)
-![Source Badge](https://img.shields.io/badge/https%3A%2F%2Fgit.sr.ht%2F~inro%2Fsimple-tools?label=code&color=black)
+[![Source Badge](https://img.shields.io/badge/https%3A%2F%2Fgit.sr.ht%2F~inro%2Fsimple-tools?label=source&color=black)](https://git.sr.ht/~inro/simple-tools)
 
 Javascript versions of the basic apps you expect to find built-in to your OS. The intention is that these utilities have simple state management that gives you the tools to power UI apps for common tasks.
+
+## Import
 
 ### In the Browser
 
@@ -22,7 +23,7 @@ import Countdown from 'https://esm.sh/jsr/@inro/simple-tools/countdown'
 - yarn: `yarn dlx jsr add @inro/simple-tools`
 - pnpm: `pnpm dlx jsr add @inro/simple-tools`
 
-### Usage
+## Usage
 
 Every one of our tools has a simple api.
 You can always get the current state either directly or via listener.
@@ -52,7 +53,7 @@ setTimeout(() => {
 
 The `.state` accessor, and the `.addEventListener` that returns state is available in every module. Even the calculator! Here are some examples of apis we have for our other modules:
 
-#### Calculator
+### Calculator
 
 ```js
 import Calculator from '@inro/simple-tools/calculator'
@@ -77,7 +78,7 @@ console.log(calc.state.history)
  */
 ```
 
-#### Stopwatch
+### Stopwatch
 
 ```ts
 import Stopwatch, { StopwatchState } from '@inro/simple-tools/stopwatch'
@@ -98,7 +99,7 @@ setTimeout(() => {
 }, 5000)
 ```
 
-#### Todolist
+### Todolist
 
 ```js
 import Todolist from '@inro/simple-tools/todolist'
@@ -127,6 +128,3 @@ In no particular order:
 - Flashcards
 - Notepad
 - Workout Timer
-- Extend utils/state for async
-- Add utils/cache
-- Make www into fully-fledged pwa
