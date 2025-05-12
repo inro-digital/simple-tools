@@ -1,5 +1,9 @@
 # Simple Tools
 
+[![JSR Badge](https://jsr.io/badges/@inro/simple-tools)](https://jsr.io/@inro/simple-tools)
+[source](https://git.sr.ht/~inro/simple-tools)
+![Source Badge](https://img.shields.io/badge/https%3A%2F%2Fgit.sr.ht%2F~inro%2Fsimple-tools?label=code&color=black)
+
 Javascript versions of the basic apps you expect to find built-in to your OS. The intention is that these utilities have simple state management that gives you the tools to power UI apps for common tasks.
 
 ### In the Browser

@@ -7,6 +7,7 @@
  * State is meant to be extended into Classes, and used with an Object state
  */
 
+/** Options to modify how State works */
 export interface Options {
   /** `.notify` should be triggered on any state change */
   isReactive: boolean
@@ -150,7 +151,7 @@ export default class State<InternalState extends object> {
     this.#watchers = this.#watchers.filter((watcher) => watcher === func)
   }
 
-  /** Save state to somewhere */
+  /** Saves state to somewhere */
   async save(saver: (state: InternalState) => Promise<boolean>): Promise<void> {
     this.saving = true
     this.notify()

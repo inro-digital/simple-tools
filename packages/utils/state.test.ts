@@ -107,11 +107,12 @@ Deno.test('can batch changes to reduce notifies', () => {
 Deno.test('can use save/load to interact with storage', async () => {
   type CountState = { count: number }
 
-  const store = new LocalStorage<CountState | null>({
-    defaultValue: null,
-    verify: (_val) => true,
-    parse: (str: string) => str ? JSON.parse(str) : null,
-    stringify: (count: CountState | null) => JSON.stringify(count),
+  const store = new LocalStorage<CountState>({
+    name: 'count',
+    defaultValue: { count: 0 },
+    deserialize: (str) => str ? JSON.parse(str) : null,
+    serialize: (state) => JSON.stringify(state),
+    verify: (state) => Boolean((state as CountState)?.count != null),
   })
 
   class Counter extends State<CountState> {
@@ -124,16 +125,16 @@ Deno.test('can use save/load to interact with storage', async () => {
   const rand = Math.floor(Math.random() * 100)
   counter.state.count = rand
 
-  const saved = counter.save((state) => store.set('counter', state))
+  const saved = counter.save((state) => store.set(state))
   assertEquals(counter.saving, true, 'Should signal saving during processing')
   await saved
   assertEquals(counter.saving, false, 'Should stop saving after processing')
-  assertEquals(await store.get('counter'), { count: rand }, 'Recover state')
+  assertEquals(await store.get(), { count: rand }, 'Recover state')
 
   counter.state.count = 0
 
   const load = counter.load(async () => {
-    return await store.get('counter') || { count: 0 }
+    return await store.get() || { count: 0 }
   })
   assertEquals(counter.loading, true, 'Should signal loading during processing')
   await load

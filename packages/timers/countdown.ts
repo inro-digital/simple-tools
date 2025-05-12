@@ -10,26 +10,26 @@ import { formatDisplayTime as defaultTimeFormatter } from './utils.ts'
 
 /** State returned via `countdown.state` or `countdown.addEventListener` */
 export interface CountdownState {
-  /* The time formatted as a pretty string */
+  /** The time formatted as a pretty string */
   display: string
-  /* ms elapsed since the timer started; does not include pause time */
+  /** ms elapsed since the timer started; does not include pause time */
   elapsed: number
-  /* Is true when both `start` and `pause` have been called */
+  /** Is true when both `start` and `pause` have been called */
   isPaused: boolean
   /** Is true when `start` has been called, and `stop` has not been called. */
   isStarted: boolean
-  /* ms remaining before the timer resolves. (total - elapsed) */
+  /** ms remaining before the timer resolves. (total - elapsed) */
   remaining: number
-  /* total ms of the timer will have been counting down */
+  /** total ms of the timer will have been counting down */
   total: number
 }
 
 export interface CountdownOptions {
-  /* Number that we count down from */
+  /** Number that we count down from */
   initialMS: number
-  /* Frequency that listeners are called while the timer is counting */
+  /** Frequency that listeners are called while the timer is counting */
   resolutionMS: number
-  /* For custom formatting for `state.display` */
+  /** For custom formatting for `state.display` */
   formatDisplayTime: (remaining: number) => string
 }
 
@@ -58,7 +58,7 @@ export default class Countdown extends State<CountdownState> {
   #resolutionMS: number
   #startMS: number | undefined
 
-  /* Timer resolution defaults to 10ms */
+  /** Timer resolution defaults to 10ms */
   constructor(options: Partial<CountdownOptions> = {}) {
     const {
       initialMS = 0,

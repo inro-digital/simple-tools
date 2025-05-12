@@ -5,21 +5,22 @@ export default class LocalStorage<T> extends Storage<T> {
     super(props)
   }
 
-  override has(name: string): Promise<boolean> {
-    return Promise.resolve(globalThis.localStorage.getItem(name) !== null)
+  override has(): Promise<boolean> {
+    return Promise.resolve(globalThis.localStorage.getItem(this.name) !== null)
   }
 
-  override get(name: string): Promise<T> {
-    const value = globalThis.localStorage.getItem(name)
+  override get(): Promise<T> {
+    const value = globalThis.localStorage.getItem(this.name)
+    if (value == null) return Promise.resolve(this.defaultValue)
     return Promise.resolve(this.safeParse(value))
   }
 
-  override set(name: string, value: T): Promise<boolean> {
+  override set(value: T): Promise<boolean> {
     if (!this.verify(value)) throw new Error('invalid value')
     try {
       globalThis.localStorage.setItem(
-        name,
-        value != null ? this.stringify(value) : String(value),
+        this.name,
+        value != null ? this.serialize(value) : String(value),
       )
       return Promise.resolve(true)
     } catch (err: unknown) {
@@ -30,29 +31,8 @@ export default class LocalStorage<T> extends Storage<T> {
     }
   }
 
-  override remove(name: string): Promise<boolean> {
-    globalThis.localStorage.removeItem(name)
+  override remove(): Promise<boolean> {
+    globalThis.localStorage.removeItem(this.name)
     return Promise.resolve(true)
-  }
-
-  override keys(): Promise<string[]> {
-    const storeKeys: string[] = []
-    for (let i = 0; i < globalThis.localStorage.length; i++) {
-      const key = globalThis.localStorage.key(i)
-      if (key) storeKeys.push(key)
-    }
-    return Promise.resolve(storeKeys)
-  }
-
-  override entries(): Promise<Array<[string, T]>> {
-    const storeEntries: Array<[string, T]> = []
-    for (let i = 0; i < globalThis.localStorage.length; i++) {
-      const name = globalThis.localStorage.key(i)
-      if (typeof name === 'string') {
-        const valueStr = globalThis.localStorage.getItem(name)
-        if (valueStr != null) storeEntries.push([name, this.parse(valueStr)])
-      }
-    }
-    return Promise.resolve(storeEntries)
   }
 }

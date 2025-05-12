@@ -46,13 +46,13 @@ export interface TodolistState {
 export default class Todolist extends State<TodolistState> {
   #initialTodos: Todo[]
 
-  /* You can feed an initial state to the todolist */
+  /** You can feed an initial state to the todolist */
   constructor({ todos = [] }: Partial<TodolistState> = {}) {
     super({ todos })
     this.#initialTodos = todos
   }
 
-  /* Add a todo */
+  /** Adds a todo */
   add(name: string, description: string) {
     this.state.todos.push({ name, description, isDone: false })
     this.notify()

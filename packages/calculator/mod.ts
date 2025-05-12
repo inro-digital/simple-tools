@@ -5,7 +5,7 @@
  */
 import State from '../utils/state.ts'
 
-/* The names of the operations that Calculator supports */
+/** The names of the operations that Calculator supports */
 export enum Operator {
   Add = 'add',
   Divide = 'divide',
@@ -16,7 +16,7 @@ export enum Operator {
 }
 const { Add, Divide, Equals, Initial, Multiply, Subtract } = Operator
 
-/* Operator strings used for rendering state.history as a string */
+/** Operator strings used for rendering state.history as a string */
 const OperatorSymbols: { [name: string]: string } = Object.freeze({
   [Add]: '+',
   [Subtract]: '-',
@@ -76,7 +76,7 @@ export default class Calculator extends State<CalculatorState> {
     this.#initialValue = value
   }
 
-  /* Add a number to the current calculator value */
+  /** Adds a value to the current calculator value */
   add(value: number) {
     this.batch(() => {
       this.state.history.push({ operator: Add, value })
@@ -85,7 +85,7 @@ export default class Calculator extends State<CalculatorState> {
     })
   }
 
-  /* Subtract a number from the current calculator value */
+  /** Subtracts a value from the current calculator value */
   subtract(value: number) {
     this.batch(() => {
       this.state.history.push({ operator: Subtract, value })
@@ -94,7 +94,7 @@ export default class Calculator extends State<CalculatorState> {
     })
   }
 
-  /* Divide a number from the current calculator value */
+  /** Divides a value from the current calculator value */
   divide(value: number) {
     this.batch(() => {
       this.state.history.push({ operator: Divide, value })
@@ -103,7 +103,7 @@ export default class Calculator extends State<CalculatorState> {
     })
   }
 
-  /* Multiply the current calculator value by a number */
+  /** Multiplies a current to the current calculator value */
   multiply(value: number) {
     this.batch(() => {
       this.state.history.push({ operator: Multiply, value })
@@ -113,7 +113,7 @@ export default class Calculator extends State<CalculatorState> {
   }
 
   /**
-   * Reset the value and the history
+   * Resets the value and the history
    * @param initialValue can be used to set the starting calculator value. It
    */
   reset(value: number = this.#initialValue) {
