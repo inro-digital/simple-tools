@@ -75,6 +75,7 @@ export default class State<InternalState extends object> {
   #watchers: Array<(state: InternalState) => void> = []
   error: Error | null = null
   loading = false
+  saving = false
 
   /**
    * Define public state on initialization
@@ -83,6 +84,19 @@ export default class State<InternalState extends object> {
   constructor(state: InternalState, options?: Partial<Options>) {
     this.#options = { ...this.#options, ...options }
     this.#state = this.#createReactive(state, this.#options)
+  }
+
+  /**
+   * Returns a reference to the state.
+   * This is used for easy editing state as well.
+   */
+  get state(): InternalState {
+    return this.#state
+  }
+
+  /** Adds an event listener. Triggered by `this.notify` */
+  addEventListener(func: (state: InternalState) => void) {
+    this.#watchers.push(func)
   }
 
   /**
@@ -102,12 +116,20 @@ export default class State<InternalState extends object> {
     }
   }
 
-  /**
-   * Returns a reference to the state.
-   * This is used for easy editing state as well.
-   */
-  get state(): InternalState {
-    return this.#state
+  /** Load state from somewhere */
+  async load(loader: () => Promise<InternalState>): Promise<void> {
+    this.loading = true
+    this.notify()
+    try {
+      const result = await loader()
+      this.#state = { ...this.#state, ...result }
+      this.error = null
+    } catch (err) {
+      this.error = err as Error
+    } finally {
+      this.loading = false
+      this.notify()
+    }
   }
 
   /**
@@ -123,14 +145,24 @@ export default class State<InternalState extends object> {
     this.#watchers.forEach((cb) => cb({ ...this.#state }))
   }
 
-  /** Adds an event listener. Triggered by `this.notify` */
-  addEventListener(func: (state: InternalState) => void) {
-    this.#watchers.push(func)
-  }
-
   /** Removes an event listener. */
   removeEventListener(func: (state: InternalState) => void) {
     this.#watchers = this.#watchers.filter((watcher) => watcher === func)
+  }
+
+  /** Save state to somewhere */
+  async save(saver: (state: InternalState) => Promise<boolean>): Promise<void> {
+    this.saving = true
+    this.notify()
+    try {
+      await saver(this.#state)
+      this.error = null
+    } catch (err) {
+      this.error = err as Error
+    } finally {
+      this.saving = false
+      this.notify()
+    }
   }
 
   #createReactive<T extends object>(obj: T, options: Options): T {

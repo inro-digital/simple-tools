@@ -78,6 +78,7 @@ export default {
                 { id: 'reset', onclick: () => calc.reset(value || 0) },
                 'C',
               ),
+              m('button', { onclick: submit }, '='),
             ]),
           ]),
           m('div', {
@@ -89,7 +90,6 @@ export default {
             m('button', { onclick: () => submit(Operator.Subtract) }, '−'),
             m('button', { onclick: () => submit(Operator.Add) }, '+'),
           ]),
-          m('button', { onclick: submit }, '='),
         ]),
       ]),
     ]),
