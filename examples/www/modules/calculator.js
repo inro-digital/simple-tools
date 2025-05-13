@@ -2,9 +2,8 @@ import Calculator, {
   Operator,
 } from 'https://esm.sh/jsr/@inro/simple-tools/calculator'
 
-const jsrLink = 'https://jsr.io/@inro/simple-tools/doc/calculator/~'
-const codeLink =
-  'https://git.sr.ht/~inro/simple-tools/tree/main/item/calculator'
+const jsrLink = 'https://jsr.io/@inro/simple-tools'
+const codeLink = 'https://git.sr.ht/~inro/simple-tools'
 
 let value = 0
 let operator
@@ -32,10 +31,15 @@ export default {
   view: () =>
     m('main', [
       m('header', [
-        m('h1', [m('a', { onclick: () => history.back() }, '<'), 'Calculator']),
-        m('ul', [
-          m('li', m('a', { href: jsrLink }, 'jsr')),
-          m('li', m('a', { href: codeLink }, 'code')),
+        m('h1', [
+          m('a[style=margin: 10px; cursor: pointer;]', {
+            onclick: () => history.back(),
+          }, '↩︎'),
+          'Calculator',
+          m('ul.links', [
+            m('li', m('a', { href: jsrLink }, 'jsr')),
+            m('li', m('a', { href: codeLink }, 'code')),
+          ]),
         ]),
       ]),
       m('article', [

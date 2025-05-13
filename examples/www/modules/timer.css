@@ -8,9 +8,11 @@
   scroll-snap-type: y mandatory;
   z-index: -1;
 }
+
 .timers::-webkit-scrollbar {
   display: none;
 }
+
 .timer {
   scroll-snap-align: center;
   display: flex;
@@ -22,16 +24,20 @@
   width: 100vw;
   user-select: none;
 }
+
 .pad-last {
   margin-bottom: 50%;
 }
+
 .pad-first {
   margin-bottom: 10%;
   margin-top: 50%;
 }
+
 .display-number {
   transition: opacity 0.2s;
 }
+
 .big-time {
   cursor: pointer;
   font-weight: bold;
@@ -39,20 +45,30 @@
   user-select: none;
   -webkit-user-select: none;
 }
+
 .detailed-time {
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
 }
+
 .laps {
-  text-align: left;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 10px;
+  list-style: none;
+}
+
+.links {
+  float: right;
+  font-size: 1rem;
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  list-style: none;
 }
-.laps-title {
-  text-decoration: underline;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  text-align: center;
+
+.links a {
+  margin: 10px;
 }

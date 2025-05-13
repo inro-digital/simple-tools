@@ -1,7 +1,8 @@
 import Countdown from '@inro/simple-tools/countdown'
+import Stopwatch from '@inro/simple-tools/stopwatch'
 
-const jsrLink = 'https://jsr.io/@inro/simple-tools/doc/countdown/~'
-const codeLink = 'https://git.sr.ht/~inro/simple-tools/tree/main/item/timers'
+const jsrLink = 'https://jsr.io/@inro/simple-tools'
+const codeLink = 'https://git.sr.ht/~inro/simple-tools'
 
 let isRunning = false
 
@@ -21,13 +22,18 @@ export default {
 
     return m('main', [
       m('header', [
-        m('h1', m('a', { onclick: () => history.back() }, '<'), 'Timer'),
-        m('ul', [
-          m('li', m('a', { href: jsrLink }, 'jsr')),
-          m('li', m('a', { href: codeLink }, 'code')),
+        m('h1', [
+          m('a[style=margin: 10px; cursor: pointer;]', {
+            onclick: () => history.back(),
+          }, '↩︎'),
+          'Timer',
+          m('ul.links', [
+            m('li', m('a', { href: jsrLink }, 'jsr')),
+            m('li', m('a', { href: codeLink }, 'code')),
+          ]),
         ]),
       ]),
-      m('.timers', {
+      m('article.timers', {
         style: { overflow: isRunning ? 'hidden' : 'scroll' },
       }, timers),
     ])
@@ -36,7 +42,8 @@ export default {
 
 function Timer(vnode) {
   const { index, initialMS, setIsRunning } = vnode.attrs
-  const timer = new Countdown({ initialMS })
+  const isStopwatch = index == 90
+  const timer = isStopwatch ? new Stopwatch() : new Countdown({ initialMS })
   let bigTime, detailedTime
   let isRunning = false
   let isRendering = false
@@ -53,21 +60,16 @@ function Timer(vnode) {
   }
 
   const setTime = () => {
-    bigTime = formatBigDisplayTime(timer.state.remaining, true)
-    detailedTime = formatDetailedDisplayTime(timer.state.remaining)
+    const time = isStopwatch ? timer.state.elapsed : timer.state.remaining
+    console.log(isStopwatch)
+    bigTime = formatBigDisplayTime(time, !isStopwatch)
+    detailedTime = formatDetailedDisplayTime(time)
   }
 
   const onStartStop = () =>
     (timer.state.isStarted && !timer.state.isPaused)
       ? timer.pause()
       : timer.start()
-
-  const onReset = () => {
-    timer.stop()
-    timer.reset({ initialMS })
-    setTime()
-    m.redraw()
-  }
 
   return {
     oninit: function () {
@@ -86,19 +88,48 @@ function Timer(vnode) {
       if (index === 89) vnode.dom.scrollIntoView(true)
     },
 
-    view: () =>
-      m('.timer', [
+    view: () => {
+      const showReset = timer.state.isStarted && timer.state.isPaused
+      const showLaps = timer.state.isStarted && isStopwatch
+      const laps = isStopwatch
+        ? timer.state?.laps.map(
+          (lap, i) => m('li.lap', `Lap ${i + 1} – ${lap.totalDisplay}`),
+        )
+        : []
+
+      return m('.timer', [
         m('.big-time', { onclick: onStartStop }, bigTime),
-        m('.detailed-time', detailedTime),
+        m('.detailed-time', {
+          style: `visibility: ${timer.state.isStarted ? '' : 'hidden'}`,
+        }, detailedTime),
         m('div.controls', [
           m('button', {
-            onclick: onReset,
-            style: `visibility: ${
-              timer.state.isStarted && timer.state.isPaused ? '' : 'hidden'
-            }`,
+            style: {
+              display: (isStopwatch && !timer.state.isPaused)
+                ? 'none'
+                : 'inline',
+              visibility: showReset ? '' : 'hidden',
+              margin: '1em',
+            },
+            onclick: () => {
+              timer.stop()
+              timer.reset({ initialMS })
+              setTime()
+              m.redraw()
+            },
           }, 'reset'),
+          m('button', {
+            style: {
+              display: (!isStopwatch) ? 'none' : 'inline',
+              visibility: showLaps ? '' : 'hidden',
+              margin: '1em',
+            },
+            onclick: () => timer.lap(),
+          }, 'lap'),
+          m('ul.laps', laps),
         ]),
-      ]),
+      ])
+    },
   }
 }
 

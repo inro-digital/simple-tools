@@ -1,7 +1,7 @@
 import Todolist from 'https://esm.sh/jsr/@inro/simple-tools/todolist'
 
-const jsrLink = 'https://jsr.io/@inro/simple-tools/doc/todolist/~'
-const codeLink = 'https://git.sr.ht/~inro/simple-tools/tree/main/item/todolist'
+const jsrLink = 'https://jsr.io/@inro/simple-tools'
+const codeLink = 'https://git.sr.ht/~inro/simple-tools'
 
 const list = new Todolist()
 
@@ -34,10 +34,15 @@ export default {
 
     return m('main', [
       m('header', [
-        m('h1', [m('a', { onclick: () => history.back() }, '<'), 'Todolist']),
-        m('ul', [
-          m('li', m('a', { href: jsrLink }, 'jsr')),
-          m('li', m('a', { href: codeLink }, 'code')),
+        m('h1', [
+          m('a[style=margin: 10px; cursor: pointer;]', {
+            onclick: () => history.back(),
+          }, '↩︎'),
+          'Todolist',
+          m('ul.links', [
+            m('li', m('a', { href: jsrLink }, 'jsr')),
+            m('li', m('a', { href: codeLink }, 'code')),
+          ]),
         ]),
       ]),
       m('article', [
