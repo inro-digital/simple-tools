@@ -11,10 +11,8 @@ let description = ''
 export default {
   view: () => {
     const items = list.state.todos.map((todo, index) =>
-      m('div', { class: 'todo' }, [
-        m('input', {
-          type: 'checkbox',
-          class: 'toggle',
+      m('div.todo', [
+        m('input.toggle[type=checkbox]', {
           'data-index': index,
           checked: todo.isDone ? 'checked' : '',
           onclick: (event) => {
@@ -25,8 +23,7 @@ export default {
           'span',
           `${todo.name}${todo.description ? (': ' + todo.description) : ''}`,
         ),
-        m('button', {
-          class: 'remove',
+        m('button.remove', {
           'data-index': index,
           onclick: (event) => {
             list.remove(parseInt(event.target.dataset.index, 10))
@@ -45,22 +42,15 @@ export default {
       ]),
       m('article', [
         m('div', { class: 'controls' }, [
-          m('input', {
-            id: 'name',
-            type: 'text',
-            placeholder: 'Name',
+          m('input#id[type=text][placeholder=Name]', {
             value: name,
             onchange: (e) => name = e.target.value,
           }),
-          m('input', {
-            id: 'description',
-            type: 'text',
-            placeholder: 'Description',
+          m('input#description[type=text][placeholder=Description]', {
             value: description,
             onchange: (e) => description = e.target.value,
           }),
-          m('button', {
-            id: 'add',
+          m('button#add', {
             onclick: () => {
               list.add(name, description)
               name = ''
@@ -68,7 +58,7 @@ export default {
             },
           }, 'add'),
         ]),
-        m('ul', { class: 'list' }, items),
+        m('ul.list', items),
       ]),
     ])
   },

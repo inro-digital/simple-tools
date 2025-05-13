@@ -1,6 +1,5 @@
 import Calculator from './modules/calculator.js'
-import Countdown from './modules/countdown.js'
-import Stopwatch from './modules/stopwatch.js'
+import Timer from './modules/timer.js'
 import Todolist from './modules/todolist.js'
 
 const Main = {
@@ -15,8 +14,7 @@ const Main = {
       ),
       m('ul', [
         m('li', m('a', { href: '/#!/calculator' }, 'calculator')),
-        m('li', m('a', { href: '/#!/countdown' }, 'countdown')),
-        m('li', m('a', { href: '/#!/stopwatch' }, 'stopwatch')),
+        m('li', m('a', { href: '/#!/timer' }, 'timer')),
         m('li', m('a', { href: '/#!/todolist' }, 'todolist')),
       ]),
     ]),
@@ -25,7 +23,6 @@ const Main = {
 m.route(document.body, '/main', {
   '/main': Main,
   '/calculator': Calculator,
-  '/countdown': Countdown,
-  '/stopwatch': Stopwatch,
+  '/timer': Timer,
   '/todolist': Todolist,
 })

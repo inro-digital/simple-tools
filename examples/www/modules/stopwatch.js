@@ -36,13 +36,13 @@ export default {
         ]),
       ]),
       m('article', [
-        m('h1', { class: 'display' }, stopwatch.state.display),
-        m('div', { class: 'controls' }, [
+        m('h1.display', stopwatch.state.display),
+        m('div.controls', [
           startPause,
-          m('button', { id: 'lap', onclick: () => stopwatch.lap() }, 'lap'),
+          m('button.lap', { onclick: () => stopwatch.lap() }, 'lap'),
           reset,
         ]),
-        m('div', { class: 'laps' }, laps),
+        m('div.laps', laps),
       ]),
     ])
   },

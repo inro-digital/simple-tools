@@ -39,23 +39,13 @@ export default {
         ]),
       ]),
       m('article', [
-        m(
-          'div',
-          { class: 'display' },
-          calc.state.display + ' = ' + calc.state.value,
-        ),
-        m('input', {
-          id: 'value',
-          type: 'number',
-          placeholder: 'Enter Value',
+        m('div.display', calc.state.display + ' = ' + calc.state.value),
+        m('input[type=number]', {
           value,
           onchange: (e) => value = parseInt(e.target.value),
         }),
-        m('div', {
-          class: 'controls',
-          style: 'display: flex; flex-direction: row;',
-        }, [
-          m('div', { class: 'nums' }, [
+        m('.controls[style=display: flex; flex-direction: row;]', [
+          m('.nums', [
             m('div', [
               m('button', { onclick: () => addDigit(1) }, 1),
               m('button', { onclick: () => addDigit(2) }, 2),
@@ -73,18 +63,11 @@ export default {
             ]),
             m('div', [
               m('button', { onclick: () => value = 0 }, 0),
-              m(
-                'button',
-                { id: 'reset', onclick: () => calc.reset(value || 0) },
-                'C',
-              ),
+              m('button#reset', { onclick: () => calc.reset(value || 0) }, 'C'),
               m('button', { onclick: submit }, '='),
             ]),
           ]),
-          m('div', {
-            class: 'methods',
-            style: 'display: flex; flex-direction: column;',
-          }, [
+          m('.methods[style=display: flex; flex-direction: column;]', [
             m('button', { onclick: () => submit(Operator.Divide) }, '÷'),
             m('button', { onclick: () => submit(Operator.Multiply) }, '×'),
             m('button', { onclick: () => submit(Operator.Subtract) }, '−'),

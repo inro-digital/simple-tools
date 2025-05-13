@@ -23,7 +23,7 @@
   },
   "tasks": {
     "dev": "serve ./examples/www",
-    "test": "deno fmt && deno lint && deno check . && deno task test:coverage && deno publish --dry-run --allow-dirty",
-    "test:coverage": "deno test --coverage=./coverage --reporter=dot ."
+    "test": "deno fmt && deno lint && deno check . && deno task test:coverage && deno publish --dry-run --allow-dirty --quiet",
+    "test:coverage": "deno test --parallel --coverage=./coverage ."
   }
 }

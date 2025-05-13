@@ -24,8 +24,7 @@ export default {
       }, 'reset')
       : undefined
     const input = (!countdown.state.isStarted)
-      ? m('input', {
-        type: 'number',
+      ? m('input[type=number]', {
         value: initialMS / 1000,
         onchange: (e) => {
           initialMS = parseInt(e.target.value) * 1000
@@ -45,9 +44,9 @@ export default {
         ]),
       ]),
       m('article', [
-        m('h1', { class: 'display' }, countdown.state.display),
+        m('h1.display', countdown.state.display),
         input,
-        m('div', { class: 'controls' }, [startPause, reset]),
+        m('div.controls', [startPause, reset]),
       ]),
     ])
   },
