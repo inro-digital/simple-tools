@@ -1,7 +1,4 @@
-import Calculator, {
-  Operator,
-} from 'https://esm.sh/jsr/@inro/simple-tools/calculator'
-
+import Calculator, { Operator } from '@inro/simple-tools/calculator'
 const jsrLink = 'https://jsr.io/@inro/simple-tools'
 const codeLink = 'https://git.sr.ht/~inro/simple-tools'
 

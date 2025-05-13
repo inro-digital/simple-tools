@@ -1,5 +1,4 @@
-import Todolist from 'https://esm.sh/jsr/@inro/simple-tools/todolist'
-
+import Todolist from '@inro/simple-tools/todolist'
 const jsrLink = 'https://jsr.io/@inro/simple-tools'
 const codeLink = 'https://git.sr.ht/~inro/simple-tools'
 

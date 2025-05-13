@@ -1,6 +1,5 @@
 import Countdown from '@inro/simple-tools/countdown'
 import Stopwatch from '@inro/simple-tools/stopwatch'
-
 const jsrLink = 'https://jsr.io/@inro/simple-tools'
 const codeLink = 'https://git.sr.ht/~inro/simple-tools'
 
