@@ -1,19 +1,12 @@
 import { associateBy } from '@std/collections/associate-by'
 import State from '../utils/state.ts'
 import type Scheduler from './scheduler.ts'
-import {
-  type Assignment,
-  CardState,
-  type Subject,
-  type SubjectFilter,
-} from './types.ts'
-import { getNow } from './utils/datetime.ts'
-
+import { type Assignment, CardState, type Subject } from './types.ts'
 export * from './types.ts'
 
 const { Failure, Pending, Success } = CardState
 
-export interface FlashcardsState {
+export interface FlashcardsState<Quality> {
   assignments: Assignment[]
   assignmentsById: Record<string, Assignment>
   subjects: Subject[]
@@ -21,6 +14,7 @@ export interface FlashcardsState {
   currAssignment: Assignment | null
   currCardState: CardState | null
   currCardType: string | null
+  currQuality: Quality | null
   currSubject: Subject | null
   /** Subjects that have been answered incorrectly */
   currFailures: Set<string>
@@ -32,40 +26,20 @@ export interface FlashcardsState {
   isLearnMode: boolean
 }
 
-export const defaultState: FlashcardsState = {
-  assignments: [],
-  assignmentsById: {},
-  subjects: [],
-  subjectsById: {},
-  isLearnMode: false,
-  currAssignment: null,
-  currCardState: null,
-  currCardType: null,
-  currSubject: null,
-  currFailures: new Set(),
-  currPending: [],
-  currSuccesses: new Set(),
-}
-
 export interface FlashcardOptions<Quality> {
   assignments: Assignment[]
   subjects: Subject[]
   isLearnMode: boolean
   scheduler: Scheduler<Quality>
-  filterLearnable?: SubjectFilter
-  filterQuizzable?: SubjectFilter
+  checkAnswer: (answer: string, subject: Subject) => Quality
+  checkPassing: (quality: Quality) => boolean
 }
 
-export default class Flashcards<Quality> extends State<FlashcardsState> {
+export default class Flashcards<Quality>
+  extends State<FlashcardsState<Quality>> {
   #scheduler: Scheduler<Quality>
-  #checkAnswer = (_answer: string, _subject: Subject) => true
-  #checkIsPassing = (_assignment: Assignment) => false
-  #getAvailableAt = (grade: CardState, _assignment: Assignment) => {
-    if (grade === CardState.Success) return getNow(24 * 60 * 60 * 1000)
-    else return getNow(24 * 60 * 60 * 1000)
-  }
-  #filterLearnable: SubjectFilter
-  #filterQuizzable: SubjectFilter
+  #checkAnswer: (answer: string, subject: Subject) => Quality
+  #checkPassing: (quality: Quality) => boolean
 
   constructor(
     { assignments, subjects, isLearnMode, ...options }: FlashcardOptions<
@@ -73,8 +47,15 @@ export default class Flashcards<Quality> extends State<FlashcardsState> {
     >,
   ) {
     super({
-      ...defaultState,
-      assignments,
+      currAssignment: null,
+      currCardState: null,
+      currCardType: null,
+      currQuality: null,
+      currSubject: null,
+      currFailures: new Set(),
+      currPending: [],
+      currSuccesses: new Set(),
+      assignments: assignments,
       isLearnMode,
       subjects,
       assignmentsById: associateBy<Assignment>(assignments, (a) => a.subjectId),
@@ -82,8 +63,8 @@ export default class Flashcards<Quality> extends State<FlashcardsState> {
     }, { isReactive: true })
 
     this.#scheduler = options.scheduler
-    this.#filterLearnable = options.filterLearnable ?? (() => true)
-    this.#filterQuizzable = options.filterQuizzable ?? (() => true)
+    this.#checkAnswer = options.checkAnswer
+    this.#checkPassing = options.checkPassing
 
     this.state.currPending =
       (isLearnMode ? this.getLearnable() : this.getQuizzable())
@@ -107,8 +88,7 @@ export default class Flashcards<Quality> extends State<FlashcardsState> {
     return this.getAvailable()
       .filter((subject) => {
         const assignment = this.state.assignmentsById[subject.id]
-        if (assignment?.startedAt) return false // Already learned
-        return this.#filterLearnable(subject, assignment)
+        return this.#scheduler.filterLearnable(subject, assignment)
       })
   }
 
@@ -117,7 +97,7 @@ export default class Flashcards<Quality> extends State<FlashcardsState> {
     return this.getAvailable()
       .filter((subject) => {
         const assignment = this.state.assignmentsById[subject.id]
-        return this.#filterQuizzable(subject, assignment)
+        return this.#scheduler.filterLearnable(subject, assignment)
       })
   }
 
@@ -146,42 +126,28 @@ export default class Flashcards<Quality> extends State<FlashcardsState> {
       throw new Error('trying to quiz, but there is no assignment')
     }
     if (isLearnMode) {
-      // If we are in "learn" mode, there is no checking.
-      // We just need to set as learned, stage 0, and go next.
-      const assignment: Assignment = {
-        markedCompleted: false,
-        subjectId: currSubject.id,
-        startedAt: currAssignment?.startedAt ?? getNow(),
-        type: currSubject.type,
-        unlockedAt: currAssignment?.unlockedAt ?? getNow(),
-      }
-      assignment.availableAt = this.#getAvailableAt(Success, assignment)
+      const assignment = this.#scheduler.add(currSubject)
       this.state.assignmentsById[currSubject.id] = assignment
     } else if (currCardState === Pending) {
       // If unanswered, don't submit answer. Just set to an answered state.
-      const isCorrect = this.#checkAnswer(answer, currSubject)
-      this.state.currCardState = isCorrect ? Success : Failure
+      this.state.currQuality = this.#checkAnswer(answer, currSubject)
+      const isPassing = this.#checkPassing(this.state.currQuality)
+      this.state.currCardState = isPassing ? Success : Failure
     } else if (currCardState === Failure) {
       if (!this.#hasPreviouslyFailed()) {
-        const availableAt = this.#getAvailableAt(Failure, currAssignment!)
-        this.state.assignmentsById[currSubject.id] = {
-          ...currAssignment!,
-          availableAt,
-        }
+        this.state.assignmentsById[currSubject.id] = this.#scheduler.update(
+          this.state.currQuality!,
+          currSubject,
+          currAssignment!,
+        )
       }
       this.state.currFailures.add(currSubject.id)
     } else if (currCardState === Success && this.#isComplete()) {
-      const { passedAt, startedAt, unlockedAt } = currAssignment!
-      const isPassed = this.#checkIsPassing(currAssignment!)
-      const availableAt = this.#getAvailableAt(Failure, currAssignment!)
-      this.state.assignmentsById[currSubject.id] = {
-        ...currAssignment!,
-        availableAt,
-        passedAt: passedAt ?? (isPassed ? getNow() : undefined),
-        startedAt: startedAt ?? getNow(),
-        unlockedAt: unlockedAt ?? getNow(),
-      }
-
+      this.state.assignmentsById[currSubject.id] = this.#scheduler.update(
+        this.state.currQuality!,
+        currSubject,
+        currAssignment!,
+      )
       this.state.currSuccesses.add(currSubject.id)
     } else {
       throw new Error('Invalid State')

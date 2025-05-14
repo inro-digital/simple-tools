@@ -31,12 +31,12 @@ export interface SubjectData {
  */
 export default class StaticScheduler extends Scheduler<boolean> {
   #srs: Record<number, Srs> = {}
-  #userLevel: number = 0
+  userLevel: number = 0
 
   constructor({ srs, userLevel }: Partial<Options>) {
     super()
     this.#srs = srs || this.#srs
-    this.#userLevel = userLevel || this.#userLevel
+    this.userLevel = userLevel || this.userLevel
   }
 
   /** Ensure that repetition is an int */
@@ -62,8 +62,20 @@ export default class StaticScheduler extends Scheduler<boolean> {
    */
   override filter(subject: Subject, assignment: Assignment): boolean {
     const { level = 0 } = subject.data as SubjectData
-    if (level > this.#userLevel) return false
+    if (level > this.userLevel) return false
     if (assignment?.markedCompleted || assignment?.completedAt) return false
+    return true
+  }
+
+  override filterLearnable(subject: Subject, assignment: Assignment): boolean {
+    if (!this.filter(subject, assignment)) return false
+    if (assignment?.startedAt) return false // Already learned
+    return true
+  }
+
+  override filterQuizzable(subject: Subject, assignment: Assignment): boolean {
+    if (!this.filter(subject, assignment)) return false
+    if (assignment?.startedAt) return false // Already learned
     return true
   }
 

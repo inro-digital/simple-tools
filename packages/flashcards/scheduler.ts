@@ -23,12 +23,26 @@ export default class Scheduler<Quality> {
    * To be used as a predicate to filter an array of subject/assignments.
    * Helps determine what cards will be shown in a given timeframe.
    */
-  filter(
-    this: Scheduler<Quality>,
-    _subject: Subject,
-    _assignment: Assignment,
-  ): boolean {
+  filter(this: Scheduler<Quality>, _s: Subject, _a: Assignment): boolean {
     return true
+  }
+
+  /** Filter to just items that haven't been learned, but are unlocked */
+  filterLearnable(
+    this: Scheduler<Quality>,
+    s: Subject,
+    a: Assignment,
+  ): boolean {
+    return this.filter(s, a)
+  }
+
+  /** Filter to items that are available to be quizzed on */
+  filterQuizzable(
+    this: Scheduler<Quality>,
+    s: Subject,
+    a: Assignment,
+  ): boolean {
+    return this.filter(s, a)
   }
 
   /**

@@ -38,9 +38,9 @@ export interface Assignment {
   subjectId: string
   /** user has learned the subject */
   startedAt?: Date
+  type: string
   /** subject is available to be learned */
   unlockedAt?: Date
-  type: string
 }
 
 export const defaultAssignment: Assignment = {
