@@ -1,0 +1,146 @@
+[
+  {
+    "id": "1",
+    "type": "animals",
+    "learnKeys": ["characters"],
+    "quizKeys": ["meanings", "readings"],
+    "data": {
+      "level": 1,
+      "position": 1,
+      "srsId": 1,
+      "characters": [
+        { "value": "猫", "locale": "zh_CN" },
+        { "value": "貓", "locale": "zh_HK" },
+        { "value": "貓", "locale": "zh_TW" }
+      ],
+      "meanings": [
+        { "isAcceptedAnswer": true, "isPrimary": true, "value": "🐈" },
+        { "isAcceptedAnswer": true, "isPrimary": false, "value": "cat" }
+      ],
+      "readings": [
+        { "value": "maau1", "type": "Jyutping" },
+        { "value": "māo", "type": "Pinyin" }
+      ]
+    }
+  },
+  {
+    "id": "2",
+    "type": "animals",
+    "learnKeys": ["characters"],
+    "quizKeys": ["meanings", "readings"],
+    "data": {
+      "level": 1,
+      "position": 2,
+      "srsId": 1,
+      "characters": [
+        { "value": "鱼", "locale": "zh_CN" },
+        { "value": "魚", "locale": "zh_HK" },
+        { "value": "魚", "locale": "zh_TW" }
+      ],
+      "meanings": [
+        { "isAcceptedAnswer": true, "isPrimary": true, "value": "🐟" },
+        { "isAcceptedAnswer": true, "isPrimary": false, "value": "fish" }
+      ],
+      "readings": [
+        { "value": "jyu4", "type": "Jyutping" },
+        { "value": "yú", "type": "Pinyin" }
+      ]
+    }
+  },
+  {
+    "id": "3",
+    "type": "animals",
+    "learnKeys": ["characters"],
+    "quizKeys": ["meanings", "readings"],
+    "data": {
+      "level": 2,
+      "position": 1,
+      "srsId": 1,
+      "characters": [
+        { "value": "鸟", "locale": "zh_CN" },
+        { "value": "鳥", "locale": "zh_HK" },
+        { "value": "鳥", "locale": "zh_TW" }
+      ],
+      "meanings": [
+        { "isAcceptedAnswer": true, "isPrimary": true, "value": "🐦" },
+        { "isAcceptedAnswer": true, "isPrimary": false, "value": "bird" }
+      ],
+      "readings": [
+        { "value": "niu5", "type": "Jyutping" },
+        { "value": "niǎo", "type": "Pinyin" }
+      ]
+    }
+  },
+  {
+    "id": "4",
+    "type": "animals",
+    "learnKeys": ["characters"],
+    "quizKeys": ["meanings", "readings"],
+    "data": {
+      "level": 2,
+      "position": 2,
+      "srsId": 1,
+      "characters": [
+        { "value": "牛", "locale": "zh_CN" },
+        { "value": "牛", "locale": "zh_HK" },
+        { "value": "牛", "locale": "zh_TW" }
+      ],
+      "meanings": [
+        { "isAcceptedAnswer": true, "isPrimary": true, "value": "🐮" },
+        { "isAcceptedAnswer": true, "isPrimary": false, "value": "cow" }
+      ],
+      "readings": [
+        { "value": "ngau4", "type": "Jyutping" },
+        { "value": "niú", "type": "Pinyin" }
+      ]
+    }
+  },
+  {
+    "id": "5",
+    "type": "animals",
+    "learnKeys": ["characters"],
+    "quizKeys": ["meanings", "readings"],
+    "data": {
+      "level": 3,
+      "position": 1,
+      "srsId": 1,
+      "characters": [
+        { "value": "马", "locale": "zh_CN" },
+        { "value": "馬", "locale": "zh_HK" },
+        { "value": "馬", "locale": "zh_TW" }
+      ],
+      "meanings": [
+        { "isAcceptedAnswer": true, "isPrimary": true, "value": "🐴" },
+        { "isAcceptedAnswer": true, "isPrimary": false, "value": "horse" }
+      ],
+      "readings": [
+        { "value": "maa5", "type": "Jyutping" },
+        { "value": "mǎ", "type": "Pinyin" }
+      ]
+    }
+  },
+  {
+    "id": "6",
+    "type": "animals",
+    "learnKeys": ["characters"],
+    "quizKeys": ["meanings", "readings"],
+    "data": {
+      "level": 3,
+      "position": 2,
+      "srsId": 1,
+      "characters": [
+        { "value": "狗", "locale": "zh_CN" },
+        { "value": "狗", "locale": "zh_HK" },
+        { "value": "狗", "locale": "zh_TW" }
+      ],
+      "meanings": [
+        { "isAcceptedAnswer": true, "isPrimary": true, "value": "🐶" },
+        { "isAcceptedAnswer": true, "isPrimary": false, "value": "dog" }
+      ],
+      "readings": [
+        { "value": "gau2", "type": "Jyutping" },
+        { "value": "gǒu", "type": "Pinyin" }
+      ]
+    }
+  }
+]

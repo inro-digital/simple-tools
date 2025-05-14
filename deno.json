@@ -4,6 +4,10 @@
   "exports": {
     "./calculator": "./packages/calculator/mod.ts",
     "./countdown": "./packages/timers/countdown.ts",
+    "./flashcards": "./packages/flashcards/mod.ts",
+    "./flashcards/schedulers/basic": "./packages/flashcards/schedulers/basic.ts",
+    "./flashcards/schedulers/sm2": "./packages/flashcards/schedulers/sm2.ts",
+    "./flashcards/schedulers/static": "./packages/flashcards/schedulers/static.ts",
     "./state": "./packages/utils/state.ts",
     "./stopwatch": "./packages/timers/stopwatch.ts",
     "./todolist": "./packages/todolist/mod.ts"

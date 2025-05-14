@@ -72,6 +72,8 @@ export default class Flashcards<Quality>
           return (isLearnMode ? learnKeys : quizKeys)
             .map((learnId) => [id, learnId] as [string, string])
         })
+
+    this.#loadNext()
   }
 
   /** All subjects that can be learned or studied */
@@ -118,7 +120,7 @@ export default class Flashcards<Quality>
    * an answer on a Pending card, we will set the card state to Success/Failure,
    * and the answer will be submitted on the next submit.
    */
-  submit(answer: string): void {
+  submit(answer: string = ''): void {
     const { currAssignment, currCardState, currSubject, isLearnMode } =
       this.state
     if (!currSubject) return
