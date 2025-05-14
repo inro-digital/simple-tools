@@ -1,56 +1,16 @@
 import { associateBy } from '@std/collections/associate-by'
 import State from '../utils/state.ts'
+import type Scheduler from './scheduler.ts'
+import {
+  type Assignment,
+  CardState,
+  type Subject,
+  type SubjectFilter,
+} from './types.ts'
+import { getNow } from './utils/datetime.ts'
 
-export interface Assignment {
-  /** subject is available to be studied */
-  availableAt?: number
-  /** subject is mastered, and should not be shown it */
-  completedAt?: number
-  /** number representing expertise */
-  efactor?: number
-  /** number represeting time until next study; usually seconds or days */
-  interval?: number
-  /** last datetime the card was updated */
-  lastStudied?: Date
-  /** user has manually marked subject as completed; reversible */
-  markedCompleted: boolean
-  /**  dependent subjects can now be shown */
-  passedAt?: number
-  /** number representing times answer correctly */
-  repetition?: number
-  /** The ID of the subject this applies to*/
-  subjectId: string
-  /** user has learned the subject */
-  startedAt?: number
-  /** subject is available to be learned */
-  unlockedAt?: number
-  type: string
-}
+export * from './types.ts'
 
-export const defaultAssignment: Assignment = {
-  subjectId: '0',
-  markedCompleted: false,
-  type: '',
-}
-
-export interface Subject {
-  id: string
-  type: string
-  created: string
-  updated: string
-  hidden?: string
-  /** Data properties we should learn against */
-  learnKeys: string[]
-  /** Data properties we should quiz against */
-  quizKeys: string[]
-  data: unknown
-}
-
-export enum CardState {
-  Failure = 'Failure',
-  Pending = 'Pending',
-  Success = 'Success',
-}
 const { Failure, Pending, Success } = CardState
 
 export interface FlashcardsState {
@@ -87,33 +47,30 @@ export const defaultState: FlashcardsState = {
   currSuccesses: new Set(),
 }
 
-export type SubjectFilter = (
-  subject: Subject,
-  assignment: Assignment,
-) => boolean
-
-export interface FlashcardOptions {
+export interface FlashcardOptions<Quality> {
   assignments: Assignment[]
   subjects: Subject[]
   isLearnMode: boolean
-  filterAvailable?: SubjectFilter
+  scheduler: Scheduler<Quality>
   filterLearnable?: SubjectFilter
   filterQuizzable?: SubjectFilter
 }
 
-export default class Flashcards extends State<FlashcardsState> {
+export default class Flashcards<Quality> extends State<FlashcardsState> {
+  #scheduler: Scheduler<Quality>
   #checkAnswer = (_answer: string, _subject: Subject) => true
   #checkIsPassing = (_assignment: Assignment) => false
   #getAvailableAt = (grade: CardState, _assignment: Assignment) => {
-    if (grade === CardState.Success) return Date.now() + (24 * 60 * 60 * 1000)
-    else return Date.now() + (24 * 60 * 60 * 1000)
+    if (grade === CardState.Success) return getNow(24 * 60 * 60 * 1000)
+    else return getNow(24 * 60 * 60 * 1000)
   }
-  #filterAvailable: SubjectFilter
   #filterLearnable: SubjectFilter
   #filterQuizzable: SubjectFilter
 
   constructor(
-    { assignments, subjects, isLearnMode, ...options }: FlashcardOptions,
+    { assignments, subjects, isLearnMode, ...options }: FlashcardOptions<
+      Quality
+    >,
   ) {
     super({
       ...defaultState,
@@ -124,7 +81,7 @@ export default class Flashcards extends State<FlashcardsState> {
       subjectsById: associateBy<Subject>(subjects, (a) => a.id),
     }, { isReactive: true })
 
-    this.#filterAvailable = options.filterAvailable ?? (() => true)
+    this.#scheduler = options.scheduler
     this.#filterLearnable = options.filterLearnable ?? (() => true)
     this.#filterQuizzable = options.filterQuizzable ?? (() => true)
 
@@ -141,8 +98,7 @@ export default class Flashcards extends State<FlashcardsState> {
     return this.state.subjects
       .filter((subject) => {
         const assignment = this.state.assignmentsById[subject.id]
-        if (assignment?.markedCompleted || assignment?.completedAt) return false
-        return this.#filterAvailable(subject, assignment)
+        return this.#scheduler.filter(subject, assignment)
       })
   }
 
@@ -195,9 +151,9 @@ export default class Flashcards extends State<FlashcardsState> {
       const assignment: Assignment = {
         markedCompleted: false,
         subjectId: currSubject.id,
-        startedAt: currAssignment?.startedAt ?? Date.now(),
+        startedAt: currAssignment?.startedAt ?? getNow(),
         type: currSubject.type,
-        unlockedAt: currAssignment?.unlockedAt ?? Date.now(),
+        unlockedAt: currAssignment?.unlockedAt ?? getNow(),
       }
       assignment.availableAt = this.#getAvailableAt(Success, assignment)
       this.state.assignmentsById[currSubject.id] = assignment
@@ -221,9 +177,9 @@ export default class Flashcards extends State<FlashcardsState> {
       this.state.assignmentsById[currSubject.id] = {
         ...currAssignment!,
         availableAt,
-        passedAt: passedAt ?? (isPassed ? Date.now() : undefined),
-        startedAt: startedAt ?? Date.now(),
-        unlockedAt: unlockedAt ?? Date.now(),
+        passedAt: passedAt ?? (isPassed ? getNow() : undefined),
+        startedAt: startedAt ?? getNow(),
+        unlockedAt: unlockedAt ?? getNow(),
       }
 
       this.state.currSuccesses.add(currSubject.id)
