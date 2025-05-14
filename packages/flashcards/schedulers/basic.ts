@@ -6,8 +6,8 @@ import Scheduler from '../scheduler.ts'
  */
 export default class BasicScheduler extends Scheduler<number> {
   /** Ensure that repetition is an int */
-  override add(_subject: Subject): Assignment {
-    return { ...defaultAssignment, repetition: 0 }
+  override add(subject: Subject): Assignment {
+    return { ...defaultAssignment, repetition: 0, subjectId: subject.id }
   }
 
   /** If answered correctly 3 times, skip it! */

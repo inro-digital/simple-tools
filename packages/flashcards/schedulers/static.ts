@@ -5,16 +5,18 @@ import { type Assignment, defaultAssignment, type Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
 import { getNow } from '../utils/datetime.ts'
 
-export interface System {
+export interface Srs {
+  id: number
+  name: string
   unlocksAt: number
   startsAt: number
   passesAt: number
   completesAt: number
-  stages: number[]
+  intervals: number[]
 }
 
 export interface Options {
-  srs: Record<number, System>
+  srs: Record<number, Srs>
   userLevel: number
 }
 
@@ -28,7 +30,7 @@ export interface SubjectData {
  * A basic scheduler to demonstrate usage
  */
 export default class StaticScheduler extends Scheduler<boolean> {
-  #srs: Record<number, System> = {}
+  #srs: Record<number, Srs> = {}
   #userLevel: number = 0
 
   constructor({ srs, userLevel }: Partial<Options>) {
@@ -39,7 +41,7 @@ export default class StaticScheduler extends Scheduler<boolean> {
 
   /** Ensure that repetition is an int */
   override add(subject: Subject): Assignment {
-    const { srsId = 1 } = subject.data as SubjectData
+    const { srsId } = subject.data as SubjectData
     const srs = this.#srs[srsId]
     if (!srs) throw new Error(`No SRS srs defined for ${srsId}`)
 
@@ -47,7 +49,8 @@ export default class StaticScheduler extends Scheduler<boolean> {
       ...defaultAssignment,
       efactor: 0,
       subjectId: subject.id,
-      availableAt: getNow(srs.stages[0]),
+      availableAt: getNow(srs.intervals[0]),
+      interval: srs.intervals[0],
       startedAt: getNow(),
       unlockedAt: getNow(),
     }
@@ -65,18 +68,14 @@ export default class StaticScheduler extends Scheduler<boolean> {
   }
 
   override sort(
-    [subjectA, assignmentA]: [Subject, Assignment],
-    [subjectB, assignmentB]: [Subject, Assignment],
+    [subjectA, _assignmentA]: [Subject, Assignment],
+    [subjectB, _assignmentB]: [Subject, Assignment],
   ): number {
     const dataA = subjectA.data as SubjectData
     const dataB = subjectB.data as SubjectData
     if (dataA?.level && !dataB?.level) return -1
-    if (dataB?.level && dataA?.level) return 1
+    if (dataB?.level && !dataA?.level) return 1
     if (dataA?.level !== dataB?.level) return dataA.level - dataB.level
-    const startedA = assignmentA?.startedAt
-    const startedB = assignmentB?.startedAt
-    if (startedA && !startedB) return -1
-    if (startedB && !startedA) return 1
     return dataA.position - dataB.position
   }
 
@@ -96,36 +95,40 @@ export default class StaticScheduler extends Scheduler<boolean> {
     if (!srs) throw new Error(`No SRS srs defined for ${srsId}`)
 
     if (isCorrect) {
-      const { efactor = 0, passedAt } = assignment
-      const stage = efactor + 1
-      const isPassed = stage >= srs.passesAt
+      const { efactor: prevEfactor = 0, passedAt } = assignment
+      const efactor = prevEfactor + 1
+      const isPassed = efactor >= srs.passesAt
+      const interval = this.#getInterval(srsId, efactor)
       return {
         ...assignment,
-        availableAt: this.#getStageInterval(srsId, stage),
+        availableAt: getNow(interval),
+        efactor,
+        interval,
         passedAt: passedAt || (isPassed ? getNow() : undefined),
-        efactor: stage,
       }
     } else {
-      const stage = Math.max(1, (assignment?.efactor || 1) - 1)
-      const stageInterval = this.#getStageInterval(srsId, stage)
+      const efactor = Math.max(1, (assignment?.efactor || 1) - 1)
+      const interval = this.#getInterval(srsId, efactor)
+      const intervalDate = getNow(interval)
       const tomorrow = getNow(86400) // 1-day do-over to recover lost stage
 
       return {
         ...assignment,
-        availableAt: stageInterval
-          ? stageInterval < tomorrow ? stageInterval : tomorrow
+        availableAt: interval
+          ? intervalDate < tomorrow ? intervalDate : tomorrow
           : undefined,
+        efactor,
+        interval,
         subjectId: subject.id,
-        efactor: stage,
       }
     }
   }
 
-  #getStageInterval(srsId: number, stageNum: number): Date | undefined {
+  #getInterval(srsId: number, efactor: number): number | undefined {
     const system = this.#srs[srsId]
     if (!system) throw new Error('No srs system found')
-    const stageInterval = system.stages[stageNum]
-    if (stageInterval == null) return undefined
-    return getNow(stageInterval)
+    const interval = system.intervals[efactor]
+    if (interval == null) return undefined
+    return interval
   }
 }

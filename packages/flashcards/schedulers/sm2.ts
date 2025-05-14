@@ -16,9 +16,10 @@ export default class Sm2 extends Scheduler<number> {
    * 1. Ensures repetition and interval start at 0.
    * 2. Ensures that EF starts at 2.5
    */
-  override add(_subject: Subject): Assignment {
+  override add(subject: Subject): Assignment {
     return {
       ...defaultAssignment,
+      subjectId: subject.id,
       efactor: defaultEfactor,
       repetition: defaultRepetition,
       interval: defaultInterval,
