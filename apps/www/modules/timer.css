@@ -25,15 +25,6 @@
   user-select: none;
 }
 
-.pad-last {
-  margin-bottom: 50%;
-}
-
-.pad-first {
-  margin-bottom: 10%;
-  margin-top: 50%;
-}
-
 .display-number {
   transition: opacity 0.2s;
 }
@@ -41,7 +32,7 @@
 .big-time {
   cursor: pointer;
   font-weight: bold;
-  font-size: 10em;
+  font-size: 15em;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -59,16 +50,4 @@
   justify-content: center;
   margin: 10px;
   list-style: none;
-}
-
-.links {
-  float: right;
-  font-size: 1rem;
-  display: flex;
-  flex-direction: row;
-  list-style: none;
-}
-
-.links a {
-  margin: 10px;
 }

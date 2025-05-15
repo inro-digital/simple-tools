@@ -1,0 +1,20 @@
+.calculator {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.calculator .controls {
+  display: flex;
+  flex-direction: row;
+}
+
+.calculator .methods {
+  display: flex;
+  flex-direction: column;
+}
+
+.calculator button {
+  margin: 3px;
+  height: 3em;
+  width: 3em;
+}

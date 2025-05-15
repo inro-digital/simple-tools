@@ -1,7 +1,6 @@
 import Countdown from '@inro/simple-tools/countdown'
 import Stopwatch from '@inro/simple-tools/stopwatch'
-const jsrLink = 'https://jsr.io/@inro/simple-tools'
-const codeLink = 'https://git.sr.ht/~inro/simple-tools'
+import Header from '../components/header.js'
 
 let isRunning = false
 
@@ -19,23 +18,12 @@ export default {
         })
       )
 
-    return m('main', [
-      m('header', [
-        m('h1', [
-          m('a[style=margin: 10px; cursor: pointer;]', {
-            onclick: () => history.back(),
-          }, '↩︎'),
-          'Timer',
-          m('ul.links', [
-            m('li', m('a', { href: jsrLink }, 'jsr')),
-            m('li', m('a', { href: codeLink }, 'code')),
-          ]),
-        ]),
-      ]),
-      m('article.timers', {
+    return [
+      m(Header, { name: 'Timer' }),
+      m('main.timers', {
         style: { overflow: isRunning ? 'hidden' : 'scroll' },
       }, timers),
-    ])
+    ]
   },
 }
 
@@ -97,8 +85,8 @@ function Timer(vnode) {
         : []
 
       return m('.timer', [
-        m('.big-time', { onclick: onStartStop }, bigTime),
-        m('.detailed-time', {
+        m('h1.big-time', { onclick: onStartStop }, bigTime),
+        m('h2.detailed-time', {
           style: `visibility: ${timer.state.isStarted ? '' : 'hidden'}`,
         }, detailedTime),
         m('div.controls', [

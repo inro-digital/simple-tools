@@ -1,6 +1,5 @@
 import Calculator, { Operator } from '@inro/simple-tools/calculator'
-const jsrLink = 'https://jsr.io/@inro/simple-tools'
-const codeLink = 'https://git.sr.ht/~inro/simple-tools'
+import Header from '../components/header.js'
 
 let value = 0
 let operator
@@ -25,56 +24,44 @@ function addDigit(toAdd) {
 }
 
 export default {
-  view: () =>
-    m('main', [
-      m('header', [
-        m('h1', [
-          m('a[style=margin: 10px; cursor: pointer;]', {
-            onclick: () => history.back(),
-          }, '↩︎'),
-          'Calculator',
-          m('ul.links', [
-            m('li', m('a', { href: jsrLink }, 'jsr')),
-            m('li', m('a', { href: codeLink }, 'code')),
+  view: () => [
+    m(Header, { name: 'Calculator' }),
+    m('main.calculator', [
+      m('h1.display', calc.state.display + ' = ' + calc.state.value),
+      m('input[type=number]', {
+        value,
+        onchange: (e) => value = parseInt(e.target.value),
+      }),
+      m('.controls', [
+        m('.nums', [
+          m('div', [
+            m('button', { onclick: () => addDigit(1) }, 1),
+            m('button', { onclick: () => addDigit(2) }, 2),
+            m('button', { onclick: () => addDigit(3) }, 3),
+          ]),
+          m('div', [
+            m('button', { onclick: () => addDigit(4) }, 4),
+            m('button', { onclick: () => addDigit(5) }, 5),
+            m('button', { onclick: () => addDigit(6) }, 6),
+          ]),
+          m('div', [
+            m('button', { onclick: () => addDigit(7) }, 7),
+            m('button', { onclick: () => addDigit(8) }, 8),
+            m('button', { onclick: () => addDigit(9) }, 9),
+          ]),
+          m('div', [
+            m('button', { onclick: () => value = 0 }, 0),
+            m('button#reset', { onclick: () => calc.reset(value || 0) }, 'C'),
+            m('button', { onclick: submit }, '='),
           ]),
         ]),
-      ]),
-      m('article', [
-        m('div.display', calc.state.display + ' = ' + calc.state.value),
-        m('input[type=number]', {
-          value,
-          onchange: (e) => value = parseInt(e.target.value),
-        }),
-        m('.controls[style=display: flex; flex-direction: row;]', [
-          m('.nums', [
-            m('div', [
-              m('button', { onclick: () => addDigit(1) }, 1),
-              m('button', { onclick: () => addDigit(2) }, 2),
-              m('button', { onclick: () => addDigit(3) }, 3),
-            ]),
-            m('div', [
-              m('button', { onclick: () => addDigit(4) }, 4),
-              m('button', { onclick: () => addDigit(5) }, 5),
-              m('button', { onclick: () => addDigit(6) }, 6),
-            ]),
-            m('div', [
-              m('button', { onclick: () => addDigit(7) }, 7),
-              m('button', { onclick: () => addDigit(8) }, 8),
-              m('button', { onclick: () => addDigit(9) }, 9),
-            ]),
-            m('div', [
-              m('button', { onclick: () => value = 0 }, 0),
-              m('button#reset', { onclick: () => calc.reset(value || 0) }, 'C'),
-              m('button', { onclick: submit }, '='),
-            ]),
-          ]),
-          m('.methods[style=display: flex; flex-direction: column;]', [
-            m('button', { onclick: () => submit(Operator.Divide) }, '÷'),
-            m('button', { onclick: () => submit(Operator.Multiply) }, '×'),
-            m('button', { onclick: () => submit(Operator.Subtract) }, '−'),
-            m('button', { onclick: () => submit(Operator.Add) }, '+'),
-          ]),
+        m('.methods', [
+          m('button', { onclick: () => submit(Operator.Divide) }, '÷'),
+          m('button', { onclick: () => submit(Operator.Multiply) }, '×'),
+          m('button', { onclick: () => submit(Operator.Subtract) }, '−'),
+          m('button', { onclick: () => submit(Operator.Add) }, '+'),
         ]),
       ]),
     ]),
+  ],
 }
