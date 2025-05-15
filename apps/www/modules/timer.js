@@ -20,7 +20,7 @@ export default {
 
     return [
       m(Header, { name: 'Timer' }),
-      m('main.timers', {
+      m('div.timers', {
         style: { overflow: isRunning ? 'hidden' : 'scroll' },
       }, timers),
     ]

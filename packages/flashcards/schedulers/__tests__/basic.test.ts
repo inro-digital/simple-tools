@@ -4,7 +4,6 @@ import type { Assignment, Subject } from '../../types.ts'
 
 const subjectA = {
   id: 'my-subject',
-  type: '',
   learnKeys: [],
   quizKeys: [],
   data: {},

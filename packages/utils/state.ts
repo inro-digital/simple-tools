@@ -255,6 +255,6 @@ export default class State<InternalState extends object> {
   }
 }
 
-function isPlainObject(value: unknown): value is object {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Object.prototype.toString.call(value) === '[object Object]'
 }

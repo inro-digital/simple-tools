@@ -106,7 +106,8 @@ export default class StaticScheduler extends Scheduler<boolean> {
   override filterQuizzable(subject: Subject, assignment: Assignment): boolean {
     if (!this.filter(subject, assignment)) return false
     if (!assignment?.startedAt) return false // Not learned yet, so can't quiz.
-    return true
+    if (!assignment?.availableAt) return false // Not available, so can't quiz
+    return assignment.availableAt <= getNow()
   }
 
   /** Sort by level, and then sort by position within level */
@@ -136,7 +137,6 @@ export default class StaticScheduler extends Scheduler<boolean> {
     const { srsId } = subject.data as SubjectData
     const srs = this.#srs[srsId]
     if (!srs) throw new Error(`No SRS srs defined for ${srsId}`)
-
     if (isCorrect) {
       const { efactor: prevEfactor = 0, passedAt } = assignment
       const efactor = prevEfactor + 1

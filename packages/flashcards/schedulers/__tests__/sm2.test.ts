@@ -7,7 +7,6 @@ const oneDayMS = 86_400_000
 
 const sA = {
   id: 'my-subject',
-  type: '',
   learnKeys: [],
   quizKeys: [],
   data: {},

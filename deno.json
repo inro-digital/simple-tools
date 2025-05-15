@@ -32,8 +32,8 @@
     "dev": "serve ./apps/www",
     "cli": "deno run ./apps/cli/main.ts",
     "cli:install": "deno install -gf ./apps/cli/main.ts --name=st --config=./apps/cli/deno.json",
-    "test": "deno fmt && deno lint && deno check . && deno task test:coverage && deno publish --dry-run --allow-dirty --quiet",
-    "test:coverage": "deno test --clean --reporter=dot --parallel --coverage=./coverage .",
+    "test": "deno fmt && deno lint && deno check -q --doc . && deno task test:coverage && deno publish -q --dry-run --allow-dirty",
+    "test:coverage": "deno test --clean --shuffle --reporter=dot --parallel --coverage=./coverage .",
     "docs": "deno doc packages/mod.ts",
     "docs:lint": "deno doc --lint packages/mod.ts"
   }

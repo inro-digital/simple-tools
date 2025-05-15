@@ -36,6 +36,10 @@ export interface FlashcardsState<Quality> {
   currSuccesses: Set<string>
   /** Is this study session a quiz or for teaching? */
   isLearnMode: boolean
+  /** Maximum amount of new cards within a day */
+  maxNew: number | null
+  /** Maximum amount of quizzes within a day */
+  maxReviews: number | null
 }
 
 /**
@@ -81,18 +85,14 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
    *   - checkComplete: Determines whether a subject should be shown again soon
    */
   constructor({ assignments, subjects, isLearnMode, ...options }: {
-    /** All assignments, as an array */
     assignments: Assignment[]
-    /** All subjects, as an array */
     subjects: Subject[]
-    /** Is this study session a quiz or for teaching? */
     isLearnMode: boolean
-    /** Scheduler for deciding which subjects to quiz/learn */
     scheduler: Scheduler<Q>
-    /** Function to determine how well a user answered */
     checkAnswer: (answer: string, subject: Subject) => Q
-    /** Check if the card should repeat within the same session */
     checkComplete: (quality: Q) => boolean
+    maxNew?: number | null
+    maxReviews?: number | null
   }) {
     super({
       currAssignment: null,
@@ -108,6 +108,8 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
       subjects,
       assignmentsById: associateBy<Assignment>(assignments, (a) => a.subjectId),
       subjectsById: associateBy<Subject>(subjects, (a) => a.id),
+      maxNew: Math.max(0, options.maxNew ?? 0) || null,
+      maxReviews: Math.max(0, options.maxReviews ?? 0) || null,
     }, { isReactive: true })
 
     this.#scheduler = options.scheduler
@@ -135,20 +137,18 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
 
   /** Get subjects that are ready to be learned */
   getLearnable(): Subject[] {
-    return this.getAvailable()
-      .filter((subject) => {
-        const assignment = this.state.assignmentsById[subject.id]
-        return this.#scheduler.filterLearnable(subject, assignment)
-      })
+    const { assignmentsById, maxNew } = this.state
+    const learnable = this.getAvailable()
+      .filter((s) => this.#scheduler.filterLearnable(s, assignmentsById[s.id]))
+    return maxNew ? learnable.slice(0, maxNew) : learnable
   }
 
   /** Get subjects that are ready to be quizzed */
   getQuizzable(): Subject[] {
-    return this.getAvailable()
-      .filter((subject) => {
-        const assignment = this.state.assignmentsById[subject.id]
-        return this.#scheduler.filterLearnable(subject, assignment)
-      })
+    const { assignmentsById, maxReviews } = this.state
+    const quizzable = this.getAvailable()
+      .filter((s) => this.#scheduler.filterQuizzable(s, assignmentsById[s.id]))
+    return maxReviews ? quizzable.slice(0, maxReviews) : quizzable
   }
 
   /** Get all learned subjects */
@@ -184,6 +184,7 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
       this.state.currQuality = this.#checkAnswer(answer, currSubject)
       const isPassing = this.#checkComplete(this.state.currQuality)
       this.state.currCardState = isPassing ? Success : Failure
+      return
     } else if (currCardState === Failure) {
       if (!this.#hasPreviouslyFailed()) {
         this.state.assignmentsById[currSubject.id] = this.#scheduler.update(
@@ -193,13 +194,15 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
         )
       }
       this.state.currFailures.add(currSubject.id)
-    } else if (currCardState === Success && this.#isComplete()) {
-      this.state.assignmentsById[currSubject.id] = this.#scheduler.update(
-        this.state.currQuality!,
-        currSubject,
-        currAssignment!,
-      )
-      this.state.currSuccesses.add(currSubject.id)
+    } else if (currCardState === Success) {
+      if (this.#isLastRemainingCard()) {
+        this.state.assignmentsById[currSubject.id] = this.#scheduler.update(
+          this.state.currQuality!,
+          currSubject,
+          currAssignment!,
+        )
+        this.state.currSuccesses.add(currSubject.id)
+      }
     } else {
       throw new Error('Invalid State')
     }
@@ -207,22 +210,24 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
     this.#loadAndShiftNext()
   }
 
-  /* Has the current card already been failed? */
+  /** Has the current card already been failed? */
   #hasPreviouslyFailed() {
     const currId = this.state.currSubject?.id
     return Boolean(currId && this.state.currFailures.has(currId))
   }
 
-  #isComplete() {
+  /** There is no more cards for the subject */
+  #isLastRemainingCard() {
     const currId = this.state.currSubject?.id
-    return !this.state.currPending
-      .some(([subjectId]) => subjectId === currId)
+    return this.state.currPending
+      .filter(([subjectId]) => subjectId === currId).length <= 1
   }
 
   /* Loads the next pending card */
   #loadNext() {
-    const [subjectId, cardType] = this.state.currPending[0]
+    const [subjectId, cardType] = this.state.currPending[0] || []
     this.state.currSubject = this.state.subjectsById[subjectId] ?? null
+    this.state.currAssignment = this.state.assignmentsById[subjectId] ?? null
     this.state.currCardState = subjectId ? Pending : null
     this.state.currCardType = cardType ?? null
   }
