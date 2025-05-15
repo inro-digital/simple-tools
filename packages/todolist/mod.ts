@@ -4,6 +4,7 @@
  */
 
 import State from '../utils/state.ts'
+import type Storage from '../utils/storage.ts'
 
 /**
  * An individual todo with pretty generic values
@@ -47,8 +48,11 @@ export default class Todolist extends State<TodolistState> {
   #initialTodos: Todo[]
 
   /** You can feed an initial state to the todolist */
-  constructor({ todos = [] }: Partial<TodolistState> = {}) {
-    super({ todos })
+  constructor(
+    { todos = [] }: Partial<TodolistState> = {},
+    { cache }: { cache?: Storage<TodolistState> } = {},
+  ) {
+    super({ todos }, { cache })
     this.#initialTodos = todos
   }
 

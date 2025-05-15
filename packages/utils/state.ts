@@ -1,3 +1,5 @@
+import type Storage from './storage.ts'
+
 /**
  * @module
  * Generic state and listener class used by all the simple-tools. This helps us:
@@ -8,7 +10,8 @@
  */
 
 /** Options to modify how State works */
-export interface Options {
+export interface Options<T> {
+  cache?: Storage<T>
   /** `.notify` should be triggered on any state change */
   isReactive: boolean
 }
@@ -17,7 +20,7 @@ export interface Options {
  * Default options for State. Add these during state construction:
  * `super(defaultState, options)`
  */
-export const DefaultOptions: Options = {
+export const DefaultOptions: Options<unknown> = {
   /** Handle notifies manually by default */
   isReactive: false,
 }
@@ -68,13 +71,15 @@ export const DefaultOptions: Options = {
  * ```
  */
 export default class State<InternalState extends object> {
+  #cache?: Storage<InternalState>
   #isBatchingUpdates = false
   #isPendingNotification = false
-  #options: Options = DefaultOptions
+  #options = DefaultOptions as Options<InternalState>
   #proxiedObjects = new WeakSet<object>()
   #state: InternalState
   #watchers: Array<(state: InternalState) => void> = []
   error: Error | null = null
+  initialized = false
   loading = false
   saving = false
 
@@ -82,9 +87,19 @@ export default class State<InternalState extends object> {
    * Define public state on initialization
    * @param state The initial state for the app
    */
-  constructor(state: InternalState, options?: Partial<Options>) {
+  constructor(state: InternalState, options?: Partial<Options<InternalState>>) {
     this.#options = { ...this.#options, ...options }
     this.#state = this.#createReactive(state, this.#options)
+    if (!options?.cache) {
+      this.initialized = true
+    } else {
+      this.#cache = options.cache
+      this.load(async () => {
+        const intialState = await this.#cache?.get() ?? state
+        this.initialized = true
+        return intialState
+      })
+    }
   }
 
   /**
@@ -138,10 +153,16 @@ export default class State<InternalState extends object> {
    * This is because notify is often used to track history over time,
    * so a reference to a mutating state is not useful.
    */
-  notify() {
+  notify({ bypassSave = false }: { bypassSave?: boolean } = {}) {
     if (this.#isBatchingUpdates) {
       this.#isPendingNotification = true
       return
+    }
+    if (this.initialized && this.#cache && !bypassSave) {
+      this.save(async () => {
+        await this.#cache?.set(this.#state)
+        return true
+      })
     }
     this.#watchers.forEach((cb) => cb({ ...this.#state }))
   }
@@ -154,7 +175,7 @@ export default class State<InternalState extends object> {
   /** Saves state to somewhere */
   async save(saver: (state: InternalState) => Promise<boolean>): Promise<void> {
     this.saving = true
-    this.notify()
+    this.notify({ bypassSave: true })
     try {
       await saver(this.#state)
       this.error = null
@@ -162,11 +183,27 @@ export default class State<InternalState extends object> {
       this.error = err as Error
     } finally {
       this.saving = false
-      this.notify()
+      this.notify({ bypassSave: true })
     }
   }
 
-  #createReactive<T extends object>(obj: T, options: Options): T {
+  waitUntilReady(): Promise<boolean> {
+    if (!this.loading && !this.saving) return Promise.resolve(true)
+    return new Promise((resolve) => {
+      const listener = () => {
+        if (!this.loading && !this.saving) {
+          this.removeEventListener(listener)
+          resolve(true)
+        }
+      }
+      this.addEventListener(listener)
+    })
+  }
+
+  #createReactive<T extends object>(
+    obj: T,
+    options: Options<InternalState>,
+  ): T {
     // deno-lint-ignore no-this-alias
     const manager = this
 

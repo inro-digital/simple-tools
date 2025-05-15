@@ -125,6 +125,5 @@ console.log(list.state.todos)
 In no particular order:
 
 - Audio/Podcast Player
-- Flashcards
 - Notepad
 - Workout Timer

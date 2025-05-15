@@ -1,6 +1,7 @@
 import { assertEquals } from '@std/assert/equals'
 import { assertSpyCall, assertSpyCalls, spy } from '@std/testing/mock'
 import Todolist from './mod.ts'
+import LocalStorage from '../utils/storage/local_storage.ts'
 
 Deno.test('initializes', () => {
   const todolist = new Todolist()
@@ -65,6 +66,7 @@ Deno.test('events', () => {
   todolist.addEventListener(listener)
 
   todolist.add('Task 1', 'Description 1')
+
   assertSpyCall(listener, 0, {
     args: [{
       todos: [{ name: 'Task 1', description: 'Description 1', isDone: false }],
@@ -74,4 +76,20 @@ Deno.test('events', () => {
   todolist.edit(0, { name: 'Updated Task 1' })
   todolist.remove(0)
   assertSpyCalls(listener, 3)
+})
+
+Deno.test('todolist: utilizes storage', async () => {
+  const cache = new LocalStorage({
+    name: 'todos',
+    defaultValue: {},
+    deserialize: (str) => JSON.parse(str),
+    serialize: (val) => JSON.stringify(val),
+    verify: (_val) => true,
+  })
+  const todolist = new Todolist({}, { cache })
+  await todolist.waitUntilReady()
+  todolist.reset()
+  todolist.add('Task 1', 'Description 1')
+  await todolist.waitUntilReady()
+  assertEquals(todolist.state, JSON.parse(localStorage.getItem('todos') || ''))
 })

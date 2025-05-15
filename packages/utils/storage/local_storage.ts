@@ -1,4 +1,4 @@
-import Storage, { type StorageProps } from './storage.ts'
+import Storage, { type StorageProps } from '../storage.ts'
 
 export default class LocalStorage<T> extends Storage<T> {
   constructor(props: StorageProps<T>) {
