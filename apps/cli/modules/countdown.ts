@@ -1,6 +1,6 @@
-import { Command } from 'jsr:@cliffy/command@1.0.0-rc.7'
-import { keypress } from 'jsr:@cliffy/keypress@1.0.0-rc.7'
-import Countdown from 'jsr:@inro/simple-tools/countdown'
+import { Command } from '@cliffy/command'
+import { keypress } from '@cliffy/keypress'
+import Countdown from '@inro/simple-tools/countdown'
 
 const encoder = new TextEncoder()
 const LINE_CLEAR = encoder.encode('\r\u001b[K')

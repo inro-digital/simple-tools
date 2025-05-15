@@ -1,6 +1,7 @@
 {
   "name": "@inro/simple-tools",
   "version": "0.0.13",
+  "workspace": ["./apps/cli"],
   "exports": {
     "./calculator": "./packages/calculator/mod.ts",
     "./countdown": "./packages/timers/countdown.ts",
@@ -9,6 +10,8 @@
     "./flashcards/schedulers/sm2": "./packages/flashcards/schedulers/sm2.ts",
     "./flashcards/schedulers/static": "./packages/flashcards/schedulers/static.ts",
     "./state": "./packages/utils/state.ts",
+    "./storage": "./packages/utils/storage.ts",
+    "./storage/local-storage": "./packages/utils/storage/local_storage.ts",
     "./stopwatch": "./packages/timers/stopwatch.ts",
     "./todolist": "./packages/todolist/mod.ts"
   },
@@ -27,6 +30,8 @@
   },
   "tasks": {
     "dev": "serve ./apps/www",
+    "cli": "deno run ./apps/cli/main.ts",
+    "cli:install": "deno install -gf ./apps/cli/main.ts --name=st --config=./apps/cli/deno.json",
     "test": "deno fmt && deno lint && deno check . && deno task test:coverage && deno publish --dry-run --allow-dirty --quiet",
     "test:coverage": "deno test --parallel --coverage=./coverage ."
   }

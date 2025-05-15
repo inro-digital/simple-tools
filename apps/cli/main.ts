@@ -1,6 +1,7 @@
-import { Command } from 'jsr:@cliffy/command@1.0.0-rc.7'
+import { Command } from '@cliffy/command'
 import Countdown from './modules/countdown.ts'
 import Stopwatch from './modules/stopwatch.ts'
+import Todolist from './modules/todolist.ts'
 
 await new Command()
   .name('simple-tools')
@@ -8,4 +9,5 @@ await new Command()
   .description('Command line versions of Simple Tools')
   .command('countdown', Countdown)
   .command('stopwatch', Stopwatch)
+  .command('todos', Todolist)
   .parse(Deno.args)

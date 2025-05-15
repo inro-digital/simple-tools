@@ -1,6 +1,6 @@
-import { Command } from 'jsr:@cliffy/command@1.0.0-rc.7'
-import { keypress } from 'jsr:@cliffy/keypress@1.0.0-rc.7'
-import Stopwatch from 'jsr:@inro/simple-tools/stopwatch'
+import { Command } from '@cliffy/command'
+import { keypress } from '@cliffy/keypress'
+import Stopwatch from '@inro/simple-tools/stopwatch'
 
 const encoder = new TextEncoder()
 const LINE_CLEAR = encoder.encode('\r\u001b[K')
