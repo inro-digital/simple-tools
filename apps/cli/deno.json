@@ -2,6 +2,6 @@
   "imports": {
     "@cliffy/command": "jsr:@cliffy/command@1.0.0-rc.7",
     "@cliffy/keypress": "jsr:@cliffy/keypress@1.0.0-rc.7",
-    "@inro/simple-tools": "jsr:@inro/simple-tools@^0.0.15"
+    "@inro/simple-tools": "jsr:@inro/simple-tools@^0.0.16"
   }
 }

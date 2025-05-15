@@ -196,9 +196,9 @@ export default class State<InternalState extends object> {
   /** Resolves the next time that state is ready */
   waitUntilReady(): Promise<boolean> {
     return new Promise((resolve) => {
-      if (!this.initialized && !this.loading && !this.saving) resolve(true)
+      if (this.initialized && !this.loading && !this.saving) resolve(true)
       const listener = () => {
-        if (!this.initialized && !this.loading && !this.saving) {
+        if (this.initialized && !this.loading && !this.saving) {
           this.removeEventListener(listener)
           resolve(true)
         }

@@ -78,7 +78,7 @@ Deno.test('events', () => {
   assertSpyCalls(listener, 3)
 })
 
-Deno.test('todolist: utilizes storage', () => {
+Deno.test('todolist: utilizes storage', async () => {
   const storage = new LocalStorage({
     name: 'todos',
     defaultValue: {},
@@ -87,7 +87,7 @@ Deno.test('todolist: utilizes storage', () => {
     verify: (_val) => true,
   })
   const todolist = new Todolist({}, { storage })
-  // `await todolist.waitUntilReady()` unnecessary, since localStorage is sync
+  await todolist.waitUntilReady()
   todolist.reset()
   todolist.add('Task 1', 'Description 1')
   assertEquals(todolist.state.todos.length, 1)
