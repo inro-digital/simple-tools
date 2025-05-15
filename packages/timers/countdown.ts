@@ -24,6 +24,7 @@ export interface CountdownState {
   total: number
 }
 
+/** Options for initializing a new timer */
 export interface CountdownOptions {
   /** Number that we count down from */
   initialMS: number
@@ -38,16 +39,17 @@ export interface CountdownOptions {
  * @example Basic Usage
  * ```ts
  * import Countdown, { CountdownState } from '@inro/simple-tools/countdown'
+ *
  * const timer = new Countdown({ initialMS: 70_000 }) // 70s timer
  * timer.addEventListener((state: CountdownState) => {
  *   console.log(state.display) // "1:10.0"
  *   console.log(state.remaining) // 70000
  * })
  *
- * document.getElementById('#start').onclick = () => timer.start()
- * document.getElementById('#pause').onclick = () => timer.pause()
- * document.getElementById('#stop').onclick = () => timer.stop()
- * document.getElementById('#reset').onclick = () => timer.reset()
+ * const start = () => timer.start()
+ * const pause = () => timer.pause()
+ * const stop = () => timer.stop()
+ * const reset = () => timer.reset()
  * ```
  */
 export default class Countdown extends State<CountdownState> {

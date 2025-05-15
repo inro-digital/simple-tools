@@ -7,12 +7,22 @@
  *
  * Provides type-safety by forcing declaration of serialization mechanisms
  */
+
+/**
+ * Provided functionality to tell storage how to interact with your data
+ */
 export interface StorageProps<T> {
+  /** Default value, if the item doesn't exist within storage */
   defaultValue: T
+  /** Function for deserializing data from the external data source */
   deserialize: (str: string) => T
+  /** Key name that external data is stored under */
   name: string
-  serialize: (toStringify: T) => string
-  verify: (toCheck: unknown) => boolean
+  /** Function for serializing data to external data source */
+  serialize: (toSerialize: T) => string
+  /** Function for determining whether a value matches our expected data */
+  // deno-lint-ignore no-explicit-any
+  verify: (toCheck: any) => boolean
 }
 
 /**
@@ -35,6 +45,7 @@ export interface StorageProps<T> {
  * ````
  */
 export default class Storage<T> implements StorageProps<T> {
+  /** Initializes storage with props */
   constructor(props: StorageProps<T>) {
     this.name = props.name
     this.defaultValue = props.defaultValue

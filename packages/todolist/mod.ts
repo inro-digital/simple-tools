@@ -11,13 +11,17 @@ import type Storage from '../utils/storage.ts'
  * @todo allow adding arbitrary values. Also add scheduling/reminder data.
  */
 export interface Todo {
+  /** The name of the todo */
   name: string
+  /** A longer description of the todo */
   description: string
+  /** Whether the todo item is completed */
   isDone: boolean
 }
 
 /** State returned via `todolist.state` or `todolist.addEventListener` */
 export interface TodolistState {
+  /** A list of all todos */
   todos: Todo[]
 }
 
@@ -32,7 +36,7 @@ export interface TodolistState {
  * })
  *
  * list.add("name", "descriptiooooon")
- * list.edit(0, { desciption: "desc"})
+ * list.edit(0, { description: "desc"})
  *
  * console.log(list.state.todos[0].description) // "desc"
  * console.log(list.state.todos[0].isDone) // false
@@ -50,9 +54,9 @@ export default class Todolist extends State<TodolistState> {
   /** You can feed an initial state to the todolist */
   constructor(
     { todos = [] }: Partial<TodolistState> = {},
-    { cache }: { cache?: Storage<TodolistState> } = {},
+    { storage }: { storage?: Storage<TodolistState> } = {},
   ) {
-    super({ todos }, { cache })
+    super({ todos }, { storage })
     this.#initialTodos = todos
   }
 

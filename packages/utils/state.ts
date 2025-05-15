@@ -11,7 +11,8 @@ import type Storage from './storage.ts'
 
 /** Options to modify how State works */
 export interface Options<T> {
-  cache?: Storage<T>
+  /** Optional storage mechanism for saving state outside of memory */
+  storage?: Storage<T>
   /** `.notify` should be triggered on any state change */
   isReactive: boolean
 }
@@ -71,16 +72,21 @@ export const DefaultOptions: Options<unknown> = {
  * ```
  */
 export default class State<InternalState extends object> {
-  #cache?: Storage<InternalState>
+  #storage?: Storage<InternalState>
   #isBatchingUpdates = false
   #isPendingNotification = false
   #options = DefaultOptions as Options<InternalState>
   #proxiedObjects = new WeakSet<object>()
   #state: InternalState
   #watchers: Array<(state: InternalState) => void> = []
+
+  /** Error returned from load/save */
   error: Error | null = null
+  /** State has initial value successfully loaded */
   initialized = false
+  /** State is currently loading data */
   loading = false
+  /** State is currently saving data */
   saving = false
 
   /**
@@ -90,12 +96,12 @@ export default class State<InternalState extends object> {
   constructor(state: InternalState, options?: Partial<Options<InternalState>>) {
     this.#options = { ...this.#options, ...options }
     this.#state = this.#createReactive(state, this.#options)
-    if (!options?.cache) {
+    if (!options?.storage) {
       this.initialized = true
     } else {
-      this.#cache = options.cache
+      this.#storage = options.storage
       this.load(async () => {
-        const intialState = await this.#cache?.get() ?? state
+        const intialState = await this.#storage?.get() ?? state
         this.initialized = true
         return intialState
       })
@@ -158,9 +164,9 @@ export default class State<InternalState extends object> {
       this.#isPendingNotification = true
       return
     }
-    if (this.initialized && this.#cache && !bypassSave) {
+    if (this.initialized && this.#storage && !bypassSave) {
       this.save(async () => {
-        await this.#cache?.set(this.#state)
+        await this.#storage?.set(this.#state)
         return true
       })
     }
@@ -187,11 +193,12 @@ export default class State<InternalState extends object> {
     }
   }
 
+  /** Resolves the next time that state is ready */
   waitUntilReady(): Promise<boolean> {
-    if (!this.loading && !this.saving) return Promise.resolve(true)
     return new Promise((resolve) => {
+      if (!this.initialized && !this.loading && !this.saving) resolve(true)
       const listener = () => {
-        if (!this.loading && !this.saving) {
+        if (!this.initialized && !this.loading && !this.saving) {
           this.removeEventListener(listener)
           resolve(true)
         }

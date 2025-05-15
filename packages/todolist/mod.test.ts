@@ -79,14 +79,14 @@ Deno.test('events', () => {
 })
 
 Deno.test('todolist: utilizes storage', async () => {
-  const cache = new LocalStorage({
+  const storage = new LocalStorage({
     name: 'todos',
     defaultValue: {},
     deserialize: (str) => JSON.parse(str),
     serialize: (val) => JSON.stringify(val),
     verify: (_val) => true,
   })
-  const todolist = new Todolist({}, { cache })
+  const todolist = new Todolist({}, { storage })
   await todolist.waitUntilReady()
   todolist.reset()
   todolist.add('Task 1', 'Description 1')

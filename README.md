@@ -33,7 +33,7 @@ Here's an example of our `Countdown` timer:
 import Countdown, { CountdownState } from '@inro/simple-tools/countdown'
 const timer = new Countdown({ initialMS: 30_000 })
 
-timer.addListener((state: CountdownState) => {
+timer.addEventListener((state: CountdownState) => {
   console.log(state.display) // "0:30.0"
   console.log(state.remaining) // 30000
 })
@@ -42,9 +42,7 @@ timer.start()
 
 setTimeout(() => {
   timer.pause()
-
-  const endState: CountdownState = timer.state
-  console.log(endState.remaining) // 29000
+  console.log(timer.state.remaining) // 29000
 
   timer.stop()
   timer.reset()
@@ -82,20 +80,20 @@ console.log(calc.state.history)
 
 ```ts
 import Stopwatch, { StopwatchState } from '@inro/simple-tools/stopwatch'
-const stopwatch = new Stopwatch()
+const timer = new Stopwatch()
 
-stopwatch.addListener((state: StopwatchState) => {
+timer.addEventListener((state: StopwatchState) => {
   console.log(state.display) // "0:00.0"
-  console.log(state.remaining) // 0
+  console.log(state.elapsed) // 0
 })
 
-stopwatch.start()
+timer.start()
 
 setTimeout(() => {
-  stopwatch.lap()
-  stopwatch.pause()
-  console.log(state.state.laps)
-  stopwatch.stop()
+  timer.lap()
+  timer.pause()
+  console.log(timer.state.laps)
+  timer.stop()
 }, 5000)
 ```
 

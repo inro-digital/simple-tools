@@ -25,7 +25,6 @@ const srs: Record<number, Srs> = {
 
 const sA: Subject = {
   id: 'my-subject-a',
-  type: '',
   learnKeys: [],
   quizKeys: [],
   data: {
@@ -37,7 +36,6 @@ const sA: Subject = {
 
 const sB = {
   id: 'my-subject-b',
-  type: '',
   learnKeys: [],
   quizKeys: [],
   data: {
@@ -49,7 +47,6 @@ const sB = {
 
 const sC = {
   id: 'my-subject-c',
-  type: '',
   learnKeys: [],
   quizKeys: [],
   data: {

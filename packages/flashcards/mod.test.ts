@@ -9,7 +9,7 @@ Deno.test('initializes flashcards', () => {
   const deck = new Flashcards<boolean>({
     assignments: [],
     checkAnswer: () => true,
-    checkPassing: () => true,
+    checkComplete: () => true,
     isLearnMode: true,
     scheduler: new StaticScheduler({ srs, userLevel: 2 }),
     subjects,

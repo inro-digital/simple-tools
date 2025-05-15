@@ -1,20 +1,32 @@
 import { associateBy } from '@std/collections/associate-by'
 import State from '../utils/state.ts'
-import type Scheduler from './scheduler.ts'
+import Scheduler from './scheduler.ts'
 import { type Assignment, CardState, type Subject } from './types.ts'
+
+export { Scheduler }
 export * from './types.ts'
 
 const { Failure, Pending, Success } = CardState
 
+/** The current state of flashcard study */
 export interface FlashcardsState<Quality> {
+  /** All assignments, as an array */
   assignments: Assignment[]
+  /** All assignments, as an id/assignment record */
   assignmentsById: Record<string, Assignment>
+  /** All subjects, as an array */
   subjects: Subject[]
+  /** All subjects, as an id/assignment record */
   subjectsById: Record<string, Subject>
+  /** Current assignment to answer */
   currAssignment: Assignment | null
+  /** Whether the current card is passed/failed/pending answer */
   currCardState: CardState | null
+  /** Each subject can have one card type per key */
   currCardType: string | null
+  /** If a card is answered, what's the quality of the answer */
   currQuality: Quality | null
+  /** The current subject to answer */
   currSubject: Subject | null
   /** Subjects that have been answered incorrectly */
   currFailures: Set<string>
@@ -26,26 +38,62 @@ export interface FlashcardsState<Quality> {
   isLearnMode: boolean
 }
 
-export interface FlashcardOptions<Quality> {
-  assignments: Assignment[]
-  subjects: Subject[]
-  isLearnMode: boolean
-  scheduler: Scheduler<Quality>
-  checkAnswer: (answer: string, subject: Subject) => Quality
-  checkPassing: (quality: Quality) => boolean
-}
+/**
+ * Flashcard Class
+ * @example Basic Usage
+ * ```ts
+ * import Flashcards from '@inro/simple-tools/flashcards'
+ * import Sm2Scheduler from '@inro/simple-tools/flashcards/sm2'
+ * const subjects = [{
+ *   id: "1",
+ *   learnKeys: ["answers"],
+ *   quizKeys: ["answers"],
+ *   data: {
+ *     question: "What is your favorite color?",
+ *     answers: ["blue"]
+ *   }
+ * }]
+ *
+ * type Quality = boolean
+ * const deck = new Flashcards<Quality>({
+ *   assignments: [],
+ *   checkAnswer: (answer, subject) => subject.data.answers.includes(answer),
+ *   checkPassing: (quality) => quality,
+ *   scheduler: new Sm2Scheduler(),
+ *   subjects,
+ * })
+ * console.log(deck.getAvailable().length) // 1
+ * console.log(deck.state.currSubject?.id) // 1
+ * deck.submit('blue')
+ * assert(deck.state.assignmentsById['1'].startedAt) // 1
+ */
+export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
+  #scheduler: Scheduler<Q>
+  #checkAnswer: (answer: string, subject: Subject) => Q
+  #checkComplete: (quality: Q) => boolean
 
-export default class Flashcards<Quality>
-  extends State<FlashcardsState<Quality>> {
-  #scheduler: Scheduler<Quality>
-  #checkAnswer: (answer: string, subject: Subject) => Quality
-  #checkPassing: (quality: Quality) => boolean
-
-  constructor(
-    { assignments, subjects, isLearnMode, ...options }: FlashcardOptions<
-      Quality
-    >,
-  ) {
+  /**
+   * Flashcards are represented by:
+   *  @property subjects: Static content to learn
+   *   - assignments: Dynamic data representing user's learning progress
+   *   - scheduler: Determines when/which subjects to display next
+   *   - checkAnswer: Determines quality of answers (correct/incorrect, 1-5, etc)
+   *   - checkComplete: Determines whether a subject should be shown again soon
+   */
+  constructor({ assignments, subjects, isLearnMode, ...options }: {
+    /** All assignments, as an array */
+    assignments: Assignment[]
+    /** All subjects, as an array */
+    subjects: Subject[]
+    /** Is this study session a quiz or for teaching? */
+    isLearnMode: boolean
+    /** Scheduler for deciding which subjects to quiz/learn */
+    scheduler: Scheduler<Q>
+    /** Function to determine how well a user answered */
+    checkAnswer: (answer: string, subject: Subject) => Q
+    /** Check if the card should repeat within the same session */
+    checkComplete: (quality: Q) => boolean
+  }) {
     super({
       currAssignment: null,
       currCardState: null,
@@ -64,7 +112,7 @@ export default class Flashcards<Quality>
 
     this.#scheduler = options.scheduler
     this.#checkAnswer = options.checkAnswer
-    this.#checkPassing = options.checkPassing
+    this.#checkComplete = options.checkComplete
 
     this.state.currPending =
       (isLearnMode ? this.getLearnable() : this.getQuizzable())
@@ -111,6 +159,7 @@ export default class Flashcards<Quality>
     })
   }
 
+  /** Reset the card state to be unanswered */
   redo() {
     this.state.currCardState = Pending
   }
@@ -133,7 +182,7 @@ export default class Flashcards<Quality>
     } else if (currCardState === Pending) {
       // If unanswered, don't submit answer. Just set to an answered state.
       this.state.currQuality = this.#checkAnswer(answer, currSubject)
-      const isPassing = this.#checkPassing(this.state.currQuality)
+      const isPassing = this.#checkComplete(this.state.currQuality)
       this.state.currCardState = isPassing ? Success : Failure
     } else if (currCardState === Failure) {
       if (!this.#hasPreviouslyFailed()) {

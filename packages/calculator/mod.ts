@@ -27,7 +27,9 @@ const OperatorSymbols: { [name: string]: string } = Object.freeze({
 
 /** Describes a change in calculator value */
 export interface Diff {
+  /** The operation being applied */
   operator: Operator
+  /** The number value being used to operate */
   value: number
 }
 
@@ -67,6 +69,7 @@ export interface CalculatorState {
 export default class Calculator extends State<CalculatorState> {
   #initialValue: number
 
+  /** Initializes with a given value */
   constructor(value: number = 0) {
     super({
       display: '0',

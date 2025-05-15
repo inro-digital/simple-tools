@@ -30,15 +30,17 @@ export interface StopwatchState {
   isPaused: boolean
   /** Is true when `start` has been called, and `stop` has not been called. */
   isStarted: boolean
+  /** List of logged laps */
   laps: Array<Lap>
 }
 
+/** Options for initializing a new timer */
 export interface StopwatchOptions {
-  /* Number that we count up from */
+  /** Number that we count up from */
   initialMS: number
-  /* Frequency that listeners are called while the timer is counting */
+  /** Frequency that listeners are called while the timer is counting */
   resolutionMS: number
-  /* For custom formatting for `state.display` */
+  /** For custom formatting for `state.display` */
   formatDisplayTime: (elapsed: number) => string
 }
 
@@ -48,17 +50,17 @@ export interface StopwatchOptions {
  * ```ts
  * import Stopwatch, { StopwatchState } from '@inro/simple-tools/stopwatch'
  * const timer = new Stopwatch()
- * timer.addEventListener((state: CountdownState) => {
+ * timer.addEventListener((state: StopwatchState) => {
  *   console.log(state.display) // "0:00.0"
  *   console.log(state.elapsed) // 0
  *   console.log(state.laps) // []
  * })
  *
- * document.getElementById('#start').onclick = () => timer.start()
- * document.getElementById('#pause').onclick = () => timer.pause()
- * document.getElementById('#stop').onclick = () => timer.stop()
- * document.getElementById('#reset').onclick = () => timer.reset()
- * document.getElementById('#lap').onclick = () => timer.lap()
+ * const start = () => timer.start()
+ * const pause = () => timer.pause()
+ * const stop = () => timer.stop()
+ * const reset = () => timer.reset()
+ * const lap = () => timer.lap()
  * ```
  */
 export default class Stopwatch extends State<StopwatchState> {
@@ -69,7 +71,7 @@ export default class Stopwatch extends State<StopwatchState> {
   #resolutionMS: number | undefined
   #startMS: number | undefined
 
-  /* Timer resolution defaults to 10ms */
+  /** Timer resolution defaults to 10ms */
   constructor(options: Partial<StopwatchOptions> = {}) {
     const {
       initialMS = 0,

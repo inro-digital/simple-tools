@@ -2,14 +2,14 @@ import { Command } from '@cliffy/command'
 import Todolist from '@inro/simple-tools/todolist'
 import LocalStorage from '@inro/simple-tools/storage/local-storage'
 
-const cache = new LocalStorage({
+const storage = new LocalStorage({
   name: 'todos',
   defaultValue: {},
   deserialize: (str) => JSON.parse(str),
   serialize: (val) => JSON.stringify(val),
   verify: (_val) => true,
 })
-const todolist = new Todolist({}, { cache })
+const todolist = new Todolist({}, { storage })
 await todolist.waitUntilReady()
 
 export default new Command()

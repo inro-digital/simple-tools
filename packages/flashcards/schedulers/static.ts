@@ -1,39 +1,67 @@
 /**
  * A scheduler with statically-tiered due-dates
  */
-import { type Assignment, defaultAssignment, type Subject } from '../types.ts'
+import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
 import { getNow } from '../utils/datetime.ts'
 
+/** Srs defines the intervals used, and cutoffs */
 export interface Srs {
+  /** Identifier for the srs system */
   id: number
+  /** Display name for the srs system */
   name: string
+  /**
+   * Once this interval is reached, an assignment is "unlocked".
+   * This generally means that an assignement is available to the user.
+   */
   unlocksAt: number
+  /**
+   * Once this interval is reached, an assignment is "started".
+   * This generally means that a user has seen/learned the assignment.
+   */
   startsAt: number
+  /**
+   * Once this interval is reached, an assignment is "passed".
+   * This generally means that dependent assignments become unlocked.
+   */
   passesAt: number
+  /**
+   * Once this interval is reached, an assignment is complete.
+   * This generally means that a user has demonstrated "mastery", and this that
+   * this assignment no longer needs to be shown.
+   */
   completesAt: number
+  /** An array of seconds, indicating how long to wait between intervals */
   intervals: number[]
 }
 
-export interface Options {
-  srs: Record<number, Srs>
-  userLevel: number
-}
-
+/**
+ * Data that is necessary to include in the subject's `data` property, in order
+ * for this scheduler to function.
+ */
 export interface SubjectData {
+  /** Level that a subject is unlocked */
   level: number
-  position: number
+  /** Represents which srs interval to use */
   srsId: number
+  /** Order in which the subject is displayed */
+  position?: number
 }
 
 /**
- * A basic scheduler to demonstrate usage
+ * A scheduler that utilizes static interval definitions
  */
 export default class StaticScheduler extends Scheduler<boolean> {
   #srs: Record<number, Srs> = {}
+  /** A user's level. They should start at 1; 0 just means not initialized */
   userLevel: number = 0
 
-  constructor({ srs, userLevel }: Partial<Options>) {
+  /** Initialize with user level and srs interval definitions */
+  constructor({ srs, userLevel }: Partial<{
+    srs: Record<number, Srs>
+    userLevel: number
+  }> = {}) {
     super()
     this.#srs = srs || this.#srs
     this.userLevel = userLevel || this.userLevel
@@ -46,10 +74,10 @@ export default class StaticScheduler extends Scheduler<boolean> {
     if (!srs) throw new Error(`No SRS srs defined for ${srsId}`)
 
     return {
-      ...defaultAssignment,
-      efactor: 0,
-      subjectId: subject.id,
       availableAt: getNow(srs.intervals[0]),
+      efactor: 0,
+      markedCompleted: false,
+      subjectId: subject.id,
       interval: srs.intervals[0],
       startedAt: getNow(),
       unlockedAt: getNow(),
@@ -67,18 +95,21 @@ export default class StaticScheduler extends Scheduler<boolean> {
     return true
   }
 
+  /** Filters out subjects that have already been learned */
   override filterLearnable(subject: Subject, assignment: Assignment): boolean {
     if (!this.filter(subject, assignment)) return false
     if (assignment?.startedAt) return false // Already learned
     return true
   }
 
+  /** Filters out subjects that haven't already been learned */
   override filterQuizzable(subject: Subject, assignment: Assignment): boolean {
     if (!this.filter(subject, assignment)) return false
-    if (assignment?.startedAt) return false // Already learned
+    if (!assignment?.startedAt) return false // Not learned yet, so can't quiz.
     return true
   }
 
+  /** Sort by level, and then sort by position within level */
   override sort(
     [subjectA, _assignmentA]: [Subject, Assignment],
     [subjectB, _assignmentB]: [Subject, Assignment],
@@ -88,7 +119,7 @@ export default class StaticScheduler extends Scheduler<boolean> {
     if (dataA?.level && !dataB?.level) return -1
     if (dataB?.level && !dataA?.level) return 1
     if (dataA?.level !== dataB?.level) return dataA.level - dataB.level
-    return dataA.position - dataB.position
+    return (dataA.position ?? 0) - (dataB.position ?? 0)
   }
 
   /**
@@ -122,7 +153,7 @@ export default class StaticScheduler extends Scheduler<boolean> {
       const efactor = Math.max(1, (assignment?.efactor || 1) - 1)
       const interval = this.#getInterval(srsId, efactor)
       const intervalDate = getNow(interval)
-      const tomorrow = getNow(86400) // 1-day do-over to recover lost stage
+      const tomorrow = getNow(86_400) // 1-day do-over to recover lost stage
 
       return {
         ...assignment,

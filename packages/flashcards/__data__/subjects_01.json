@@ -1,13 +1,13 @@
 [
   {
     "id": "1",
-    "type": "animals",
     "learnKeys": ["characters"],
     "quizKeys": ["meanings", "readings"],
     "data": {
       "level": 1,
       "position": 1,
       "srsId": 1,
+      "type": "animals",
       "characters": [
         { "value": "猫", "locale": "zh_CN" },
         { "value": "貓", "locale": "zh_HK" },
@@ -25,13 +25,13 @@
   },
   {
     "id": "2",
-    "type": "animals",
     "learnKeys": ["characters"],
     "quizKeys": ["meanings", "readings"],
     "data": {
       "level": 1,
       "position": 2,
       "srsId": 1,
+      "type": "animals",
       "characters": [
         { "value": "鱼", "locale": "zh_CN" },
         { "value": "魚", "locale": "zh_HK" },
@@ -49,13 +49,13 @@
   },
   {
     "id": "3",
-    "type": "animals",
     "learnKeys": ["characters"],
     "quizKeys": ["meanings", "readings"],
     "data": {
       "level": 2,
       "position": 1,
       "srsId": 1,
+      "type": "animals",
       "characters": [
         { "value": "鸟", "locale": "zh_CN" },
         { "value": "鳥", "locale": "zh_HK" },
@@ -73,13 +73,13 @@
   },
   {
     "id": "4",
-    "type": "animals",
     "learnKeys": ["characters"],
     "quizKeys": ["meanings", "readings"],
     "data": {
       "level": 2,
       "position": 2,
       "srsId": 1,
+      "type": "animals",
       "characters": [
         { "value": "牛", "locale": "zh_CN" },
         { "value": "牛", "locale": "zh_HK" },
@@ -97,13 +97,13 @@
   },
   {
     "id": "5",
-    "type": "animals",
     "learnKeys": ["characters"],
     "quizKeys": ["meanings", "readings"],
     "data": {
       "level": 3,
       "position": 1,
       "srsId": 1,
+      "type": "animals",
       "characters": [
         { "value": "马", "locale": "zh_CN" },
         { "value": "馬", "locale": "zh_HK" },
@@ -121,13 +121,13 @@
   },
   {
     "id": "6",
-    "type": "animals",
     "learnKeys": ["characters"],
     "quizKeys": ["meanings", "readings"],
     "data": {
       "level": 3,
       "position": 2,
       "srsId": 1,
+      "type": "animals",
       "characters": [
         { "value": "狗", "locale": "zh_CN" },
         { "value": "狗", "locale": "zh_HK" },

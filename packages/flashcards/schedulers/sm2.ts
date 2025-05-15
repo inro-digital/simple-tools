@@ -1,9 +1,4 @@
-/**
- * Supermemo2 Algorithm
- * @reference https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method
- * @reference https://super-memory.com/english/ol/sm2.htm
- */
-import { type Assignment, defaultAssignment, type Subject } from '../types.ts'
+import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
 import { getNow, isSameDay } from '../utils/datetime.ts'
 
@@ -11,6 +6,11 @@ const defaultEfactor = 2.5
 const defaultRepetition = 0
 const defaultInterval = 0
 
+/**
+ * Supermemo2 Algorithm
+ * @reference https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method
+ * @reference https://super-memory.com/english/ol/sm2.htm
+ */
 export default class Sm2 extends Scheduler<number> {
   /**
    * 1. Ensures repetition and interval start at 0.
@@ -18,11 +18,11 @@ export default class Sm2 extends Scheduler<number> {
    */
   override add(subject: Subject): Assignment {
     return {
-      ...defaultAssignment,
-      subjectId: subject.id,
       efactor: defaultEfactor,
-      repetition: defaultRepetition,
       interval: defaultInterval,
+      markedCompleted: false,
+      repetition: defaultRepetition,
+      subjectId: subject.id,
     }
   }
 

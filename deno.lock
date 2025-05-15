@@ -7,7 +7,6 @@
     "jsr:@cliffy/keycode@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@cliffy/keypress@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@cliffy/table@1.0.0-rc.7": "1.0.0-rc.7",
-    "jsr:@inro/simple-tools@^0.0.13": "0.0.13",
     "jsr:@std/assert@^1.0.13": "1.0.13",
     "jsr:@std/async@^1.0.13": "1.0.13",
     "jsr:@std/collections@^1.1.0": "1.1.0",
@@ -57,12 +56,6 @@
         "jsr:@std/fmt"
       ]
     },
-    "@inro/simple-tools@0.0.13": {
-      "integrity": "3f9c46cd7e21919145a1aa2b74b1333348af332750f2e57fc486a06c12a10772",
-      "dependencies": [
-        "jsr:@std/collections"
-      ]
-    },
     "@std/assert@1.0.13": {
       "integrity": "ae0d31e41919b12c656c742b22522c32fb26ed0cba32975cb0de2a273cb68b29",
       "dependencies": [
@@ -108,6 +101,15 @@
       "integrity": "40ba34caa095f393e78796e5eda37b8b4e2cc6cfd6f51f34658ad7487b1451e4"
     }
   },
+  "redirects": {
+    "https://esm.sh/jsr/@inro/simple-tools/countdown": "https://esm.sh/jsr/@inro/simple-tools@0.0.11/countdown"
+  },
+  "remote": {
+    "https://esm.sh/@jsr/inro__simple-tools@0.0.11/denonext/countdown.mjs": "268f17b32363fbfceb2f0d0805cb1ee3363b625b002717f8ed77903fb66e147b",
+    "https://esm.sh/@jsr/inro__simple-tools@0.0.11/denonext/state.mjs": "9dc3369b55a101185cc4c48f64c5a6970ee16ab0e49f43699823de5a19fe7f36",
+    "https://esm.sh/@jsr/inro__simple-tools@0.0.11/denonext/timers/utils.mjs": "7328cffaaae24d4a871280878800dde4f6489cbd3dfec83e7918a4b16e072a62",
+    "https://esm.sh/jsr/@inro/simple-tools@0.0.11/countdown": "ec2ebe25109d17059ab08bd8716bd11bb30e4a7bb5fda2e84cd35a7933a1b6f3"
+  },
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@^1.0.13",
@@ -119,7 +121,7 @@
         "dependencies": [
           "jsr:@cliffy/command@1.0.0-rc.7",
           "jsr:@cliffy/keypress@1.0.0-rc.7",
-          "jsr:@inro/simple-tools@^0.0.13"
+          "jsr:@inro/simple-tools@^0.0.14"
         ]
       }
     }

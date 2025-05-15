@@ -1,4 +1,4 @@
-import { type Assignment, defaultAssignment, type Subject } from '../types.ts'
+import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
 
 /**
@@ -7,7 +7,7 @@ import Scheduler from '../scheduler.ts'
 export default class BasicScheduler extends Scheduler<number> {
   /** Ensure that repetition is an int */
   override add(subject: Subject): Assignment {
-    return { ...defaultAssignment, repetition: 0, subjectId: subject.id }
+    return { markedCompleted: false, repetition: 0, subjectId: subject.id }
   }
 
   /** If answered correctly 3 times, skip it! */

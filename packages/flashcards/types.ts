@@ -3,14 +3,17 @@
  * likely provided from a relatively static resource.
  */
 export interface Subject {
+  /** unique id for a subject */
   id: string
-  type: string
-  hidden?: string
+  /** subject is no longer being used */
+  hiddenAt?: Date
   /** Data properties we should learn against */
   learnKeys: string[]
   /** Data properties we should quiz against */
   quizKeys: string[]
-  data: unknown
+  /** Data associated with a subject */
+  // deno-lint-ignore no-explicit-any
+  data: any
 }
 
 /**
@@ -38,24 +41,13 @@ export interface Assignment {
   subjectId: string
   /** user has learned the subject */
   startedAt?: Date
-  type: string
   /** subject is available to be learned */
   unlockedAt?: Date
 }
 
-export const defaultAssignment: Assignment = {
-  subjectId: '0',
-  markedCompleted: false,
-  type: '',
-}
-
+/** How well a card is answered */
 export enum CardState {
   Failure = 'Failure',
   Pending = 'Pending',
   Success = 'Success',
 }
-
-export type SubjectFilter = (
-  subject: Subject,
-  assignment: Assignment,
-) => boolean
