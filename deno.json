@@ -23,10 +23,10 @@
     "@std/testing": "jsr:@std/testing@^1.0.12"
   },
   "publish": {
-    "exclude": ["examples"]
+    "exclude": ["apps"]
   },
   "tasks": {
-    "dev": "serve ./examples/www",
+    "dev": "serve ./apps/www",
     "test": "deno fmt && deno lint && deno check . && deno task test:coverage && deno publish --dry-run --allow-dirty --quiet",
     "test:coverage": "deno test --parallel --coverage=./coverage ."
   }
