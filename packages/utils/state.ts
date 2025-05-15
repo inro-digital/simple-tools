@@ -101,7 +101,7 @@ export default class State<InternalState extends object> {
     } else {
       this.#storage = options.storage
       this.load(async () => {
-        const intialState = await this.#storage?.get() ?? state
+        const intialState = (await this.#storage?.get()) ?? state
         this.initialized = true
         return intialState
       })
