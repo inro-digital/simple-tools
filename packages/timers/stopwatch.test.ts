@@ -164,8 +164,8 @@ Deno.test('laps', () => {
         totalDisplay: '0:02.1',
       },
       {
-        split: 2300,
-        splitDisplay: '0:02.3',
+        split: 1200,
+        splitDisplay: '0:01.2',
         total: 3300,
         totalDisplay: '0:03.3',
       },

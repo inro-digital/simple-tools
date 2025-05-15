@@ -178,7 +178,8 @@ export default class Stopwatch extends State<StopwatchState> {
   /** Logs a lap. This does not affect timer counting at all. */
   lap() {
     const total = this.state.elapsed
-    const prevTime = this.state.laps[0]?.total ?? 0
+    const prevLapId = this.state.laps.length - 1
+    const prevTime = this.state.laps[prevLapId]?.total ?? 0
     const split = total - prevTime
     this.state.laps.push({
       split,
