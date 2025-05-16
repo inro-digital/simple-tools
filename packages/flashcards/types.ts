@@ -51,3 +51,9 @@ export enum CardState {
   Pending = 'Pending',
   Success = 'Success',
 }
+
+/** Whether the current session can have a correct/incorrect state */
+export enum StudyMode {
+  'Learn' = 'Learn',
+  'Quiz' = 'Quiz',
+}

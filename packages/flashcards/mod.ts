@@ -1,23 +1,18 @@
-import { associateBy } from '@std/collections/associate-by'
 import State from '../utils/state.ts'
 import Scheduler from './scheduler.ts'
-import { type Assignment, CardState, type Subject } from './types.ts'
+import { type Assignment, CardState, StudyMode, type Subject } from './types.ts'
+import { isToday } from './utils/datetime.ts'
 
 export { Scheduler }
 export * from './types.ts'
 
+const { Learn, Quiz } = StudyMode
 const { Failure, Pending, Success } = CardState
 
 /** The current state of flashcard study */
 export interface FlashcardsState<Quality> {
-  /** All assignments, as an array */
-  assignments: Assignment[]
-  /** All assignments, as an id/assignment record */
-  assignmentsById: Record<string, Assignment>
-  /** All subjects, as an array */
-  subjects: Subject[]
-  /** All subjects, as an id/assignment record */
-  subjectsById: Record<string, Subject>
+  /** Assignments by Id */
+  assignments: Record<string, Assignment>
   /** Current assignment to answer */
   currAssignment: Assignment | null
   /** Whether the current card is passed/failed/pending answer */
@@ -34,10 +29,12 @@ export interface FlashcardsState<Quality> {
   currPending: [string, string][]
   /** Subjects that have been answered correctly */
   currSuccesses: Set<string>
+  /** Turns answer submission into a two-step process: 1. grade, 2. submit */
+  allowRedos: boolean
   /** Is this study session a quiz or for teaching? */
-  isLearnMode: boolean
+  mode: StudyMode
   /** Maximum amount of new cards within a day */
-  maxNew: number | null
+  maxLearns: number | null
   /** Maximum amount of quizzes within a day */
   maxReviews: number | null
 }
@@ -60,7 +57,7 @@ export interface FlashcardsState<Quality> {
  *
  * type Quality = boolean
  * const deck = new Flashcards<Quality>({
- *   assignments: [],
+ *   assignments: {},
  *   checkAnswer: (answer, subject) => subject.data.answers.includes(answer),
  *   checkPassing: (quality) => quality,
  *   scheduler: new Sm2Scheduler(),
@@ -69,29 +66,33 @@ export interface FlashcardsState<Quality> {
  * console.log(deck.getAvailable().length) // 1
  * console.log(deck.state.currSubject?.id) // 1
  * deck.submit('blue')
- * assert(deck.state.assignmentsById['1'].startedAt) // 1
+ * assert(deck.state.assignments['1'].startedAt) // 1
  */
 export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
+  #subjects: Record<string, Subject>
   #scheduler: Scheduler<Q>
   #checkAnswer: (answer: string, subject: Subject) => Q
   #checkComplete: (quality: Q) => boolean
+  #numLearnedToday: number
+  #numReviewedToday: number
 
   /**
    * Flashcards are represented by:
-   *  @property subjects: Static content to learn
+   *   - subjects: Static content to learn
    *   - assignments: Dynamic data representing user's learning progress
    *   - scheduler: Determines when/which subjects to display next
    *   - checkAnswer: Determines quality of answers (correct/incorrect, 1-5, etc)
    *   - checkComplete: Determines whether a subject should be shown again soon
    */
-  constructor({ assignments, subjects, isLearnMode, ...options }: {
-    assignments: Assignment[]
-    subjects: Subject[]
-    isLearnMode: boolean
+  constructor(options: {
+    assignments: Record<string, Assignment>
+    subjects: Record<string, Subject>
     scheduler: Scheduler<Q>
+    allowRedos?: boolean
+    mode?: StudyMode
     checkAnswer: (answer: string, subject: Subject) => Q
     checkComplete: (quality: Q) => boolean
-    maxNew?: number | null
+    maxLearns?: number | null
     maxReviews?: number | null
   }) {
     super({
@@ -103,60 +104,73 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
       currFailures: new Set(),
       currPending: [],
       currSuccesses: new Set(),
-      assignments: assignments,
-      isLearnMode,
-      subjects,
-      assignmentsById: associateBy<Assignment>(assignments, (a) => a.subjectId),
-      subjectsById: associateBy<Subject>(subjects, (a) => a.id),
-      maxNew: Math.max(0, options.maxNew ?? 0) || null,
+      assignments: options.assignments,
+      allowRedos: options.allowRedos ?? false,
+      mode: options.mode ?? Quiz,
+      maxLearns: Math.max(0, options.maxLearns ?? 0) || null,
       maxReviews: Math.max(0, options.maxReviews ?? 0) || null,
     }, { isReactive: true })
 
+    this.#subjects = options.subjects
     this.#scheduler = options.scheduler
     this.#checkAnswer = options.checkAnswer
     this.#checkComplete = options.checkComplete
+    this.#numLearnedToday = 0
+    this.#numReviewedToday = 0
 
-    this.state.currPending =
-      (isLearnMode ? this.getLearnable() : this.getQuizzable())
-        .flatMap(({ learnKeys, quizKeys, id }) => {
-          return (isLearnMode ? learnKeys : quizKeys)
-            .map((learnId) => [id, learnId] as [string, string])
-        })
+    this.batch((state) => {
+      state.currPending =
+        (options.mode === Learn ? this.getLearnable() : this.getQuizzable())
+          .flatMap(({ learnKeys, quizKeys, id }) => {
+            return (options.mode === Learn ? learnKeys : quizKeys)
+              .map((learnId) => [id, learnId] as [string, string])
+          })
 
-    this.#loadNext()
+      this.#loadNext(state)
+    })
+  }
+
+  /** Subjects by Id */
+  get subjects(): Record<string, Subject> {
+    return this.#subjects
+  }
+
+  /** All subjects */
+  getAll(): Subject[] {
+    this.#numLearnedToday = 0
+    this.#numReviewedToday = 0
+
+    return Object.keys(this.#subjects)
+      .map((id) => {
+        const { lastStudiedAt, startedAt } = this.state.assignments[id] || {}
+        if (isToday(startedAt)) this.#numLearnedToday++
+        else if (isToday(lastStudiedAt)) this.#numReviewedToday++
+        return this.#subjects[id]
+      })
   }
 
   /** All subjects that can be learned or studied */
   getAvailable(): Subject[] {
-    return this.state.subjects
-      .filter((subject) => {
-        const assignment = this.state.assignmentsById[subject.id]
-        return this.#scheduler.filter(subject, assignment)
-      })
+    return this.getAll()
+      .filter((s) => this.#scheduler.filter(s, this.state.assignments[s.id]))
   }
 
   /** Get subjects that are ready to be learned */
   getLearnable(): Subject[] {
-    const { assignmentsById, maxNew } = this.state
+    const { assignments, maxLearns } = this.state
     const learnable = this.getAvailable()
-      .filter((s) => this.#scheduler.filterLearnable(s, assignmentsById[s.id]))
-    return maxNew ? learnable.slice(0, maxNew) : learnable
+      .filter((s) => this.#scheduler.filterLearnable(s, assignments[s.id]))
+    if (!maxLearns) return learnable
+    return learnable.slice(0, Math.max(0, maxLearns - this.#numLearnedToday))
   }
 
   /** Get subjects that are ready to be quizzed */
   getQuizzable(): Subject[] {
-    const { assignmentsById, maxReviews } = this.state
+    const { assignments, maxReviews } = this.state
     const quizzable = this.getAvailable()
-      .filter((s) => this.#scheduler.filterQuizzable(s, assignmentsById[s.id]))
-    return maxReviews ? quizzable.slice(0, maxReviews) : quizzable
-  }
-
-  /** Get all learned subjects */
-  getStarted(): Subject[] {
-    return this.state.subjects.filter((subject: Subject) => {
-      const assignment = this.state.assignmentsById[subject.id]
-      return assignment?.startedAt || assignment?.markedCompleted
-    })
+      .filter((s) => this.#scheduler.filterQuizzable(s, assignments[s.id]))
+    if (!maxReviews) return quizzable
+    return quizzable.slice(0, Math.max(0, maxReviews - this.#numReviewedToday))
   }
 
   /** Reset the card state to be unanswered */
@@ -170,44 +184,51 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
    * and the answer will be submitted on the next submit.
    */
   submit(answer: string = ''): void {
-    const { currAssignment, currCardState, currSubject, isLearnMode } =
-      this.state
-    if (!currSubject) return
-    if (!isLearnMode && !currAssignment) {
-      throw new Error('trying to quiz, but there is no assignment')
-    }
-    if (isLearnMode) {
-      const assignment = this.#scheduler.add(currSubject)
-      this.state.assignmentsById[currSubject.id] = assignment
-    } else if (currCardState === Pending) {
-      // If unanswered, don't submit answer. Just set to an answered state.
-      this.state.currQuality = this.#checkAnswer(answer, currSubject)
-      const isPassing = this.#checkComplete(this.state.currQuality)
-      this.state.currCardState = isPassing ? Success : Failure
-      return
-    } else if (currCardState === Failure) {
-      if (!this.#hasPreviouslyFailed()) {
-        this.state.assignmentsById[currSubject.id] = this.#scheduler.update(
-          this.state.currQuality!,
-          currSubject,
-          currAssignment!,
-        )
-      }
-      this.state.currFailures.add(currSubject.id)
-    } else if (currCardState === Success) {
-      if (this.#isLastRemainingCard()) {
-        this.state.assignmentsById[currSubject.id] = this.#scheduler.update(
-          this.state.currQuality!,
-          currSubject,
-          currAssignment!,
-        )
-        this.state.currSuccesses.add(currSubject.id)
-      }
-    } else {
-      throw new Error('Invalid State')
-    }
+    this.batch((state) => {
+      const { currAssignment, currSubject, mode } = state
+      if (!currSubject) return
 
-    this.#loadAndShiftNext()
+      // If this is a new concept, create an assignment and load next
+      if (mode === Learn || !currAssignment) {
+        const assignment = this.#scheduler.add(currSubject)
+        state.assignments[currSubject.id] = assignment
+        this.#loadAndShiftNext()
+        return
+      }
+
+      if (state.currCardState === Pending) {
+        state.currQuality = this.#checkAnswer(answer, currSubject)
+        state.currCardState = this.#checkComplete(state.currQuality)
+          ? Success
+          : Failure
+        // If allowing redos, don't submit answer. Just set to an answered state.
+        if (state.allowRedos) return
+      }
+
+      if (state.currCardState === Failure) {
+        if (!this.#hasPreviouslyFailed()) {
+          state.assignments[currSubject.id] = this.#scheduler.update(
+            state.currQuality!,
+            currSubject,
+            currAssignment!,
+          )
+        }
+        state.currFailures.add(currSubject.id)
+      } else if (state.currCardState === Success) {
+        if (this.#isLastRemainingCard()) {
+          state.assignments[currSubject.id] = this.#scheduler.update(
+            state.currQuality!,
+            currSubject,
+            currAssignment!,
+          )
+          state.currSuccesses.add(currSubject.id)
+        }
+      } else {
+        throw new Error('Invalid State')
+      }
+
+      this.#loadAndShiftNext()
+    })
   }
 
   /** Has the current card already been failed? */
@@ -224,21 +245,23 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
   }
 
   /* Loads the next pending card */
-  #loadNext() {
+  #loadNext(state: FlashcardsState<Q>) {
     const [subjectId, cardType] = this.state.currPending[0] || []
-    this.state.currSubject = this.state.subjectsById[subjectId] ?? null
-    this.state.currAssignment = this.state.assignmentsById[subjectId] ?? null
-    this.state.currCardState = subjectId ? Pending : null
-    this.state.currCardType = cardType ?? null
+    state.currSubject = this.#subjects[subjectId] ?? null
+    state.currAssignment = state.assignments[subjectId] ?? null
+    state.currCardState = subjectId ? Pending : null
+    state.currCardType = cardType ?? null
   }
 
   /* Loads the next pending card, and pops it out of currPending */
   #loadAndShiftNext() {
     if (!this.state.currPending?.length) return
-    const prev = this.state.currPending.shift()
-    if (prev && this.state.currCardState === Failure) {
-      this.state.currPending.push(prev)
-    }
-    this.#loadNext()
+    this.batch((state) => {
+      const prev = state.currPending.shift()
+      if (prev && state.currCardState === Failure) {
+        state.currPending.push(prev)
+      }
+      this.#loadNext(state)
+    })
   }
 }

@@ -9,3 +9,8 @@ export function isSameDay(d1: Date, d2: Date): boolean {
     d1.getMonth() === d2.getMonth() &&
     d1.getDate() === d2.getDate()
 }
+
+export function isToday(d1?: Date): boolean {
+  if (!d1) return false
+  return isSameDay(d1, new Date())
+}
