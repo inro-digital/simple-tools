@@ -1,8 +1,11 @@
 import { assert, assertEquals } from '@std/assert'
+import { FakeTime } from '@std/testing/time'
 import Flashcards, { StudyMode } from './mod.ts'
 import StaticScheduler from './schedulers/static.ts'
 import subjects from './__data__/subjects_01.json' with { type: 'json' }
 import srs from './__data__/srs_01.json' with { type: 'json' }
+
+const oneDayMS = 86_400_000
 
 const assignments = {
   '1': {
@@ -55,7 +58,8 @@ Deno.test('quiz mode', () => {
   assertEquals(deck.getQuizzable().length, 0, 'no more left!')
 })
 
-Deno.test('max learns, max studies', () => {
+Deno.test('max learns', () => {
+  const time = new FakeTime(new Date())
   const deck = new Flashcards<boolean>({
     assignments: {},
     checkAnswer: () => true,
@@ -68,5 +72,7 @@ Deno.test('max learns, max studies', () => {
   })
   assertEquals(deck.getLearnable().length, 1)
   deck.submit()
-  assertEquals(deck.getQuizzable().length, 1)
+  assertEquals(deck.getLearnable().length, 0)
+  time.tick(oneDayMS)
+  assertEquals(deck.getLearnable().length, 1)
 })
