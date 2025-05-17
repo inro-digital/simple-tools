@@ -1,5 +1,7 @@
 import type Storage from './storage.ts'
 
+const IS_REACTIVE = Symbol('is_reactive')
+
 /**
  * @module
  * Generic state and listener class used by all the simple-tools. This helps us:
@@ -76,7 +78,7 @@ export default class State<InternalState extends object> {
   #isBatchingUpdates = false
   #isPendingNotification = false
   #options = DefaultOptions as Options<InternalState>
-  #proxiedObjects = new WeakSet<object>()
+  #objectToProxy = new WeakMap<object, object>()
   #state: InternalState
   #watchers: Array<(state: InternalState) => void> = []
 
@@ -211,17 +213,24 @@ export default class State<InternalState extends object> {
     obj: T,
     options: Options<InternalState>,
   ): T {
+    if (!options.isReactive) return obj
+    if (this.#isReactiveProxy(obj)) return obj
+
+    const existing = this.#objectToProxy.get(obj)
+    if (existing) return existing as T
+
     // deno-lint-ignore no-this-alias
     const manager = this
-
-    if (this.#proxiedObjects.has(obj)) return obj
-
     const proxy = new Proxy(obj, {
       // deno-lint-ignore no-explicit-any
       get(target: any, prop: string | symbol) {
+        if (prop === IS_REACTIVE) return true
+
         const value = target[prop]
-        if (isPlainObject(value) && !manager.#proxiedObjects.has(value)) {
-          target[prop] = manager.#createReactive(value, options)
+        if (isPlainObject(value) && !manager.#isReactiveProxy(value)) {
+          const existing = manager.#objectToProxy.get(value)
+          target[prop] = existing ||
+            manager.#createReactive(value, options)
         }
         return target[prop]
       },
@@ -250,8 +259,17 @@ export default class State<InternalState extends object> {
       },
     })
 
-    this.#proxiedObjects.add(proxy)
+    this.#objectToProxy.set(obj, proxy)
     return proxy as T
+  }
+
+  // deno-lint-ignore no-explicit-any
+  #isReactiveProxy(obj: any): boolean {
+    try {
+      return obj[IS_REACTIVE] === true
+    } catch {
+      return false
+    }
   }
 }
 
