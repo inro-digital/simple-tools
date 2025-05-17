@@ -34,9 +34,9 @@ export interface FlashcardsState<Quality> {
   /** Is this study session a quiz or for teaching? */
   mode: StudyMode
   /** Maximum amount of new cards within a day */
-  maxLearns: number | null
+  learnLimit: number | null
   /** Maximum amount of quizzes within a day */
-  maxReviews: number | null
+  reviewLimit: number | null
 }
 
 /**
@@ -92,8 +92,8 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
     mode?: StudyMode
     checkAnswer: (answer: string, subject: Subject) => Q
     checkComplete: (quality: Q) => boolean
-    maxLearns?: number | null
-    maxReviews?: number | null
+    learnLimit?: number | null
+    reviewLimit?: number | null
   }) {
     super({
       currAssignment: null,
@@ -107,8 +107,8 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
       assignments: options.assignments,
       allowRedos: options.allowRedos ?? false,
       mode: options.mode ?? Quiz,
-      maxLearns: Math.max(0, options.maxLearns ?? 0) || null,
-      maxReviews: Math.max(0, options.maxReviews ?? 0) || null,
+      learnLimit: Math.max(0, options.learnLimit ?? 0) || null,
+      reviewLimit: Math.max(0, options.reviewLimit ?? 0) || null,
     }, { isReactive: true })
 
     this.#subjects = options.subjects
@@ -157,20 +157,20 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
 
   /** Get subjects that are ready to be learned */
   getLearnable(): Subject[] {
-    const { assignments, maxLearns } = this.state
+    const { assignments, learnLimit } = this.state
     const learnable = this.getAvailable()
       .filter((s) => this.#scheduler.filterLearnable(s, assignments[s.id]))
-    if (!maxLearns) return learnable
-    return learnable.slice(0, Math.max(0, maxLearns - this.#numLearnedToday))
+    if (!learnLimit) return learnable
+    return learnable.slice(0, Math.max(0, learnLimit - this.#numLearnedToday))
   }
 
   /** Get subjects that are ready to be quizzed */
   getQuizzable(): Subject[] {
-    const { assignments, maxReviews } = this.state
+    const { assignments, reviewLimit } = this.state
     const quizzable = this.getAvailable()
       .filter((s) => this.#scheduler.filterQuizzable(s, assignments[s.id]))
-    if (!maxReviews) return quizzable
-    return quizzable.slice(0, Math.max(0, maxReviews - this.#numReviewedToday))
+    if (!reviewLimit) return quizzable
+    return quizzable.slice(0, Math.max(0, reviewLimit - this.#numReviewedToday))
   }
 
   /** Reset the card state to be unanswered */

@@ -65,8 +65,8 @@ Deno.test('max learns', () => {
     checkAnswer: () => true,
     checkComplete: () => true,
     mode: StudyMode.Learn,
-    maxLearns: 1,
-    maxReviews: 1,
+    learnLimit: 1,
+    reviewLimit: 1,
     scheduler: new StaticScheduler({ srs, userLevel: 2 }),
     subjects,
   })

@@ -175,7 +175,7 @@ export default class State<InternalState extends object> {
 
   /** Removes an event listener. */
   removeEventListener(func: (state: InternalState) => void) {
-    this.#watchers = this.#watchers.filter((watcher) => watcher === func)
+    this.#watchers = this.#watchers.filter((watcher) => watcher !== func)
   }
 
   /** Saves state to somewhere */
@@ -220,7 +220,7 @@ export default class State<InternalState extends object> {
       // deno-lint-ignore no-explicit-any
       get(target: any, prop: string | symbol) {
         const value = target[prop]
-        if (isPlainObject(value)) {
+        if (isPlainObject(value) && !manager.#proxiedObjects.has(value)) {
           target[prop] = manager.#createReactive(value, options)
         }
         return target[prop]

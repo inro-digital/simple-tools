@@ -1,4 +1,4 @@
-import { assertEquals } from '@std/assert/equals'
+import { assertEquals } from '@std/assert'
 import { assertSpyCall, assertSpyCalls, spy } from '@std/testing/mock'
 import LocalStorage from './storage/local_storage.ts'
 import State from './state.ts'
@@ -37,7 +37,7 @@ Deno.test('watches value', () => {
   assertSpyCalls(listener, 1)
   assertSpyCall(listener, 0, { args: [{ count: 1 }] })
 
-  counter.removeEventListener(listener.original)
+  counter.removeEventListener(listener)
   counter.increment()
   assertSpyCalls(listener, 1)
 })
