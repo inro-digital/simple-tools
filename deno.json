@@ -7,6 +7,7 @@
     "./countdown": "./packages/timers/countdown.ts",
     "./flashcards": "./packages/flashcards/mod.ts",
     "./flashcards/schedulers/basic": "./packages/flashcards/schedulers/basic.ts",
+    "./flashcards/schedulers/fsrs": "./packages/flashcards/schedulers/fsrs.ts",
     "./flashcards/schedulers/sm2": "./packages/flashcards/schedulers/sm2.ts",
     "./flashcards/schedulers/static": "./packages/flashcards/schedulers/static.ts",
     "./state": "./packages/utils/state.ts",
@@ -22,7 +23,8 @@
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@^1.0.13",
-    "@std/testing": "jsr:@std/testing@^1.0.12"
+    "@std/testing": "jsr:@std/testing@^1.0.12",
+    "ts-fsrs": "npm:ts-fsrs@^5.0.0"
   },
   "publish": {
     "exclude": ["apps"]

@@ -15,7 +15,11 @@ const IS_REACTIVE = Symbol('is_reactive')
 export interface Options<T> {
   /** Optional storage mechanism for saving state outside of memory */
   storage?: Storage<T>
-  /** `.notify` should be triggered on any state change */
+  /**
+   * Using reactivity causes `.notify` to trigger on any state change. Note that
+   * this can be a performance hog on frequent reads, so prefer to handle
+   * notification manually in these cases.
+   */
   isReactive: boolean
 }
 

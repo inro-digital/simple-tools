@@ -25,6 +25,8 @@ export interface Assignment {
   availableAt?: Date
   /** subject is mastered, and should not be shown it */
   completedAt?: Date
+  /** difficulty factor for FSRS algorithm (0-1) */
+  difficulty?: number
   /** number representing expertise */
   efactor?: number
   /** number represeting time until next study; usually seconds or days */
@@ -39,6 +41,8 @@ export interface Assignment {
   repetition?: number
   /** The ID of the subject this applies to*/
   subjectId: string
+  /** stability factor for FSRS algorithm */
+  stability?: number
   /** user has learned the subject */
   startedAt?: Date
   /** subject is available to be learned */

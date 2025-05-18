@@ -29,7 +29,6 @@ Deno.bench('Successive nested proxies', () => {
 Deno.bench('Successive nested proxies, reactive', () => {
   const inner = new State({ counts: { one: 1 } }, { isReactive: true })
   const outer = new State({ counts: inner.state.counts }, { isReactive: true })
-
   for (let i = 0; i < 1_000_000; i++) {
     assert(outer.state.counts)
     assert(outer.state.counts.one)
