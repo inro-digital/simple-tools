@@ -1,0 +1,59 @@
+{
+  "1": {
+    "id": 1,
+    "name": "Default",
+    "unlocksAt": 0,
+    "startsAt": 1,
+    "passesAt": 5,
+    "completesAt": 9,
+    "intervals": [
+      0,
+      14400,
+      28800,
+      82800,
+      169200,
+      601200,
+      1206000,
+      2588400,
+      10364400
+    ]
+  },
+  "2": {
+    "id": 2,
+    "name": "Accelerated",
+    "unlocksAt": 0,
+    "startsAt": 1,
+    "passesAt": 5,
+    "completesAt": 9,
+    "intervals": [
+      0,
+      7200,
+      14400,
+      28800,
+      82800,
+      601200,
+      1206000,
+      2588400,
+      10364400
+    ]
+  },
+  "3": {
+    "id": 3,
+    "name": "Test",
+    "unlocksAt": 0,
+    "startsAt": 1,
+    "passesAt": 2,
+    "completesAt": 9,
+    "intervals": [
+      0,
+      10,
+      10,
+      10000,
+      10000,
+      10000,
+      10000,
+      10000,
+      10000
+    ]
+  }
+}

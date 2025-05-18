@@ -6,6 +6,15 @@ const defaultEfactor = 2.5
 const defaultRepetition = 0
 const defaultInterval = 0
 
+export enum Quality {
+  Blackout = 0,
+  Incorrect = 1,
+  AlmostCorrect = 2,
+  BarelyCorrect = 3,
+  Correct = 4,
+  Perfect = 5,
+}
+
 /**
  * Supermemo2 Algorithm
  * @reference https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method

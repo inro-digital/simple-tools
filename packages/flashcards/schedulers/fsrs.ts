@@ -1,30 +1,23 @@
 import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
 import { getNow, isSameDay } from '../utils/datetime.ts'
-import { FSRS } from 'ts-fsrs'
+import {
+  default_maximum_interval,
+  default_request_retention,
+  default_w,
+  FSRS,
+} from 'ts-fsrs'
 
-const defaultParameters = {
-  w: [
-    0.4,
-    0.6,
-    2.4,
-    5.8,
-    4.93,
-    0.94,
-    0.86,
-    0.01,
-    1.49,
-    0.14,
-    0.94,
-    2.18,
-    0.05,
-    0.34,
-    1.26,
-    0.29,
-    2.61,
-  ],
-  requestRetention: 0.9,
-  maximumInterval: 36500,
+/** Quality levels for FSRS */
+export enum Quality {
+  /** Complete failure to recall */
+  Again = 1,
+  /** Recalled with significant difficulty */
+  Hard = 2,
+  /** Recalled with some effort */
+  Good = 3,
+  /** Recalled with no effort */
+  Easy = 4,
 }
 
 /**
@@ -35,7 +28,11 @@ const defaultParameters = {
 export default class FsrsScheduler extends Scheduler<number> {
   private fsrs: FSRS
 
-  constructor(params = defaultParameters) {
+  constructor(params = {
+    w: default_w,
+    requestRetention: default_request_retention,
+    maximumInterval: default_maximum_interval,
+  }) {
     super()
     this.fsrs = new FSRS(params)
   }

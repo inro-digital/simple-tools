@@ -3,7 +3,7 @@ import { FakeTime } from '@std/testing/time'
 import Flashcards, { StudyMode } from './mod.ts'
 import StaticScheduler from './schedulers/static.ts'
 import subjects from './__data__/subjects_01.json' with { type: 'json' }
-import srs from './__data__/srs_01.json' with { type: 'json' }
+import srs from './__data__/srs_static.json' with { type: 'json' }
 
 const oneDayMS = 86_400_000
 

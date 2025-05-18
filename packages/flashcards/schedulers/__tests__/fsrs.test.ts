@@ -73,12 +73,8 @@ Deno.test('FsrsScheduler.update - updates card with rating 3 (Good)', () => {
     quizKeys: [],
     data: {},
   }
-
-  // New card with default parameters
   const assignment = fsrs.add(subject)
-
-  // Update with "Good" rating (3)
-  const updatedAssignment = fsrs.update(3, subject, assignment)
+  const updatedAssignment = fsrs.update(3, subject, assignment) // 3 === Good
 
   // Verify updated values
   assert(updatedAssignment.repetition === 1, 'repetition should be incremented')

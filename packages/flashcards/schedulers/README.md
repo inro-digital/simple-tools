@@ -20,25 +20,17 @@ A scheduler with statically-tiered due dates. Good for curricula with predefined
 
 Implementation of the Free Spaced Repetition Scheduler algorithm, which uses a modern approach to optimize memory retention.
 
+### FSRS Levels Scheduler
+
+An implementation of the static scheduler, but using FSRS for determining intervals between quizzes
+
 ## How to Choose a Scheduler
 
 - **Basic Scheduler**: Simplest, best for small decks where order matters more than optimization.
 - **SM2 Scheduler**: Good balance of simplicity and effectiveness for most use cases.
 - **Static Scheduler**: Best for curricula with levels and predefined learning paths.
 - **FSRS Scheduler**: Most advanced algorithm, optimized for maximum retention with minimal reviews.
-
-## Using the FSRS Scheduler
-
-The FSRS scheduler implements a modern spaced repetition algorithm that optimizes review intervals based on memory models.
-
-### Rating Scale
-
-FSRS uses a 1-4 rating scale:
-
-1. Again - Complete failure to recall
-2. Hard - Recalled with significant difficulty
-3. Good - Recalled with some effort
-4. Easy - Recalled with no effort
+- **FSRS Levels Scheduler**: Probably better than Static Scheduler? But this is still new for me, so I'm figuring it out.
 
 ### Example Usage
 
