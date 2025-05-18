@@ -1,9 +1,7 @@
 import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
 
-/**
- * A basic scheduler to demonstrate usage
- */
+/** A basic scheduler to demonstrate usage */
 export default class BasicScheduler extends Scheduler<number> {
   /** Ensure that repetition is an int */
   override add(subject: Subject): Assignment {

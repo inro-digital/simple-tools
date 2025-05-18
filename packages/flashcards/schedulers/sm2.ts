@@ -6,6 +6,7 @@ const defaultEfactor = 2.5
 const defaultRepetition = 0
 const defaultInterval = 0
 
+/** Quality levels for SM2 */
 export enum Quality {
   Blackout = 0,
   Incorrect = 1,

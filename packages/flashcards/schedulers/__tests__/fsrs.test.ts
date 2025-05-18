@@ -1,7 +1,9 @@
 import { assert, assertEquals } from '@std/assert'
-import FsrsScheduler from '../fsrs.ts'
+import FsrsScheduler, { Quality } from '../fsrs.ts'
 import type { Subject } from '../../types.ts'
 import { getNow } from '../../utils/datetime.ts'
+
+const { Good, Again } = Quality
 
 Deno.test('FsrsScheduler.add - initializes a new assignment correctly', () => {
   const fsrs = new FsrsScheduler()
@@ -16,10 +18,7 @@ Deno.test('FsrsScheduler.add - initializes a new assignment correctly', () => {
 
   assertEquals(assignment.subjectId, 'test-subject')
   assertEquals(assignment.markedCompleted, false)
-  assert(
-    assignment.difficulty !== undefined,
-    'difficulty should be initialized',
-  )
+  assert(assignment.difficulty !== undefined, 'difficulty initialized')
   assert(assignment.stability !== undefined, 'stability should be initialized')
   assert(assignment.interval === 0, 'interval should start at 0')
   assert(assignment.repetition === 0, 'repetition should start at 0')
@@ -52,7 +51,6 @@ Deno.test('FsrsScheduler.filter - includes cards due today or earlier', () => {
     data: {},
   }
 
-  // Card due today
   const now = getNow()
   const yesterdayAssignment = {
     subjectId: 'test-subject',
@@ -74,23 +72,12 @@ Deno.test('FsrsScheduler.update - updates card with rating 3 (Good)', () => {
     data: {},
   }
   const assignment = fsrs.add(subject)
-  const updatedAssignment = fsrs.update(3, subject, assignment) // 3 === Good
-
-  // Verify updated values
+  const updatedAssignment = fsrs.update(Good, subject, assignment)
   assert(updatedAssignment.repetition === 1, 'repetition should be incremented')
   assert(updatedAssignment.interval !== undefined, 'interval should be defined')
-  assert(
-    updatedAssignment.lastStudiedAt !== undefined,
-    'lastStudiedAt should be set',
-  )
-  assert(
-    updatedAssignment.stability !== undefined,
-    'stability should be updated',
-  )
-  assert(
-    updatedAssignment.difficulty !== undefined,
-    'difficulty should be updated',
-  )
+  assert(updatedAssignment.lastStudiedAt !== undefined, 'lastStudiedAt is set')
+  assert(updatedAssignment.stability !== undefined, 'stability is updated')
+  assert(updatedAssignment.difficulty !== undefined, 'difficulty is updated')
 })
 
 Deno.test('FsrsScheduler.update - resets repetition on Again (1) rating', () => {
@@ -102,27 +89,12 @@ Deno.test('FsrsScheduler.update - resets repetition on Again (1) rating', () => 
     data: {},
   }
 
-  // Card with some history
-  const assignment = {
-    ...fsrs.add(subject),
-    repetition: 3,
-    interval: 10,
-  }
+  const assignment = { ...fsrs.add(subject), repetition: 3, interval: 10 }
 
-  // Update with "Again" rating (1)
-  const updatedAssignment = fsrs.update(1, subject, assignment)
-
-  // Verify updated values
-  assertEquals(
-    updatedAssignment.repetition,
-    0,
-    'repetition should be reset to 0',
-  )
+  const updatedAssignment = fsrs.update(Again, subject, assignment)
+  assertEquals(updatedAssignment.repetition, 0, 'repetition should be reset')
   assert(updatedAssignment.interval !== undefined, 'interval should be defined')
-  assert(
-    updatedAssignment.lastStudiedAt !== undefined,
-    'lastStudiedAt should be updated',
-  )
+  assert(updatedAssignment.lastStudiedAt !== undefined, 'lastStudiedAt exists')
 })
 
 Deno.test('FsrsScheduler.sort - sorts by due date with oldest first', () => {
@@ -158,10 +130,10 @@ Deno.test('FsrsScheduler.sort - sorts by due date with oldest first', () => {
 
   // Should sort with the older due date first
   assertEquals(
-    fsrs.sort([subject, assignmentDueYesterday], [
-      subject,
-      assignmentDueTomorrow,
-    ]) < 0,
+    fsrs.sort(
+      [subject, assignmentDueYesterday],
+      [subject, assignmentDueTomorrow],
+    ) < 0,
     true,
     'Card due yesterday should come before card due tomorrow',
   )
