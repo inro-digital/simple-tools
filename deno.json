@@ -1,6 +1,6 @@
 {
   "name": "@inro/simple-tools",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "workspace": ["./apps/cli", "./apps/examples"],
   "exports": {
     "./calculator": "./packages/calculator/mod.ts",

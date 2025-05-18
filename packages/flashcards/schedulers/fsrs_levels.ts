@@ -125,6 +125,7 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
       repetition: 0,
       unlockedAt: now,
       availableAt: now,
+      startedAt: now,
     }
   }
 
@@ -218,9 +219,6 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
     const lastStudiedAt = assignment.lastStudiedAt || now
     const fsrs = this.#fsrsInstances[srsId]
 
-    // First study session (setting startedAt)
-    const startedAt = assignment.startedAt || now
-
     // Create card input for FSRS
     const card = {
       due: assignment.availableAt || now,
@@ -268,7 +266,6 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
         lastStudiedAt: now,
         interval: newInterval,
         repetition: newRepetition,
-        startedAt: startedAt,
         availableAt: nextAvailableDate,
         passedAt: isPassed && !assignment.passedAt ? now : assignment.passedAt,
         completedAt: isCompleted ? now : assignment.completedAt,
@@ -308,7 +305,6 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
         lastStudiedAt: now,
         interval: newInterval,
         repetition: newRepetition,
-        startedAt: startedAt,
         availableAt: nextAvailableDate,
         passedAt: isPassed && !assignment.passedAt ? now : assignment.passedAt,
         completedAt: isCompleted ? now : assignment.completedAt,
