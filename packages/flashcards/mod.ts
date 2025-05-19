@@ -15,9 +15,9 @@ export { Scheduler }
 export * from './types.ts'
 
 const { Learn, Quiz } = SessionType
-const { Failure, Pending, Success } = CardState
 const { Active, Completed, Inactive } = SessionStatus
 const { Paired, Random, Sequential } = CardSortMethod
+const { Failure, Pending, Success } = CardState
 
 /** The current state of flashcard study */
 export interface FlashcardsState<Quality> {
@@ -41,14 +41,14 @@ export interface FlashcardsState<Quality> {
   currSuccesses: Set<string>
   /** Turns answer submission into a two-step process: 1. grade, 2. submit */
   allowRedos: boolean
-  /** Is this study session a quiz or for teaching? */
-  mode: SessionType
   /** Maximum amount of new cards within a day */
   learnLimit: number | null
   /** Maximum amount of quizzes within a day */
   reviewLimit: number | null
   /** Status of the current session */
   sessionStatus: SessionStatus
+  /** Is this study session a quiz or for teaching? */
+  sessionType: SessionType | null
   /** Method to determine the order of cards within a session */
   cardSortMethod: CardSortMethod
   /** Specific order of card types to show (null means random) */
@@ -91,10 +91,10 @@ export interface FlashcardsState<Quality> {
  * assert(deck.state.assignments['1'].startedAt) // 1
  */
 export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
-  #subjects: Record<string, Subject>
+  #subjects: Record<string, Subject> = {}
   #scheduler: Scheduler<Q>
-  #checkAnswer: (answer: string, subject: Subject) => Q
-  #checkComplete: (quality: Q) => boolean
+  #checkAnswer: (answer: string, subject: Subject, cardType: string) => Q
+  #checkSuccess: (quality: Q) => boolean
   #numLearnedToday: number
   #numReviewedToday: number
 
@@ -111,7 +111,6 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
     subjects: Record<string, Subject> | Subject[]
     scheduler: Scheduler<Q>
     allowRedos?: boolean
-    mode?: SessionType
     checkAnswer: (answer: string, subject: Subject) => Q
     checkComplete: (quality: Q) => boolean
     learnLimit?: number | null
@@ -132,37 +131,37 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
       currSuccesses: new Set(),
       assignments: options.assignments,
       allowRedos: options.allowRedos ?? false,
-      mode: options.mode ?? Quiz,
       learnLimit: Math.max(0, options.learnLimit ?? 0) || null,
       reviewLimit: Math.max(0, options.reviewLimit ?? 0) || null,
       sessionStatus: Inactive,
+      sessionType: null,
       cardSortMethod: options.cardSortMethod ?? Paired,
       cardSortOrder: options.cardSortOrder ?? null,
       learnSessionSize: options.learnSessionSize ?? null,
       reviewSessionSize: options.reviewSessionSize ?? null,
       allPending: [],
     }, { isReactive: true })
-
-    this.#subjects = Array.isArray(options.subjects)
-      ? associateBy(options.subjects, (subject) => subject.id)
-      : options.subjects
-
     this.#scheduler = options.scheduler
     this.#checkAnswer = options.checkAnswer
-    this.#checkComplete = options.checkComplete
+    this.#checkSuccess = options.checkComplete
     this.#numLearnedToday = 0
     this.#numReviewedToday = 0
+    this.subjects = options.subjects
+  }
+
+  set subjects(subjects: Record<string, Subject> | Subject[]) {
+    this.#subjects = Array.isArray(subjects)
+      ? associateBy(subjects, (subject) => subject.id)
+      : subjects
 
     this.batch((state) => {
-      state.allPending =
-        (options.mode === Learn ? this.getLearnable() : this.getQuizzable())
-          .flatMap(({ learnCards, quizCards, id }) => {
-            return (options.mode === Learn ? learnCards : quizCards)
-              .map((cardType) => [id, cardType] as [string, string])
-          })
+      const isQuiz = state.sessionType === Quiz
 
-      // Auto-start a session if needed
-      if (state.allPending.length > 0) this.startSession(options.mode ?? Quiz)
+      state.allPending = (isQuiz ? this.quizzable : this.learnable)
+        .flatMap(({ learnCards, quizCards, id }) =>
+          (isQuiz ? quizCards : learnCards)
+            .map((cardType) => [id, cardType] as [string, string])
+        )
     })
   }
 
@@ -172,7 +171,7 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
   }
 
   /** All subjects */
-  getAll(): Subject[] {
+  get all(): Subject[] {
     this.#numLearnedToday = 0
     this.#numReviewedToday = 0
 
@@ -186,24 +185,24 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
   }
 
   /** All subjects that can be learned or studied */
-  getAvailable(): Subject[] {
-    return this.getAll()
+  get available(): Subject[] {
+    return this.all
       .filter((s) => this.#scheduler.filter(s, this.state.assignments[s.id]))
   }
 
   /** Get subjects that are ready to be learned */
-  getLearnable(): Subject[] {
+  get learnable(): Subject[] {
     const { assignments, learnLimit } = this.state
-    const learnable = this.getAvailable()
+    const learnable = this.available
       .filter((s) => this.#scheduler.filterLearnable(s, assignments[s.id]))
     if (!learnLimit) return learnable
     return learnable.slice(0, Math.max(0, learnLimit - this.#numLearnedToday))
   }
 
   /** Get subjects that are ready to be quizzed */
-  getQuizzable(): Subject[] {
+  get quizzable(): Subject[] {
     const { assignments, reviewLimit } = this.state
-    const quizzable = this.getAvailable()
+    const quizzable = this.available
       .filter((s) => this.#scheduler.filterQuizzable(s, assignments[s.id]))
     if (!reviewLimit) return quizzable
     return quizzable.slice(0, Math.max(0, reviewLimit - this.#numReviewedToday))
@@ -221,15 +220,15 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
    */
   submit(answer: string = ''): void {
     this.batch((state) => {
-      const { currAssignment, currSubject, mode, sessionStatus } = state
-      if (!currSubject) return
+      const { currAssignment, currSubject, sessionType, sessionStatus } = state
+      if (!currSubject || !sessionType) return
       if (sessionStatus === Inactive) {
-        this.startSession(mode)
+        this.startSession(sessionType)
         return
       }
 
       // If this is a new concept, create an assignment and load next
-      if (mode === Learn || !currAssignment) {
+      if (sessionType === Learn || !currAssignment) {
         const assignment = this.#scheduler.add(currSubject)
         state.assignments[currSubject.id] = assignment
         this.#loadAndShiftNext()
@@ -237,8 +236,12 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
       }
 
       if (state.currCardState === Pending) {
-        state.currQuality = this.#checkAnswer(answer, currSubject)
-        state.currCardState = this.#checkComplete(state.currQuality)
+        state.currQuality = this.#checkAnswer(
+          answer,
+          currSubject,
+          state.currCardType!,
+        )
+        state.currCardState = this.#checkSuccess(state.currQuality)
           ? Success
           : Failure
         // If allowing redos, don't submit answer. Just set to an answered state.
@@ -281,13 +284,12 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
   }
 
   /**
-   * Start a new study session with the specified mode
-   * @param mode The study mode to use for this session
+   * Start a new study session with the specified sessionType
+   * @param sessionType The study sessionType to use for this session
    * @returns True if session was started, false if no cards are available
    */
-  startSession(mode: SessionType = this.state.mode): boolean {
+  startSession(sessionType: SessionType): boolean {
     return this.batch<boolean>((state) => {
-      state.mode = mode
       state.currFailures = new Set()
       state.currSuccesses = new Set()
       state.currPending = []
@@ -296,26 +298,25 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
       state.currCardState = null
       state.currCardType = null
       state.currQuality = null
+      state.sessionType = sessionType
+      const isQuiz = sessionType === Quiz
 
-      const available = mode === Learn
-        ? this.getLearnable()
-        : this.getQuizzable()
+      const available = isQuiz ? this.quizzable : this.learnable
       if (!available.length) {
         state.sessionStatus = Inactive
         return false
       }
 
-      // Get subjects for this session based on session size limits
-      const sessionSize = mode === Learn
-        ? state.learnSessionSize
-        : state.reviewSessionSize
+      const sessionSize = isQuiz
+        ? state.reviewSessionSize
+        : state.learnSessionSize
       const subjectsForSession = sessionSize
         ? available.slice(0, sessionSize)
         : available
 
       const sessionCards: [string, string][] = subjectsForSession.flatMap(
         ({ learnCards, quizCards, id }) => {
-          return (mode === Learn ? learnCards : quizCards)
+          return (isQuiz ? quizCards : learnCards)
             .map((cardType) => [id, cardType] as [string, string])
         },
       )

@@ -30,20 +30,19 @@ Deno.test('learn mode', () => {
     assignments: {},
     checkAnswer: () => true,
     checkComplete: () => true,
-    mode: SessionType.Learn,
     scheduler: new StaticScheduler({ srs, userLevel: 2 }),
     subjects,
   })
-  assertEquals(deck.getLearnable().length, 4) // Levels 1-2, but not 3
-  assertEquals(deck.getQuizzable().length, 0)
+  assertEquals(deck.learnable.length, 4) // Levels 1-2, but not 3
+  assertEquals(deck.quizzable.length, 0)
   deck.startSession(SessionType.Learn)
   assertEquals(deck.state.currSubject?.id, '1') // Loads first
   assertEquals(deck.state.sessionStatus, Active)
   deck.submit() // First card of subject 1 (characters)
   assertEquals(deck.state.currSubject?.id, '1') // Still on subject 1
   deck.submit() // Second card of subject 1 (meanings)
-  assertEquals(deck.getLearnable().length, 3) // First item is now learned
-  assertEquals(deck.getQuizzable().length, 1)
+  assertEquals(deck.learnable.length, 3) // First item is now learned
+  assertEquals(deck.quizzable.length, 1)
   assertEquals(deck.state.currSubject?.id, '2')
   assert(deck.state.assignments['1'].startedAt, 'should be started')
 })
@@ -57,7 +56,7 @@ Deno.test('quiz mode', () => {
     scheduler: new StaticScheduler({ srs, userLevel: 2 }),
     subjects,
   })
-  assertEquals(deck.getQuizzable().length, 1, 'starts with 1 quizzable')
+  assertEquals(deck.quizzable.length, 1, 'starts with 1 quizzable')
   deck.startSession(SessionType.Quiz)
   assertEquals(deck.state.currSubject?.id, '1', 'first item loads')
   assertEquals(deck.state.sessionStatus, Active)
@@ -68,7 +67,7 @@ Deno.test('quiz mode', () => {
   assertEquals(deck.state.currSubject, null, 'no more left!')
   assertEquals(deck.state.sessionStatus, Completed)
   assertEquals(deck.state.assignments['1'].efactor, 1, '++efactor')
-  assertEquals(deck.getQuizzable().length, 0, 'no more left!')
+  assertEquals(deck.quizzable.length, 0, 'no more left!')
 })
 
 Deno.test('max learns', () => {
@@ -77,20 +76,19 @@ Deno.test('max learns', () => {
     assignments: {},
     checkAnswer: () => true,
     checkComplete: () => true,
-    mode: SessionType.Learn,
     learnLimit: 1,
     reviewLimit: 1,
     scheduler: new StaticScheduler({ srs, userLevel: 2 }),
     subjects,
   })
   deck.startSession(SessionType.Learn)
-  assertEquals(deck.getLearnable().length, 1)
+  assertEquals(deck.learnable.length, 1)
   deck.submit() // First card (characters)
   assertEquals(deck.state.currSubject?.id, '1') // Still on subject 1
   deck.submit() // Second card (meanings)
-  assertEquals(deck.getLearnable().length, 0)
+  assertEquals(deck.learnable.length, 0)
   time.tick(oneDayMS)
-  assertEquals(deck.getLearnable().length, 1)
+  assertEquals(deck.learnable.length, 1)
 })
 
 Deno.test('session management', () => {
