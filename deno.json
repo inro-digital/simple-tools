@@ -13,13 +13,20 @@
     "./flashcards/schedulers/static": "./packages/flashcards/schedulers/static.ts",
     "./state": "./packages/utils/state.ts",
     "./storage": "./packages/utils/storage.ts",
-    "./storage/deno-fs-storage": "./packages/utils/storage/deno_fs_storage.ts",
+    "./storage/deno-fs": "./packages/utils/storage/deno_fs_storage.ts",
+    "./storage/idb": "./packages/utils/storage/index_db_storage.ts",
     "./storage/local-storage": "./packages/utils/storage/local_storage.ts",
-    "./storage/tauri-storage": "./packages/utils/storage/tauri_storage.ts",
+    "./storage/tauri": "./packages/utils/storage/tauri_storage.ts",
     "./stopwatch": "./packages/timers/stopwatch.ts",
     "./todolist": "./packages/todolist/mod.ts"
   },
   "compilerOptions": {
+    "lib": [
+      "deno.ns",
+      "dom",
+      "dom.iterable",
+      "dom.asynciterable"
+    ],
     "types": ["./index.d.ts"]
   },
   "fmt": {

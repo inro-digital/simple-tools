@@ -7,6 +7,21 @@ import { ensureFile } from '@std/fs/ensure-file'
 /**
  * A mechanism for using Deno's file system as a Storage instance.
  * The `name` property can be used as a path for the data file.
+ * @example
+ * ```ts
+ * import { Todo } from '@inro/simple-tools/todolist'
+ * import DenoFsStorage from '@inro/simple-tools/storage/deno-fs'
+ *
+ * const storage = new DenoFsStorage<Todo[]>({
+ *   name: 'todos',
+ *   defaultValue: [],
+ *   deserialize: (str) => JSON.parse(str),
+ *   serialize: (todos) => JSON.stringify(todos),
+ *   verify: (todos) => Array.isArray(todos),
+ * })
+ * await storage.set([{ name: '1', description: 'do it', isDone: false }])
+ * const todos = await storage.get()
+ * ```
  */
 export default class DenoFsStorage<T> extends Storage<T> {
   /** Initializes storage */

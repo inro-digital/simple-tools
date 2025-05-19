@@ -5,6 +5,22 @@ import Storage, { type StorageProps } from '../storage.ts'
 
 /**
  * A mechanism for using localStorage as a Storage instance.
+ * @example
+ * ```ts
+ *  import LocalStorage from './local_storage.ts'
+ *
+ *  type User = { id: number, name: string } | null
+ *  const storage = new LocalStorage<User>({
+ *    name: 'current-user',
+ *    defaultValue: null,
+ *    deserialize: (str) => JSON.parse(str),
+ *    serialize: (user) => JSON.stringify(user),
+ *    verify: (user) => user === null || (typeof user === 'object' && 'id' in user),
+ *  })
+ *
+ *  await storage.set({ id: 1, name: 'User' })
+ *  const user = await storage.get()
+ * ```
  */
 export default class LocalStorage<T> extends Storage<T> {
   /** Initializes storage */

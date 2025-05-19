@@ -1,5 +1,8 @@
 /**
  * @module stores data using Tauri's storage plugin
+ * Note: This requires the Tauri store plugin to be set up in your project.
+ *
+ * @reference https://tauri.app/plugin/store/
  */
 import Storage, { type StorageProps } from '../storage.ts'
 import { load, type Store } from '@tauri-apps/plugin-store'
@@ -7,29 +10,6 @@ import { load, type Store } from '@tauri-apps/plugin-store'
 const isTauri = () =>
   typeof (globalThis as Record<string, unknown>).__TAURI_INTERNALS__ !==
     'undefined'
-
-/**
- * A mechanism for using Tauri's storage plugin as a Storage instance.
- *
- * Note: This requires the Tauri store plugin to be set up in your project.
- * See: https://tauri.app/plugin/store/
- *
- * @example
- * ```ts
- * import TauriStorage from '@inro/simple-tools/storage/tauri-storage'
- *
- * const store = new TauriStorage<{ count: number } | null>({
- *   name: 'count',
- *   defaultValue: null,
- *   deserialize: (str) => str ? JSON.parse(str) : null,
- *   serialize: (state) => JSON.stringify(state),
- *   verify: (state) => Boolean(state?.count),
- *   storeName: 'app-data.dat', // optional
- * })
- * await store.set({ count: 5 })
- * await store.get()
- * ```
- */
 
 /**
  * Extended storage props for Tauri with additional configuration options
@@ -46,7 +26,25 @@ export interface TauriStorageProps<T> extends StorageProps<T> {
 
 /**
  * A Storage implementation that uses Tauri's store plugin.
- * Provides a seamless way to store data persistently in Tauri applications.
+ * @example
+ * ```ts
+ * import TauriStorage from '@inro/simple-tools/storage/tauri'
+ *
+ * type Settings = { theme: string, fontSize: number }
+ * const storage = new TauriStorage<Settings>({
+ *   name: 'app-settings',
+ *   defaultValue: { theme: 'light', fontSize: 16 },
+ *   deserialize: (str) => JSON.parse(str),
+ *   serialize: (settings) => JSON.stringify(settings),
+ *   verify: (settings) =>
+ *     typeof settings === 'object' &&
+ *     settings !== null &&
+ *     'theme' in settings,
+ *   storeName: 'app-data.dat',
+ * })
+ * await storage.set({ theme: 'dark', fontSize: 18 })
+ * const settings = await storage.get()
+ * ```
  */
 export default class TauriStorage<T> extends Storage<T> {
   #store: Store | null = null
