@@ -1,7 +1,6 @@
 import { assertEquals } from '@std/assert'
 import FsrsLevelsScheduler, { Quality } from '../fsrs_levels.ts'
 import type { Subject } from '../../types.ts'
-import srs from '../../__data__/srs_fsrs.json' with { type: 'json' }
 
 const { Again, Easy, Good, Hard } = Quality
 
@@ -45,12 +44,12 @@ const subjects: Subject[] = [
 ]
 
 Deno.test('FsrsLevelsScheduler - initialize scheduler', () => {
-  const scheduler = new FsrsLevelsScheduler({ srs, userLevel: 1 })
+  const scheduler = new FsrsLevelsScheduler({ userLevel: 1 })
   assertEquals(scheduler.userLevel, 1)
 })
 
 Deno.test('FsrsLevelsScheduler - add new assignment', () => {
-  const scheduler = new FsrsLevelsScheduler({ srs, userLevel: 1 })
+  const scheduler = new FsrsLevelsScheduler({ userLevel: 1 })
   const assignment = scheduler.add(subjects[0])
 
   assertEquals(assignment.subjectId, 'subject-1')
@@ -64,7 +63,7 @@ Deno.test('FsrsLevelsScheduler - add new assignment', () => {
 })
 
 Deno.test('FsrsLevelsScheduler - filter by level', () => {
-  const scheduler = new FsrsLevelsScheduler({ srs, userLevel: 1 })
+  const scheduler = new FsrsLevelsScheduler({ userLevel: 1 })
   const assignment1 = scheduler.add(subjects[0])
   assertEquals(scheduler.filter(subjects[0], assignment1), true, 'lvl1 visible')
 
@@ -76,7 +75,7 @@ Deno.test('FsrsLevelsScheduler - filter by level', () => {
 })
 
 Deno.test('FsrsLevelsScheduler - update assignment', () => {
-  const scheduler = new FsrsLevelsScheduler({ srs, userLevel: 2 })
+  const scheduler = new FsrsLevelsScheduler({ userLevel: 2 })
   const assignment = scheduler.add(subjects[0])
 
   const updated = scheduler.update(Good, subjects[0], assignment)
@@ -85,7 +84,7 @@ Deno.test('FsrsLevelsScheduler - update assignment', () => {
   assertEquals(updated.startedAt instanceof Date, true)
   assertEquals(updated.lastStudiedAt instanceof Date, true)
   assertEquals(updated.availableAt instanceof Date, true)
-  assertEquals(updated.passedAt, undefined, 'not passed, needs 3')
+  assertEquals(updated.passedAt, undefined, 'not passed, needs 5')
 
   assertEquals(typeof updated.interval, 'number')
   assertEquals(updated?.interval && updated?.interval > 0, true)
@@ -93,22 +92,25 @@ Deno.test('FsrsLevelsScheduler - update assignment', () => {
   // Study again twice more to reach passesAt threshold
   const updated2 = scheduler.update(Good, subjects[0], updated)
   const updated3 = scheduler.update(Easy, subjects[0], updated2)
-
-  assertEquals(updated3.repetition, 3, '3 reps')
-  assertEquals(updated3.passedAt instanceof Date, true, 'passed after 3')
-  assertEquals(updated3.completedAt, undefined, 'not completed (needs 6)')
-
-  // Study three more times to reach completesAt threshold
   const updated4 = scheduler.update(Good, subjects[0], updated3)
   const updated5 = scheduler.update(Good, subjects[0], updated4)
-  const updated6 = scheduler.update(Good, subjects[0], updated5)
 
-  assertEquals(updated6.repetition, 6, '6 reps')
-  assertEquals(updated6.completedAt instanceof Date, true, 'passed after 6')
+  assertEquals(updated5.repetition, 5, '5 reps')
+  assertEquals(updated5.passedAt instanceof Date, true, 'passed after 5')
+  assertEquals(updated5.completedAt, undefined, 'not completed (needs 9)')
+
+  // reach completesAt threshold
+  const updated6 = scheduler.update(Good, subjects[0], updated5)
+  const updated7 = scheduler.update(Good, subjects[0], updated6)
+  const updated8 = scheduler.update(Good, subjects[0], updated7)
+  const updated9 = scheduler.update(Good, subjects[0], updated8)
+
+  assertEquals(updated9.repetition, 9, '9 reps')
+  assertEquals(updated9.completedAt instanceof Date, true, 'passed after 9')
 })
 
 Deno.test('FsrsLevelsScheduler - failed card resets repetition', () => {
-  const scheduler = new FsrsLevelsScheduler({ srs, userLevel: 2 })
+  const scheduler = new FsrsLevelsScheduler({ userLevel: 2 })
 
   const initial = scheduler.add(subjects[0])
   const updated1 = scheduler.update(Good, subjects[0], initial)
@@ -126,7 +128,7 @@ Deno.test('FsrsLevelsScheduler - failed card resets repetition', () => {
 })
 
 Deno.test('FsrsLevelsScheduler - sort works correctly', () => {
-  const scheduler = new FsrsLevelsScheduler({ srs, userLevel: 2 })
+  const scheduler = new FsrsLevelsScheduler({ userLevel: 2 })
 
   const assignment1 = scheduler.add(subjects[0]) // level 1, position 0
   const assignment2 = scheduler.add(subjects[1]) // level 1, position 1

@@ -1,3 +1,9 @@
+/**
+ * @module
+ * A scheduler implementing Free Spaced Repetition Scheduler (FSRS).
+ * @reference https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler
+ * @reference https://github.com/open-spaced-repetition/ts-fsrs
+ */
 import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
 import { getNow, isSameDay } from '../utils/datetime.ts'
@@ -20,19 +26,43 @@ export enum Quality {
   Easy = 4,
 }
 
+/** Custom Adjustments to the algorithm */
+export interface Params {
+  /** Weights affet things like initial intervale length, growth rate, impact of difficulty, etc */
+  w: readonly number[]
+  /** Target retention rate (85% == aims for you to remember 85% of the cards) */
+  requestRetention: number
+  /** maximum interval between reviews  */
+  maximumInterval: number
+}
+
+/** Default parameters of the Fsrs scheduler */
+export const defaultParams: Params = {
+  w: default_w,
+  requestRetention: default_request_retention,
+  maximumInterval: default_maximum_interval,
+}
+
 /**
- * Free Spaced Repetition Scheduler (FSRS) Algorithm
- * @reference https://github.com/open-spaced-repetition/fsrs4anki/discussions/3
- * @reference https://github.com/open-spaced-repetition/fsrs.js
+ * @example
+ * ```
+ *   import FsrsScheduler, { Quality } from '@inro/simple-tools/flashcards/schedulers/fsrs'
+ *   const scheduler = new FsrsScheduler()
+ *
+ *   // Create FSRS scheduler with custom parameters
+ *   const customScheduler = new FsrsScheduler({
+ *     requestRetention: 0.85, // Target retention rate (0-1)
+ *     maximumInterval: 36500, // Maximum interval in days
+ *     w: [0.4, 0.6, 2.4, 5.8],
+ *   })
+ *   const assignment = scheduler.add(subject)
+ *   const updatedAssignment = scheduler.update(Quality.Good, subject, assignment)
+ * ```
  */
 export default class FsrsScheduler extends Scheduler<number> {
   private fsrs: FSRS
 
-  constructor(params = {
-    w: default_w,
-    requestRetention: default_request_retention,
-    maximumInterval: default_maximum_interval,
-  }) {
+  constructor(params = defaultParams) {
     super()
     this.fsrs = new FSRS(params)
   }

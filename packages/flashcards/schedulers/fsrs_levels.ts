@@ -1,30 +1,43 @@
+/**
+ * @module
+ * An FSRS scheduler that includes level-based subject introduction and threshold
+ * properties like the static scheduler. This combines features of both the
+ * static and FSRS schedulers.
+ */
 import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
+import { defaultParams, type Params, Quality } from './fsrs.ts'
 import { getNow } from '../utils/datetime.ts'
-import {
-  default_maximum_interval,
-  default_request_retention,
-  default_w,
-  FSRS,
-} from 'ts-fsrs'
+import { FSRS } from 'ts-fsrs'
 
-/** Default parameters for the FSRS algorithm */
-const defaultParameters = {
-  w: default_w,
-  requestRetention: default_request_retention,
-  maximumInterval: default_maximum_interval,
-}
+export { defaultParams, type Params, Quality }
 
-/** Quality levels for FSRS */
-export enum Quality {
-  /** Complete failure to recall */
-  Again = 1,
-  /** Recalled with significant difficulty */
-  Hard = 2,
-  /** Recalled with some effort */
-  Good = 3,
-  /** Recalled with no effort */
-  Easy = 4,
+export const defaultSRS: Record<number, FsrsSrs> = {
+  [1]: {
+    id: 1,
+    name: 'Default',
+    unlocksAt: 0,
+    startsAt: 1,
+    passesAt: 5,
+    completesAt: 9,
+  },
+  [2]: {
+    id: 2,
+    name: 'Fast',
+    unlocksAt: 0,
+    startsAt: 1,
+    passesAt: 4,
+    completesAt: 9,
+    fsrsParams: {
+      // deno-fmt-ignore
+      w: [
+        0.3, 0.5, 2.0, 5.0, 4.5, 0.9, 0.8, 0.01, 1.3,
+        0.14, 0.9, 2.0, 0.05, 0.3, 1.2, 0.25, 2.5
+      ],
+      requestRetention: 0.85,
+      maximumInterval: 36500,
+    },
+  },
 }
 
 /** Srs defines the intervals used, and cutoffs */
@@ -55,11 +68,7 @@ export interface FsrsSrs {
    */
   completesAt: number
   /** Custom FSRS parameters for this SRS level, if undefined, use default */
-  fsrsParams?: {
-    w: number[]
-    requestRetention: number
-    maximumInterval: number
-  }
+  fsrsParams?: Params
 }
 
 /**
@@ -76,12 +85,27 @@ export interface SubjectData {
 }
 
 /**
- * An FSRS scheduler that includes level-based subject introduction and threshold
- * properties like the static scheduler. This combines the best features of both
- * the static and FSRS schedulers.
+ * @example
+ * ```ts
+ * const scheduler = new FsrsLevelsScheduler({ userLevel: 1 })
+ * const subject = {
+ *   id: 'math-1',
+ *   learnCards: ['question'],
+ *   quizCards: ['answer'],
+ *   data: {
+ *     level: 1,
+ *     srsId: 1,
+ *     position: 0,
+ *     question: 'What is 2+2?',
+ *     answer: '4',
+ *   },
+ * }
+ * let assignment1 = scheduler.add(subject)
+ * assignment1 = scheduler.update(3, subject, assignment1)
+ * ```
  */
 export default class FsrsLevelsScheduler extends Scheduler<number> {
-  #srs: Record<number, FsrsSrs> = {}
+  #srs: Record<number, FsrsSrs> = defaultSRS
   #fsrsInstances: Record<number, FSRS> = {}
   /** A user's level. They should start at 1; 0 just means not initialized */
   userLevel: number = 0
@@ -90,17 +114,17 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
   constructor({ srs, userLevel, fsrsParams }: Partial<{
     srs: Record<number, FsrsSrs>
     userLevel: number
-    fsrsParams: typeof defaultParameters
+    fsrsParams: Params
   }> = {}) {
     super()
-    this.#srs = srs || this.#srs
+    this.#srs = srs || this.#srs || defaultSRS
     this.userLevel = userLevel || this.userLevel
 
     // Initialize FSRS instances for each SRS system
     Object.entries(this.#srs).forEach(([idStr, srsSystem]) => {
       const id = Number(idStr)
       this.#fsrsInstances[id] = new FSRS(
-        srsSystem.fsrsParams || fsrsParams || defaultParameters,
+        srsSystem.fsrsParams || fsrsParams || defaultParams,
       )
     })
   }
