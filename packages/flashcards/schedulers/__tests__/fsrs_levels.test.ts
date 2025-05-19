@@ -8,8 +8,8 @@ const { Again, Easy, Good, Hard } = Quality
 const subjects: Subject[] = [
   {
     id: 'subject-1',
-    learnKeys: ['front'],
-    quizKeys: ['back'],
+    learnCards: ['front'],
+    quizCards: ['back'],
     data: {
       level: 1,
       srsId: 1,
@@ -20,8 +20,8 @@ const subjects: Subject[] = [
   },
   {
     id: 'subject-2',
-    learnKeys: ['front'],
-    quizKeys: ['back'],
+    learnCards: ['front'],
+    quizCards: ['back'],
     data: {
       level: 1,
       srsId: 1,
@@ -32,8 +32,8 @@ const subjects: Subject[] = [
   },
   {
     id: 'subject-3',
-    learnKeys: ['front'],
-    quizKeys: ['back'],
+    learnCards: ['front'],
+    quizCards: ['back'],
     data: {
       level: 2,
       srsId: 2,

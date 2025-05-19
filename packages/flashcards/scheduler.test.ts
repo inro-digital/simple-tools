@@ -4,8 +4,8 @@ import Scheduler from './scheduler.ts'
 const aA = { subjectId: 'a', markedCompleted: false }
 const sA = {
   id: 'a',
-  learnKeys: [],
-  quizKeys: [],
+  learnCards: [],
+  quizCards: [],
   data: {},
 }
 

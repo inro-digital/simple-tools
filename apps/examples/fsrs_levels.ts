@@ -18,8 +18,8 @@ const scheduler = new FsrsLevelsScheduler({
 const subjects: Subject[] = [
   {
     id: 'math-1',
-    learnKeys: ['question'],
-    quizKeys: ['answer'],
+    learnCards: ['question'],
+    quizCards: ['answer'],
     data: {
       level: 1,
       srsId: 1,
@@ -30,8 +30,8 @@ const subjects: Subject[] = [
   },
   {
     id: 'math-2',
-    learnKeys: ['question'],
-    quizKeys: ['answer'],
+    learnCards: ['question'],
+    quizCards: ['answer'],
     data: {
       level: 1,
       srsId: 1,
@@ -42,8 +42,8 @@ const subjects: Subject[] = [
   },
   {
     id: 'geography-1',
-    learnKeys: ['question'],
-    quizKeys: ['answer'],
+    learnCards: ['question'],
+    quizCards: ['answer'],
     data: {
       level: 2,
       srsId: 1,

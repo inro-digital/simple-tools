@@ -131,10 +131,11 @@ export default class State<InternalState extends object> {
    * Runs the provided function in a batch update context
    * @param updateFn Function that will make updates to the state
    */
-  batch(updateFn: (state: InternalState) => void): void {
+  batch<T = void>(updateFn: (state: InternalState) => T): T {
+    let resp: T
     this.#isBatchingUpdates = true
     try {
-      updateFn(this.state)
+      resp = updateFn(this.state)
     } finally {
       this.#isBatchingUpdates = false
       if (this.#isPendingNotification) {
@@ -142,6 +143,7 @@ export default class State<InternalState extends object> {
         this.#isPendingNotification = false
       }
     }
+    return resp
   }
 
   /** Load state from somewhere */

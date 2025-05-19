@@ -8,9 +8,9 @@ export interface Subject {
   /** subject is no longer being used */
   hiddenAt?: Date
   /** Data properties we should learn against */
-  learnKeys: string[]
+  learnCards: string[]
   /** Data properties we should quiz against */
-  quizKeys: string[]
+  quizCards: string[]
   /** Data associated with a subject */
   // deno-lint-ignore no-explicit-any
   data: any
@@ -18,7 +18,8 @@ export interface Subject {
 
 /**
  * The assignment is the mastery of a subject, and is the data updated when a
- * user answers a card.
+ * user answers a card. This includes all data needed to schedule the next
+ * study, as well as dates representing checkpoints/targets.
  */
 export interface Assignment {
   /** subject is available to be studied */
@@ -56,8 +57,31 @@ export enum CardState {
   Success = 'Success',
 }
 
+/**
+ * The order in which cards are shown within a session relative to subjects.
+ * Used in conjunction with cardSortOrder, which defines the order of cards
+ * are shown relative to themselves
+ */
+export enum CardSortMethod {
+  /** All cards of a subject should be shown together */
+  'Paired' = 'Paired',
+  /** All cards are shown in a random order */
+  'Random' = 'Random',
+  /** All cards of a type should be shown together */
+  'Sequential' = 'Sequential',
+}
+
 /** Whether the current session can have a correct/incorrect state */
-export enum StudyMode {
+export enum SessionType {
+  /** Cards cannot fail; scheduler will add a new assignment */
   'Learn' = 'Learn',
+  /** Cards can fail; the scheduler will update an existing assignment */
   'Quiz' = 'Quiz',
+}
+
+/** Status of the current session */
+export enum SessionStatus {
+  'Active' = 'Active',
+  'Completed' = 'Completed',
+  'Inactive' = 'Inactive',
 }

@@ -9,6 +9,7 @@
     "jsr:@cliffy/table@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@std/assert@^1.0.13": "1.0.13",
     "jsr:@std/async@^1.0.13": "1.0.13",
+    "jsr:@std/collections@^1.1.0": "1.1.0",
     "jsr:@std/data-structures@^1.0.8": "1.0.8",
     "jsr:@std/fmt@~1.0.2": "1.0.8",
     "jsr:@std/fs@^1.0.17": "1.0.17",
@@ -66,6 +67,9 @@
     "@std/async@1.0.13": {
       "integrity": "1d76ca5d324aef249908f7f7fe0d39aaf53198e5420604a59ab5c035adc97c96"
     },
+    "@std/collections@1.1.0": {
+      "integrity": "2ee8761c84c3d203f7a4ecd376f9ca88a0c559817a4a54c9150f28c0b948027c"
+    },
     "@std/data-structures@1.0.8": {
       "integrity": "2fb7219247e044c8fcd51341788547575653c82ae2c759ff209e0263ba7d9b66"
     },
@@ -107,6 +111,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@^1.0.13",
+      "jsr:@std/collections@^1.1.0",
       "jsr:@std/testing@^1.0.12",
       "npm:ts-fsrs@5"
     ],
@@ -115,7 +120,7 @@
         "dependencies": [
           "jsr:@cliffy/command@1.0.0-rc.7",
           "jsr:@cliffy/keypress@1.0.0-rc.7",
-          "jsr:@inro/simple-tools@^0.0.20"
+          "jsr:@inro/simple-tools@0.1"
         ]
       }
     }

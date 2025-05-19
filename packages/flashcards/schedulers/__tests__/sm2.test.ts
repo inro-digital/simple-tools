@@ -9,8 +9,8 @@ const oneDayMS = 86_400_000
 
 const sA = {
   id: 'my-subject',
-  learnKeys: [],
-  quizKeys: [],
+  learnCards: [],
+  quizCards: [],
   data: {},
 }
 
@@ -55,8 +55,8 @@ Deno.test('sort', () => {
   const sB = {
     id: 'my-subject',
     type: '',
-    learnKeys: ['count'],
-    quizKeys: ['count'],
+    learnCards: ['count'],
+    quizCards: ['count'],
     data: { count: 1 },
   }
   let aA = sched.add(sA)

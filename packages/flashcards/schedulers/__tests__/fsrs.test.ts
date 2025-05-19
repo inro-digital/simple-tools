@@ -9,8 +9,8 @@ Deno.test('FsrsScheduler.add - initializes a new assignment correctly', () => {
   const fsrs = new FsrsScheduler()
   const subject: Subject = {
     id: 'test-subject',
-    learnKeys: ['front'],
-    quizKeys: ['back'],
+    learnCards: ['front'],
+    quizCards: ['back'],
     data: { front: 'Test Front', back: 'Test Back' },
   }
 
@@ -28,8 +28,8 @@ Deno.test('FsrsScheduler.filter - filters out completed cards', () => {
   const fsrs = new FsrsScheduler()
   const subject: Subject = {
     id: 'test-subject',
-    learnKeys: [],
-    quizKeys: [],
+    learnCards: [],
+    quizCards: [],
     data: {},
   }
   const assignment = {
@@ -46,8 +46,8 @@ Deno.test('FsrsScheduler.filter - includes cards due today or earlier', () => {
   const fsrs = new FsrsScheduler()
   const subject: Subject = {
     id: 'test-subject',
-    learnKeys: [],
-    quizKeys: [],
+    learnCards: [],
+    quizCards: [],
     data: {},
   }
 
@@ -67,8 +67,8 @@ Deno.test('FsrsScheduler.update - updates card with rating 3 (Good)', () => {
   const fsrs = new FsrsScheduler()
   const subject: Subject = {
     id: 'test-subject',
-    learnKeys: [],
-    quizKeys: [],
+    learnCards: [],
+    quizCards: [],
     data: {},
   }
   const assignment = fsrs.add(subject)
@@ -84,8 +84,8 @@ Deno.test('FsrsScheduler.update - resets repetition on Again (1) rating', () => 
   const fsrs = new FsrsScheduler()
   const subject: Subject = {
     id: 'test-subject',
-    learnKeys: [],
-    quizKeys: [],
+    learnCards: [],
+    quizCards: [],
     data: {},
   }
 
@@ -101,8 +101,8 @@ Deno.test('FsrsScheduler.sort - sorts by due date with oldest first', () => {
   const fsrs = new FsrsScheduler()
   const subject: Subject = {
     id: 'test-subject',
-    learnKeys: [],
-    quizKeys: [],
+    learnCards: [],
+    quizCards: [],
     data: {},
   }
 

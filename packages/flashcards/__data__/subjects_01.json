@@ -1,8 +1,8 @@
 {
   "1": {
     "id": "1",
-    "learnKeys": ["characters"],
-    "quizKeys": ["meanings", "readings"],
+    "learnCards": ["characters", "meanings"],
+    "quizCards": ["meanings", "readings"],
     "data": {
       "level": 1,
       "position": 1,
@@ -25,8 +25,8 @@
   },
   "2": {
     "id": "2",
-    "learnKeys": ["characters"],
-    "quizKeys": ["meanings", "readings"],
+    "learnCards": ["characters", "meanings"],
+    "quizCards": ["meanings", "readings"],
     "data": {
       "level": 1,
       "position": 2,
@@ -49,8 +49,8 @@
   },
   "3": {
     "id": "3",
-    "learnKeys": ["characters"],
-    "quizKeys": ["meanings", "readings"],
+    "learnCards": ["characters", "meanings"],
+    "quizCards": ["meanings", "readings"],
     "data": {
       "level": 2,
       "position": 1,
@@ -73,8 +73,8 @@
   },
   "4": {
     "id": "4",
-    "learnKeys": ["characters"],
-    "quizKeys": ["meanings", "readings"],
+    "learnCards": ["characters", "meanings"],
+    "quizCards": ["meanings", "readings"],
     "data": {
       "level": 2,
       "position": 2,
@@ -97,8 +97,8 @@
   },
   "5": {
     "id": "5",
-    "learnKeys": ["characters"],
-    "quizKeys": ["meanings", "readings"],
+    "learnCards": ["characters", "meanings"],
+    "quizCards": ["meanings", "readings"],
     "data": {
       "level": 3,
       "position": 1,
@@ -121,8 +121,8 @@
   },
   "6": {
     "id": "6",
-    "learnKeys": ["characters"],
-    "quizKeys": ["meanings", "readings"],
+    "learnCards": ["characters", "meanings"],
+    "quizCards": ["meanings", "readings"],
     "data": {
       "level": 3,
       "position": 2,

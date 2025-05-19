@@ -4,8 +4,8 @@ import type { Assignment, Subject } from '../../types.ts'
 
 const subjectA = {
   id: 'my-subject',
-  learnKeys: [],
-  quizKeys: [],
+  learnCards: [],
+  quizCards: [],
   data: {},
 }
 
@@ -37,8 +37,8 @@ Deno.test('sort', () => {
   const subjectB = {
     id: 'my-subject',
     type: '',
-    learnKeys: ['count'],
-    quizKeys: ['count'],
+    learnCards: ['count'],
+    quizCards: ['count'],
     data: { count: 1 },
   }
   const b: [Subject, Assignment] = [
