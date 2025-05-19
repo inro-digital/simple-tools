@@ -126,6 +126,15 @@
       "integrity": "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="
     }
   },
+  "redirects": {
+    "https://esm.sh/jsr/@inro/simple-tools/countdown": "https://esm.sh/jsr/@inro/simple-tools@0.0.11/countdown"
+  },
+  "remote": {
+    "https://esm.sh/@jsr/inro__simple-tools@0.0.11/denonext/countdown.mjs": "268f17b32363fbfceb2f0d0805cb1ee3363b625b002717f8ed77903fb66e147b",
+    "https://esm.sh/@jsr/inro__simple-tools@0.0.11/denonext/state.mjs": "9dc3369b55a101185cc4c48f64c5a6970ee16ab0e49f43699823de5a19fe7f36",
+    "https://esm.sh/@jsr/inro__simple-tools@0.0.11/denonext/timers/utils.mjs": "7328cffaaae24d4a871280878800dde4f6489cbd3dfec83e7918a4b16e072a62",
+    "https://esm.sh/jsr/@inro/simple-tools@0.0.11/countdown": "ec2ebe25109d17059ab08bd8716bd11bb30e4a7bb5fda2e84cd35a7933a1b6f3"
+  },
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@^1.0.13",

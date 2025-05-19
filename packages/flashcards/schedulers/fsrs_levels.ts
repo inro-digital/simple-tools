@@ -7,11 +7,16 @@
 import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
 import { defaultParams, type Params, Quality } from './fsrs.ts'
+import type { SubjectData } from './static.ts'
 import { getNow } from '../utils/datetime.ts'
 import { FSRS } from 'ts-fsrs'
 
-export { defaultParams, type Params, Quality }
+export { defaultParams, type Params, Quality, type SubjectData }
 
+/**
+ * Default SRS thresholds; includes a normal-paced and a fast-paced config.
+ * Threshold cut-offs are based on repetition num.
+ */
 export const defaultSRS: Record<number, FsrsSrs> = {
   [1]: {
     id: 1,
@@ -72,19 +77,8 @@ export interface FsrsSrs {
 }
 
 /**
- * Data that is necessary to include in the subject's `data` property, in order
- * for this scheduler to function.
- */
-export interface SubjectData {
-  /** Level that a subject is unlocked */
-  level: number
-  /** Represents which srs interval to use */
-  srsId: number
-  /** Order in which the subject is displayed */
-  position?: number
-}
-
-/**
+ * A scheduler for working with the fsrs algorithm, while retaining the nice
+ * gamification features of the static scheduler
  * @example
  * ```ts
  * const scheduler = new FsrsLevelsScheduler({ userLevel: 1 })

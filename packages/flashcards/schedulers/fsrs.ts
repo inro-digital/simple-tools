@@ -44,6 +44,7 @@ export const defaultParams: Params = {
 }
 
 /**
+ * A scheduler for working with the fsrs algorithm
  * @example
  * ```
  *   import FsrsScheduler, { Quality } from '@inro/simple-tools/flashcards/schedulers/fsrs'
@@ -62,6 +63,7 @@ export const defaultParams: Params = {
 export default class FsrsScheduler extends Scheduler<number> {
   private fsrs: FSRS
 
+  /** Initialize with fsrs params */
   constructor(params = defaultParams) {
     super()
     this.fsrs = new FSRS(params)
