@@ -111,7 +111,7 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
     subjects: Record<string, Subject> | Subject[]
     scheduler: Scheduler<Q>
     allowRedos?: boolean
-    checkAnswer: (answer: string, subject: Subject) => Q
+    checkAnswer: (answer: string, subject: Subject, cardType: string) => Q
     checkComplete: (quality: Q) => boolean
     learnLimit?: number | null
     reviewLimit?: number | null
@@ -149,20 +149,16 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
     this.subjects = options.subjects
   }
 
+  set scheduler(scheduler: Scheduler<Q>) {
+    this.#scheduler = scheduler
+    this.#updatePending()
+  }
+
   set subjects(subjects: Record<string, Subject> | Subject[]) {
     this.#subjects = Array.isArray(subjects)
       ? associateBy(subjects, (subject) => subject.id)
       : subjects
-
-    this.batch((state) => {
-      const isQuiz = state.sessionType === Quiz
-
-      state.allPending = (isQuiz ? this.quizzable : this.learnable)
-        .flatMap(({ learnCards, quizCards, id }) =>
-          (isQuiz ? quizCards : learnCards)
-            .map((cardType) => [id, cardType] as [string, string])
-        )
-    })
+    this.#updatePending()
   }
 
   /** Subjects by Id */
@@ -419,6 +415,18 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
         state.currPending.push(prev)
       }
       this.#loadNext(state)
+    })
+  }
+
+  #updatePending() {
+    this.batch((state) => {
+      const isQuiz = state.sessionType === Quiz
+
+      state.allPending = (isQuiz ? this.quizzable : this.learnable)
+        .flatMap(({ learnCards, quizCards, id }) =>
+          (isQuiz ? quizCards : learnCards)
+            .map((cardType) => [id, cardType] as [string, string])
+        )
     })
   }
 }
