@@ -1,10 +1,9 @@
-import type { Assignment, Subject } from './types.ts'
-
 /**
  * @module
  * The purpose of the scheduler is to update Assignments. It schedules when
  * we should next show
  */
+import type { Assignment, Subject } from './types.ts'
 
 /**
  * The scheduler class expects to be defined with a `Quality` type that defines

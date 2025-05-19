@@ -1,6 +1,6 @@
 import { assert, assertEquals } from '@std/assert'
-import StaticScheduler, { type Srs } from '../static.ts'
 import type { Subject } from '../../types.ts'
+import StaticScheduler, { type Srs } from '../static.ts'
 
 const srs: Record<number, Srs> = {
   [1]: {

@@ -3,8 +3,8 @@
  * A basic scheduler that helps us to demonstrate how one is built. You probably
  * will find one of the other schedulers to be a bit more useful.
  */
-import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
+import type { Assignment, Subject } from '../types.ts'
 
 /** A basic scheduler to demonstrate usage */
 export default class BasicScheduler extends Scheduler<number> {

@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert'
-import FsrsLevelsScheduler, { Quality } from '../fsrs_levels.ts'
 import type { Subject } from '../../types.ts'
+import FsrsLevelsScheduler, { Quality } from '../fsrs_levels.ts'
 
 const { Again, Easy, Good, Hard } = Quality
 

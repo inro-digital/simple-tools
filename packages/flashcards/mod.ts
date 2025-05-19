@@ -1,4 +1,11 @@
+/**
+ * @module
+ * A flashcard deck helps us maintain the state for any flashcard-based app.
+ * By using a custom scheduler, the sky is the limit! However, we also provide
+ * some commonly-used schedulers that could be helpful.
+ */
 import { associateBy } from '@std/collections'
+import { isToday } from '../utils/datetime.ts'
 import State from '../utils/state.ts'
 import Scheduler from './scheduler.ts'
 import {
@@ -9,7 +16,6 @@ import {
   SessionType,
   type Subject,
 } from './types.ts'
-import { isToday } from './utils/datetime.ts'
 
 export { Scheduler }
 export * from './types.ts'
@@ -104,7 +110,7 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
    *   - assignments: Dynamic data representing user's learning progress
    *   - scheduler: Determines when/which subjects to display next
    *   - checkAnswer: Determines quality of answers (correct/incorrect, 1-5, etc)
-   *   - checkComplete: Determines whether a subject should be shown again soon
+   *   - checkSuccess: Determines whether a subject should be shown again soon
    */
   constructor(options: {
     assignments: Record<string, Assignment>
@@ -112,7 +118,7 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
     scheduler: Scheduler<Q>
     allowRedos?: boolean
     checkAnswer: (answer: string, subject: Subject, cardType: string) => Q
-    checkComplete: (quality: Q) => boolean
+    checkSuccess: (quality: Q) => boolean
     learnLimit?: number | null
     reviewLimit?: number | null
     learnSessionSize?: number | null
@@ -143,17 +149,19 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
     }, { isReactive: true })
     this.#scheduler = options.scheduler
     this.#checkAnswer = options.checkAnswer
-    this.#checkSuccess = options.checkComplete
+    this.#checkSuccess = options.checkSuccess
     this.#numLearnedToday = 0
     this.#numReviewedToday = 0
     this.subjects = options.subjects
   }
 
+  /** Swap schedulers */
   set scheduler(scheduler: Scheduler<Q>) {
     this.#scheduler = scheduler
     this.#updatePending()
   }
 
+  /** Update subjects */
   set subjects(subjects: Record<string, Subject> | Subject[]) {
     this.#subjects = Array.isArray(subjects)
       ? associateBy(subjects, (subject) => subject.id)

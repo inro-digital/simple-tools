@@ -1,9 +1,10 @@
 /**
+ * @module
  * A scheduler with statically-tiered due-dates
  */
+import { getNow } from '../../utils/datetime.ts'
 import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
-import { getNow } from '../utils/datetime.ts'
 
 /** Srs defines the intervals used, and cutoffs */
 export interface Srs {

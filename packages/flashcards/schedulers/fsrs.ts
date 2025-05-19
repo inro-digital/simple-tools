@@ -4,15 +4,15 @@
  * @reference https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler
  * @reference https://github.com/open-spaced-repetition/ts-fsrs
  */
-import type { Assignment, Subject } from '../types.ts'
-import Scheduler from '../scheduler.ts'
-import { getNow, isSameDay } from '../utils/datetime.ts'
 import {
   default_maximum_interval,
   default_request_retention,
   default_w,
   FSRS,
 } from 'ts-fsrs'
+import { getNow, isSameDay } from '../../utils/datetime.ts'
+import Scheduler from '../scheduler.ts'
+import type { Assignment, Subject } from '../types.ts'
 
 /** Quality levels for FSRS */
 export enum Quality {

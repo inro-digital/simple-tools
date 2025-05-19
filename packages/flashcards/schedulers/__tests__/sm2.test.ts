@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertNotEquals } from '@std/assert'
-import { FakeTime } from 'jsr:@std/testing/time'
+import { FakeTime } from '@std/testing/time'
 import Sm2Scheduler, { Quality } from '../sm2.ts'
 
 const { BarelyCorrect, Blackout, Correct, AlmostCorrect, Perfect } = Quality

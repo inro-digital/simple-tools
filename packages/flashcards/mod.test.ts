@@ -1,13 +1,13 @@
 import { assert, assertEquals } from '@std/assert'
 import { FakeTime } from '@std/testing/time'
+import subjects from './__data__/subjects_01.json' with { type: 'json' }
+import srs from './__data__/srs_static.json' with { type: 'json' }
 import Flashcards, {
   CardSortMethod,
   SessionStatus,
   SessionType,
 } from './mod.ts'
 import StaticScheduler from './schedulers/static.ts'
-import subjects from './__data__/subjects_01.json' with { type: 'json' }
-import srs from './__data__/srs_static.json' with { type: 'json' }
 
 const { Inactive, Active, Completed } = SessionStatus
 
@@ -29,7 +29,7 @@ Deno.test('learn mode', () => {
   const deck = new Flashcards<boolean>({
     assignments: {},
     checkAnswer: () => true,
-    checkComplete: () => true,
+    checkSuccess: () => true,
     scheduler: new StaticScheduler({ srs, userLevel: 2 }),
     subjects,
   })
@@ -52,7 +52,7 @@ Deno.test('quiz mode', () => {
     assignments,
     allowRedos: true,
     checkAnswer: () => true,
-    checkComplete: () => true,
+    checkSuccess: () => true,
     scheduler: new StaticScheduler({ srs, userLevel: 2 }),
     subjects,
   })
@@ -75,7 +75,7 @@ Deno.test('max learns', () => {
   const deck = new Flashcards<boolean>({
     assignments: {},
     checkAnswer: () => true,
-    checkComplete: () => true,
+    checkSuccess: () => true,
     learnLimit: 1,
     reviewLimit: 1,
     scheduler: new StaticScheduler({ srs, userLevel: 2 }),
@@ -95,7 +95,7 @@ Deno.test('session management', () => {
   const deck = new Flashcards<boolean>({
     assignments: {},
     checkAnswer: () => true,
-    checkComplete: () => true,
+    checkSuccess: () => true,
     scheduler: new StaticScheduler({ srs, userLevel: 2 }),
     subjects,
     learnSessionSize: 2,
@@ -124,7 +124,7 @@ Deno.test('card sorting methods', () => {
   const pairedDeck = new Flashcards<boolean>({
     assignments: {},
     checkAnswer: () => true,
-    checkComplete: () => true,
+    checkSuccess: () => true,
     scheduler: new StaticScheduler({ srs, userLevel: 2 }),
     subjects,
     cardSortMethod: CardSortMethod.Paired,
@@ -140,7 +140,7 @@ Deno.test('card sorting methods', () => {
   const sequentialDeck = new Flashcards<boolean>({
     assignments: {},
     checkAnswer: () => true,
-    checkComplete: () => true,
+    checkSuccess: () => true,
     scheduler: new StaticScheduler({ srs, userLevel: 2 }),
     subjects,
     cardSortMethod: CardSortMethod.Sequential,
@@ -168,7 +168,7 @@ Deno.test('card sorting methods', () => {
   const sequentialDeckNoOrder = new Flashcards<boolean>({
     assignments: {},
     checkAnswer: () => true,
-    checkComplete: () => true,
+    checkSuccess: () => true,
     scheduler: new StaticScheduler({ srs, userLevel: 2 }),
     subjects,
     cardSortMethod: CardSortMethod.Sequential,

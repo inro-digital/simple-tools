@@ -4,12 +4,12 @@
  * properties like the static scheduler. This combines features of both the
  * static and FSRS schedulers.
  */
-import type { Assignment, Subject } from '../types.ts'
+import { FSRS } from 'ts-fsrs'
+import { getNow } from '../../utils/datetime.ts'
 import Scheduler from '../scheduler.ts'
+import type { Assignment, Subject } from '../types.ts'
 import { defaultParams, type Params, Quality } from './fsrs.ts'
 import type { SubjectData } from './static.ts'
-import { getNow } from '../utils/datetime.ts'
-import { FSRS } from 'ts-fsrs'
 
 export { defaultParams, type Params, Quality, type SubjectData }
 

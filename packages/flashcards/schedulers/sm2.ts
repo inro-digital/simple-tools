@@ -1,6 +1,12 @@
+/**
+ * @module
+ * @name Supermemo2 Algorithm
+ * @reference https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method
+ * @reference https://super-memory.com/english/ol/sm2.htm
+ */
+import { getNow, isSameDay } from '../../utils/datetime.ts'
 import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
-import { getNow, isSameDay } from '../utils/datetime.ts'
 
 const defaultEfactor = 2.5
 const defaultRepetition = 0
@@ -18,8 +24,13 @@ export enum Quality {
 
 /**
  * Supermemo2 Algorithm
- * @reference https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method
- * @reference https://super-memory.com/english/ol/sm2.htm
+ * @example
+ * ```
+ *   import Sm2, { Quality } from '@inro/simple-tools/flashcards/schedulers/sm2'
+ *   const scheduler = new Sm2Scheduler()
+ *   const assignment = scheduler.add(subject)
+ *   const updatedAssignment = scheduler.update(Quality.Correct, subject, assignment)
+ * ```
  */
 export default class Sm2 extends Scheduler<number> {
   /**

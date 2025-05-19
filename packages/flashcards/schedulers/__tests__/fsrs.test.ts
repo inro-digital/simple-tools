@@ -1,7 +1,7 @@
 import { assert, assertEquals } from '@std/assert'
-import FsrsScheduler, { Quality } from '../fsrs.ts'
+import { getNow } from '../../../utils/datetime.ts'
 import type { Subject } from '../../types.ts'
-import { getNow } from '../../utils/datetime.ts'
+import FsrsScheduler, { Quality } from '../fsrs.ts'
 
 const { Good, Again } = Quality
 
