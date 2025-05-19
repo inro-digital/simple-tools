@@ -20,6 +20,8 @@
     "jsr:@std/testing@*": "1.0.12",
     "jsr:@std/testing@^1.0.12": "1.0.12",
     "jsr:@std/text@~1.0.7": "1.0.13",
+    "npm:@tauri-apps/api@^2.5.0": "2.5.0",
+    "npm:@tauri-apps/plugin-store@^2.2.0": "2.2.0",
     "npm:@types/node@*": "22.15.3",
     "npm:ts-fsrs@5": "5.0.0",
     "npm:ts-fsrs@5.0.0": "5.0.0"
@@ -113,6 +115,15 @@
     }
   },
   "npm": {
+    "@tauri-apps/api@2.5.0": {
+      "integrity": "sha512-Ldux4ip+HGAcPUmuLT8EIkk6yafl5vK0P0c0byzAKzxJh7vxelVtdPONjfgTm96PbN24yjZNESY8CKo8qniluA=="
+    },
+    "@tauri-apps/plugin-store@2.2.0": {
+      "integrity": "sha512-hJTRtuJis4w5fW1dkcgftsYxKXK0+DbAqurZ3CURHG5WkAyyZgbxpeYctw12bbzF9ZbZREXZklPq8mocCC3Sgg==",
+      "dependencies": [
+        "@tauri-apps/api"
+      ]
+    },
     "@types/node@22.15.3": {
       "integrity": "sha512-lX7HFZeHf4QG/J7tBZqrCAXwz9J5RD56Y6MpP0eJkka8p+K0RY/yBTW7CYFJ4VGCclxqOLKmiGP5juQc6MKgcw==",
       "dependencies": [
@@ -142,6 +153,8 @@
       "jsr:@std/fs@^1.0.17",
       "jsr:@std/path@^1.0.9",
       "jsr:@std/testing@^1.0.12",
+      "npm:@tauri-apps/api@^2.5.0",
+      "npm:@tauri-apps/plugin-store@^2.2.0",
       "npm:ts-fsrs@5"
     ],
     "members": {
