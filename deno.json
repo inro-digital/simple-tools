@@ -13,6 +13,7 @@
     "./flashcards/schedulers/static": "./packages/flashcards/schedulers/static.ts",
     "./state": "./packages/utils/state.ts",
     "./storage": "./packages/utils/storage.ts",
+    "./storage/deno-fs-storage": "./packages/utils/storage/deno_fs_storage.ts",
     "./storage/local-storage": "./packages/utils/storage/local_storage.ts",
     "./stopwatch": "./packages/timers/stopwatch.ts",
     "./todolist": "./packages/todolist/mod.ts"
@@ -25,6 +26,8 @@
   "imports": {
     "@std/assert": "jsr:@std/assert@^1.0.13",
     "@std/collections": "jsr:@std/collections@^1.1.0",
+    "@std/fs": "jsr:@std/fs@^1.0.17",
+    "@std/path": "jsr:@std/path@^1.0.9",
     "@std/testing": "jsr:@std/testing@^1.0.12",
     "ts-fsrs": "npm:ts-fsrs@^5.0.0"
   },
@@ -33,10 +36,10 @@
   },
   "tasks": {
     "dev": "serve ./apps/www",
-    "cli": "deno run ./apps/cli/main.ts",
+    "cli": "deno run -RW ./apps/cli/main.ts",
     "cli:install": "deno install -gf ./apps/cli/main.ts --name=st --config=./apps/cli/deno.json",
     "test": "deno fmt && deno lint && deno check -q --doc . && deno task test:coverage && deno publish -q --dry-run --allow-dirty",
-    "test:coverage": "deno test --clean --shuffle --reporter=dot --parallel --coverage=./coverage .",
+    "test:coverage": "deno test -RW --clean --shuffle --reporter=dot --parallel --coverage=./coverage .",
     "docs": "deno doc packages/mod.ts",
     "docs:lint": "deno doc --lint packages/mod.ts"
   }

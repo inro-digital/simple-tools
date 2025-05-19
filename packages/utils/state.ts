@@ -1,7 +1,3 @@
-import type Storage from './storage.ts'
-
-const IS_REACTIVE = Symbol('is_reactive')
-
 /**
  * @module
  * Generic state and listener class used by all the simple-tools. This helps us:
@@ -10,6 +6,9 @@ const IS_REACTIVE = Symbol('is_reactive')
  *
  * State is meant to be extended into Classes, and used with an Object state
  */
+import type Storage from './storage.ts'
+
+const IS_REACTIVE = Symbol('is_reactive')
 
 /** Options to modify how State works */
 export interface Options<T> {

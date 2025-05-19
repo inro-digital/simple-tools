@@ -1,3 +1,6 @@
+/**
+ * @module stores data in localStorage
+ */
 import Storage, { type StorageProps } from '../storage.ts'
 
 /**
