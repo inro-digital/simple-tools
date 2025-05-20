@@ -98,11 +98,20 @@ export default class Countdown extends State<CountdownState> {
     this.notify()
 
     this.#interval = setInterval(() => {
-      if (!this.#startMS) throw new Error('unexpected no start time')
+      if (!this.#startMS) {
+        // Handle case where startMS is undefined
+        this.#startMS = Date.now()
+      }
 
-      const elapsedSincePauseMS = Date.now() - this.#startMS
-      this.state.elapsed = this.#elapsedBeforePauseMS + elapsedSincePauseMS
-      this.state.remaining = this.state.total - this.state.elapsed
+      if (!this.#startMS) {
+        // Handle the case where startMS is not defined
+        this.state.elapsed = this.#elapsedBeforePauseMS
+        this.state.remaining = this.state.total - this.state.elapsed
+      } else {
+        const elapsedSincePauseMS = Date.now() - this.#startMS
+        this.state.elapsed = this.#elapsedBeforePauseMS + elapsedSincePauseMS
+        this.state.remaining = this.state.total - this.state.elapsed
+      }
 
       // Countdown is complete
       if (this.state.remaining <= 0) {
@@ -119,7 +128,9 @@ export default class Countdown extends State<CountdownState> {
   /** Pauses the timer, and clears the interval */
   pause() {
     if (!this.state.isStarted || this.state.isPaused) return
-    if (!this.#startMS) throw new Error('unexpected no start time')
+    if (!this.#startMS) {
+      this.#startMS = Date.now()
+    }
 
     clearInterval(this.#interval)
 

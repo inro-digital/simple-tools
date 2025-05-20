@@ -11,6 +11,7 @@
     "./flashcards/schedulers/fsrs-levels": "./packages/flashcards/schedulers/fsrs_levels.ts",
     "./flashcards/schedulers/sm2": "./packages/flashcards/schedulers/sm2.ts",
     "./flashcards/schedulers/static": "./packages/flashcards/schedulers/static.ts",
+    "./interval": "./packages/timers/interval.ts",
     "./state": "./packages/utils/state.ts",
     "./storage": "./packages/utils/storage.ts",
     "./storage/deno-fs": "./packages/utils/storage/deno_fs_storage.ts",
