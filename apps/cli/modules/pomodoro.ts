@@ -1,9 +1,10 @@
+import { colors } from '@cliffy/ansi/colors'
+import { ansi } from '@cliffy/ansi'
 import { Command } from '@cliffy/command'
 import { keypress } from '@cliffy/keypress'
 import PomodoroTimer from '@inro/simple-tools/pomodoro'
 
 const encoder = new TextEncoder()
-const LINE_CLEAR = encoder.encode('\r\u001b[K')
 
 export default new Command()
   .name('pomodoro')
@@ -32,49 +33,70 @@ export default new Command()
       longBreakMinutes: options.longBreak,
       periodsBeforeLongBreak: options.periods,
       cycles: options.cycles,
+      resolutionMS: 300,
     })
 
-    // Function to render the current state
+    let lineCount = 0
+
     function renderState() {
-      console.log(timer.state.display)
       const state = timer.state
+
+      if (lineCount > 0) {
+        // Clear previous output by moving to top and erasing down
+        Deno.stdout.writeSync(encoder.encode(
+          ansi.cursorTo(0, 0).eraseDown().toString(),
+        ))
+      }
+
+      // Add bold formatting to title and main timer info
+      // Add color based on period type
+      const periodColor = state.periodType.includes('focus')
+        ? colors.red
+        : colors.green
+
       const lines = [
-        `\nPeriod: ${state.periodType.toUpperCase()}`,
-        `Time Remaining: ${state.display}`,
-        `Completed Focus Periods: ${state.completedFocusPeriods}`,
-        `Periods until long break: ${state.periodsUntilLongBreak}`,
-        state.isPaused ? '\nPAUSED' : '',
-        '\n',
+        colors.bold.underline.white('Pomodoro Timer\n'),
+        periodColor.bold(`${state.periodType.toUpperCase()}`) + ' – ' +
+        colors.bold.white(colors.bold(`${state.display}`)) +
+        (state.isPaused ? ` – ${colors.bold.yellow('PAUSED')}` : ''),
+        '',
+        colors.dim(`Completed: ${state.completedFocusPeriods}`),
+        colors.dim(`Next long break: ${state.periodsUntilLongBreak}`),
       ]
 
-      // Clear previous lines and write new state
+      lines.push(
+        '\n' + colors.dim('Controls:'),
+        colors.dim('- Press "spacebar" to pause/resume'),
+        colors.dim('- Press "return" to reset the timer'),
+        colors.dim('- Press "s" to skip to next period'),
+        colors.dim('- Press Ctrl+C to exit'),
+        '',
+      )
+
       const output = lines.join('\n')
-      const frame = encoder.encode(output)
-      const writeData = new Uint8Array(LINE_CLEAR.length + frame.length)
-      writeData.set(LINE_CLEAR)
-      writeData.set(frame, LINE_CLEAR.length)
-      Deno.stdout.writeSync(writeData)
+      Deno.stdout.writeSync(encoder.encode(output))
+      lineCount = output.split('\n').length
 
       if (state.isComplete) {
-        console.log('\nPomodoro session complete! 🎉')
+        Deno.stdout.writeSync(encoder.encode(
+          '\n\n' + colors.bold.green('Pomodoro session complete! 🎉') + '\n',
+        ))
         Deno.exit(0)
       }
     }
-    console.log(timer)
+
+    Deno.stdout.writeSync(encoder.encode(
+      ansi.cursorHide.cursorTo(0, 0).eraseScreen().toString(),
+    ))
+
     timer.addEventListener(() => {
       renderState()
     })
 
-    console.log('Pomodoro Timer\n')
-    console.log('Controls:')
-    console.log('- Press "spacebar" to pause/resume')
-    console.log('- Press "return" to reset the timer')
-    console.log('- Press "s" to skip to next period')
-    console.log('- Press Ctrl+C to exit\n')
+    renderState()
 
     timer.start()
 
-    // Handle keyboard input
     for await (const event of keypress()) {
       const { isPaused, isStarted } = timer.state
 
@@ -93,6 +115,7 @@ export default new Command()
       }
 
       if (event.ctrlKey && event.key === 'c') {
+        Deno.stdout.writeSync(encoder.encode(ansi.cursorShow().toString()))
         timer.dispose()
         Deno.exit(0)
       }

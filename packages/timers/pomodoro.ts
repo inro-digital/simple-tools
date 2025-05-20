@@ -1,4 +1,5 @@
 import IntervalTimer, { type Interval } from './interval.ts'
+import { formatDisplayTime } from './utils.ts'
 
 /**
  * Configuration options for the Pomodoro timer
@@ -14,6 +15,8 @@ export interface PomodoroOptions {
   periodsBeforeLongBreak?: number
   /** Total number of cycles to complete (default 1, -1 for infinite) */
   cycles?: number
+  /** Frequency that listeners are called while the timer is counting */
+  resolutionMS?: number
 }
 
 /** Represents the type of period in a Pomodoro sequence */
@@ -90,6 +93,7 @@ export default class PomodoroTimer {
     this.#timer = new IntervalTimer({
       intervals,
       cycles: this.#cycles,
+      resolutionMS: options.resolutionMS,
     })
 
     // Listen for state changes from the underlying timer
@@ -209,7 +213,7 @@ export default class PomodoroTimer {
     }
 
     return {
-      display: timerState.display,
+      display: formatDisplayTime(timerState.remaining, { useTenths: false }),
       periodType,
       completedFocusPeriods,
       periodsUntilLongBreak,

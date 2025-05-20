@@ -6,7 +6,7 @@ Deno.test('initializes with default options', () => {
   const timer = new PomodoroTimer()
 
   assertEquals(timer.state, {
-    display: '25:00.0',
+    display: '25:00',
     periodType: 'focus',
     completedFocusPeriods: 0,
     periodsUntilLongBreak: 4,
@@ -26,7 +26,7 @@ Deno.test('initializes with custom options', () => {
   })
 
   assertEquals(timer.state, {
-    display: '30:00.0',
+    display: '30:00',
     periodType: 'focus',
     completedFocusPeriods: 0,
     periodsUntilLongBreak: 3,
@@ -121,7 +121,7 @@ Deno.test('stop and reset functionality', () => {
 
     timer.reset()
     assertEquals(timer.state, {
-      display: '1:00.0',
+      display: '1:00',
       periodType: 'focus',
       completedFocusPeriods: 0,
       periodsUntilLongBreak: 4,
