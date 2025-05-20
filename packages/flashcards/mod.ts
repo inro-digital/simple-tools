@@ -305,7 +305,19 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
       state.sessionType = sessionType
       const isQuiz = sessionType === Quiz
 
-      const available = isQuiz ? this.quizzable : this.learnable
+      const available = isQuiz
+        ? this.quizzable.sort((a, b) =>
+          this.#scheduler.sortQuizzable(
+            [a, state.assignments[a.id]],
+            [b, state.assignments[b.id]],
+          )
+        )
+        : this.learnable.sort((a, b) =>
+          this.#scheduler.sortLearnable(
+            [a, state.assignments[a.id]],
+            [b, state.assignments[b.id]],
+          )
+        )
       if (!available.length) {
         state.sessionStatus = Inactive
         return false
@@ -314,15 +326,15 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
       const sessionSize = isQuiz
         ? state.reviewSessionSize
         : state.learnSessionSize
+
       const subjectsForSession = sessionSize
         ? available.slice(0, sessionSize)
         : available
 
       const sessionCards: [string, string][] = subjectsForSession.flatMap(
-        ({ learnCards, quizCards, id }) => {
-          return (isQuiz ? quizCards : learnCards)
-            .map((cardType) => [id, cardType] as [string, string])
-        },
+        ({ learnCards, quizCards, id }) =>
+          (isQuiz ? quizCards : learnCards)
+            .map((cardType) => [id, cardType] as [string, string]),
       )
 
       if (state.cardSortMethod === Paired) {

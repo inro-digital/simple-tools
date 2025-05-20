@@ -19,5 +19,25 @@ Deno.test('Scheduler stubs', () => {
     sched.sort([sA, aA], [{ ...sA, id: 'b' }, { ...aA, subjectId: 'b' }]),
     0,
   )
+
+  // New methods
+  const sPair: [typeof sA, typeof aA] = [sA, aA]
+  const tPair: [typeof sA, typeof aA] = [{ ...sA, id: 'b' }, {
+    ...aA,
+    subjectId: 'b',
+  }]
+  assertEquals(
+    sched.sortLearnable(sPair, tPair),
+    0,
+    'sortLearnable falls back to sort',
+  )
+
+  // Test multiple calls to verify random behavior
+  const results = Array(10).fill(0).map(() => sched.sortQuizzable(sPair, tPair))
+
+  // At least one result should be different from others (random behavior)
+  const allSame = results.every((val) => val === results[0])
+  assertEquals(allSame, false, 'sortQuizzable should use random sort')
+
   assertEquals(sched.update(1, sA, aA), aA)
 })

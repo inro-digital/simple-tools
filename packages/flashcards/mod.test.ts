@@ -3,9 +3,11 @@ import { FakeTime } from '@std/testing/time'
 import subjects from './__data__/subjects_01.json' with { type: 'json' }
 import srs from './__data__/srs_static.json' with { type: 'json' }
 import Flashcards, {
+  type Assignment,
   CardSortMethod,
   SessionStatus,
   SessionType,
+  type Subject,
 } from './mod.ts'
 import StaticScheduler from './schedulers/static.ts'
 
@@ -206,4 +208,79 @@ Deno.test('card sorting methods', () => {
     )
     assert(grouped, 'Cards should be grouped by type')
   }
+})
+
+Deno.test('scheduler sorting methods', () => {
+  let learnableSortCalled = false
+  let quizzableSortCalled = false
+
+  class MockSortScheduler extends StaticScheduler {
+    override sortLearnable(
+      a: [Subject, Assignment],
+      b: [Subject, Assignment],
+    ): number {
+      learnableSortCalled = true
+      return this.sort(a, b)
+    }
+
+    override sortQuizzable(
+      _a: [Subject, Assignment],
+      _b: [Subject, Assignment],
+    ): number {
+      quizzableSortCalled = true
+      return 0
+    }
+
+    override filterQuizzable(
+      _subject: Subject,
+      _assignment: Assignment,
+    ): boolean {
+      return true
+    }
+  }
+
+  const learnDeck = new Flashcards<boolean>({
+    assignments: {},
+    checkAnswer: () => true,
+    checkSuccess: () => true,
+    scheduler: new MockSortScheduler({ srs, userLevel: 2 }),
+    subjects,
+  })
+
+  learnDeck.startSession(SessionType.Learn)
+  assert(
+    learnableSortCalled,
+    'sortLearnable should be called for learn sessions',
+  )
+
+  learnableSortCalled = false
+  quizzableSortCalled = false
+
+  const quizAssignments: Record<string, Assignment> = {}
+  for (let i = 1; i <= 6; i++) {
+    const id = String(i)
+    quizAssignments[id] = {
+      subjectId: id,
+      markedCompleted: false,
+      startedAt: new Date(),
+      availableAt: new Date(),
+      unlockedAt: new Date(),
+      interval: 1,
+      efactor: 1,
+    }
+  }
+
+  const quizDeck = new Flashcards<boolean>({
+    assignments: quizAssignments,
+    checkAnswer: () => true,
+    checkSuccess: () => true,
+    scheduler: new MockSortScheduler({ srs, userLevel: 2 }),
+    subjects,
+  })
+
+  quizDeck.startSession(SessionType.Quiz)
+  assert(
+    quizzableSortCalled,
+    'sortQuizzable should be called for quiz sessions',
+  )
 })

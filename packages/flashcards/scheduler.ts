@@ -56,6 +56,30 @@ export default class Scheduler<Quality> {
   }
 
   /**
+   * A predicate specifically for sorting learnable cards
+   * Falls back to the general sort method if not overridden
+   */
+  sortLearnable(
+    this: Scheduler<Quality>,
+    a: [Subject, Assignment],
+    b: [Subject, Assignment],
+  ): number {
+    return this.sort(a, b)
+  }
+
+  /**
+   * A predicate specifically for sorting quizzable cards
+   * Uses random sorting if not overridden
+   */
+  sortQuizzable(
+    this: Scheduler<Quality>,
+    _a: [Subject, Assignment],
+    _b: [Subject, Assignment],
+  ): number {
+    return Math.random() - 0.5
+  }
+
+  /**
    * This is the scheduler's grading algorithm, and is expected to update the
    * Scheduling with updated stats
    */
