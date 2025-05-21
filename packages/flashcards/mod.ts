@@ -198,7 +198,9 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
   get learnable(): Subject[] {
     const { assignments, learnLimit } = this.state
     const learnable = this.available
-      .filter((s) => this.#scheduler.filterLearnable(s, assignments[s.id]))
+      .filter((s) =>
+        this.#scheduler.filterLearnable(s, assignments[s.id], assignments)
+      )
     if (!learnLimit) return learnable
     return learnable.slice(0, Math.max(0, learnLimit - this.#numLearnedToday))
   }
@@ -207,7 +209,9 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
   get quizzable(): Subject[] {
     const { assignments, reviewLimit } = this.state
     const quizzable = this.available
-      .filter((s) => this.#scheduler.filterQuizzable(s, assignments[s.id]))
+      .filter((s) =>
+        this.#scheduler.filterQuizzable(s, assignments[s.id], assignments)
+      )
     if (!reviewLimit) return quizzable
     return quizzable.slice(0, Math.max(0, reviewLimit - this.#numReviewedToday))
   }

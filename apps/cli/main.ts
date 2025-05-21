@@ -6,7 +6,7 @@ import Todolist from './modules/todolist.ts'
 
 await new Command()
   .name('simple-tools')
-  .version('0.1.8')
+  .version('0.1.9')
   .description('Command line versions of Simple Tools')
   .command('countdown', Countdown)
   .command('pomodoro', Pomodoro)
