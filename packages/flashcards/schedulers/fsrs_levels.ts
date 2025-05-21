@@ -169,15 +169,41 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
     return true
   }
 
-  /** Filters out subjects that have already been learned */
-  override filterLearnable(subject: Subject, assignment: Assignment): boolean {
+  /**
+   * Filters out subjects that have already been learned or have unmet requirements
+   * @param subject The subject to check
+   * @param assignment The assignment for the subject
+   * @param allAssignments Optional map of all assignments by subjectId to check requirements
+   */
+  override filterLearnable(
+    subject: Subject,
+    assignment: Assignment,
+    allAssignments?: Record<string, Assignment>,
+  ): boolean {
     if (!this.filter(subject, assignment)) return false
     if (assignment?.startedAt) return false // Already learned
+
+    const { requiredSubjects = [] } = subject.data as SubjectData
+    if (requiredSubjects.length > 0 && allAssignments) {
+      const allRequiredPassed = requiredSubjects.every((reqSubjectId) => {
+        const reqAssignment = allAssignments[reqSubjectId]
+        return reqAssignment && reqAssignment.passedAt !== undefined
+      })
+      if (!allRequiredPassed) return false
+    }
+
     return true
   }
 
-  /** Filters out subjects that haven't already been learned or aren't due */
-  override filterQuizzable(subject: Subject, assignment: Assignment): boolean {
+  /**
+   * Filters out subjects that haven't already been learned or aren't due
+   * @param subject The subject to check
+   * @param assignment The assignment for the subject
+   */
+  override filterQuizzable(
+    subject: Subject,
+    assignment: Assignment,
+  ): boolean {
     if (!this.filter(subject, assignment)) return false
     if (!assignment?.startedAt) return false // Not learned yet, so can't quiz
     if (!assignment?.availableAt) return false // Not available, so can't quiz

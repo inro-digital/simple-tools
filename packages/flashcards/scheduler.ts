@@ -26,20 +26,36 @@ export default class Scheduler<Quality> {
     return true
   }
 
-  /** Filter to just items that haven't been learned, but are unlocked */
+  /**
+   /**
+    * Filter to just items that haven't been learned, but are unlocked and meet prerequisites.
+    * If a subject has requiredSubjects, all of those subjects must have passedAt values.
+    * @param s The subject to check
+    * @param a The assignment for the subject
+    * @param allAssignments Optional map of all assignments by subjectId to check requirements
+    */
   filterLearnable(
     this: Scheduler<Quality>,
     s: Subject,
     a: Assignment,
+    _allAssignments?: Record<string, Assignment>,
   ): boolean {
     return this.filter(s, a)
   }
 
-  /** Filter to items that are available to be quizzed on */
+  /**
+   * Filter to items that are available to be quizzed on.
+   * Unlike filterLearnable, this doesn't check requiredSubjects since the assignment
+   * would have already passed those checks to be started.
+   * @param s The subject to check
+   * @param a The assignment for the subject
+   * @param allAssignments Optional map of all assignments by subjectId (unused by default)
+   */
   filterQuizzable(
     this: Scheduler<Quality>,
     s: Subject,
     a: Assignment,
+    _allAssignments?: Record<string, Assignment>,
   ): boolean {
     return this.filter(s, a)
   }

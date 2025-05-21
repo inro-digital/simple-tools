@@ -1,5 +1,5 @@
 import { assert, assertEquals } from '@std/assert'
-import type { Subject } from '../../types.ts'
+import type { Assignment, Subject } from '../../types.ts'
 import FsrsLevelsScheduler, { Quality } from '../fsrs_levels.ts'
 
 const subjects: Subject[] = [
@@ -218,5 +218,118 @@ Deno.test('FsrsLevelsScheduler - fractional day intervals', () => {
     updated.availableAt!.getTime() >= minExpectedTime,
     true,
     'fractional days applied to availableAt',
+  )
+})
+
+Deno.test('FsrsLevelsScheduler - requiredSubjects', () => {
+  const scheduler = new FsrsLevelsScheduler({ userLevel: 10 })
+
+  const prerequisiteSubject: Subject = {
+    id: 'prerequisite-subject',
+    learnCards: ['front'],
+    quizCards: ['back'],
+    data: {
+      level: 1,
+      srsId: 1,
+      position: 0,
+      front: 'Basic question',
+      back: 'Basic answer',
+    },
+  }
+
+  const dependentSubject: Subject = {
+    id: 'dependent-subject',
+    learnCards: ['front'],
+    quizCards: ['back'],
+    data: {
+      level: 2,
+      srsId: 1,
+      position: 0,
+      requiredSubjects: ['prerequisite-subject'],
+      front: 'Advanced question',
+      back: 'Advanced answer',
+    },
+  }
+
+  const prerequisiteAssignment = scheduler.add(prerequisiteSubject)
+  const baseAssignment = scheduler.add(dependentSubject)
+
+  const dependentAssignment = { ...baseAssignment, startedAt: undefined }
+
+  const all: Record<string, Assignment> = {
+    [prerequisiteSubject.id]: prerequisiteAssignment,
+    [dependentSubject.id]: dependentAssignment,
+  }
+
+  assertEquals(
+    scheduler.filterLearnable(dependentSubject, dependentAssignment, all),
+    false,
+    'Subject with unmet prerequisites should not be learnable',
+  )
+
+  let updatedPrereqAssignment = prerequisiteAssignment
+  for (let i = 0; i < 3; i++) { // Need 3 reps to reach passesAt
+    updatedPrereqAssignment = scheduler.update(
+      Quality.Good,
+      prerequisiteSubject,
+      updatedPrereqAssignment,
+    )
+  }
+
+  assertEquals(
+    updatedPrereqAssignment.passedAt instanceof Date,
+    true,
+    'Prerequisite should be passed after 3 successful repetitions',
+  )
+
+  all[prerequisiteSubject.id] = updatedPrereqAssignment
+  assertEquals(
+    scheduler.filterLearnable(dependentSubject, dependentAssignment, all),
+    true,
+    'Subject with met prerequisites should be learnable',
+  )
+
+  const multiPrereqSubject: Subject = {
+    id: 'multi-prereq-subject',
+    learnCards: ['front'],
+    quizCards: ['back'],
+    data: {
+      level: 3,
+      srsId: 1,
+      position: 0,
+      requiredSubjects: ['prerequisite-subject', 'dependent-subject'],
+      front: 'Complex question',
+      back: 'Complex answer',
+    },
+  }
+
+  const baseMultiPrereqAssignment = scheduler.add(multiPrereqSubject)
+  const multiPrereqAssignment = {
+    ...baseMultiPrereqAssignment,
+    startedAt: undefined,
+  }
+  all[multiPrereqSubject.id] = multiPrereqAssignment
+
+  assertEquals(
+    scheduler.filterLearnable(multiPrereqSubject, multiPrereqAssignment, all),
+    false,
+    'Subject with partially met prerequisites should not be learnable',
+  )
+
+  let updatedDependentAssignment = { ...baseAssignment }
+  for (let i = 0; i < 3; i++) {
+    updatedDependentAssignment = scheduler.update(
+      Quality.Good,
+      dependentSubject,
+      updatedDependentAssignment,
+    )
+  }
+
+  all[dependentSubject.id] = updatedDependentAssignment
+
+  assertEquals(
+    scheduler.filterLearnable(multiPrereqSubject, multiPrereqAssignment, all),
+    true,
+    'Subject with all prerequisites met should be learnable',
   )
 })

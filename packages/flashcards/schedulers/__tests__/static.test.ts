@@ -1,5 +1,5 @@
 import { assert, assertEquals } from '@std/assert'
-import type { Subject } from '../../types.ts'
+import type { Assignment, Subject } from '../../types.ts'
 import StaticScheduler, { type Srs } from '../static.ts'
 
 const srs: Record<number, Srs> = {
@@ -86,6 +86,89 @@ Deno.test('sort', () => {
 
   assert(sched.sort([sB, aB], [sC, aC]) < 0, 'sort by lessonOrder')
   assert(sched.sort([sC, aC], [sB, aB]) > 0, 'sort by lessonOrder')
+})
+
+Deno.test('requiredSubjects', () => {
+  const sched = new StaticScheduler({ srs, userLevel: 10 })
+
+  const subjectWithPrereq: Subject = {
+    id: 'subject-with-prereq',
+    learnCards: [],
+    quizCards: [],
+    data: {
+      level: 5,
+      position: 1,
+      srsId: 1,
+      requiredSubjects: ['my-subject-a'],
+    },
+  }
+
+  const assignmentA = sched.add(sA)
+  const assignmentWithPrereq = {
+    ...sched.add(subjectWithPrereq),
+    startedAt: undefined,
+  }
+
+  const all: Record<string, Assignment> = {
+    [sA.id]: assignmentA,
+    [subjectWithPrereq.id]: assignmentWithPrereq,
+  }
+
+  assert(
+    !sched.filterLearnable(subjectWithPrereq, assignmentWithPrereq, all),
+    'Subject with unmet prerequisites should not be learnable',
+  )
+
+  const passedAssignmentA = { ...assignmentA, passedAt: new Date(), efactor: 2 }
+
+  all[sA.id] = passedAssignmentA
+
+  assert(
+    sched.filterLearnable(subjectWithPrereq, assignmentWithPrereq, all),
+    'Subject with met prerequisites should be learnable',
+  )
+
+  const subjectWithMultiPrereqs: Subject = {
+    id: 'subject-with-multi-prereqs',
+    learnCards: [],
+    quizCards: [],
+    data: {
+      level: 5,
+      position: 2,
+      srsId: 1,
+      requiredSubjects: ['my-subject-a', 'my-subject-b'],
+    },
+  }
+
+  const assignmentWithMultiPrereqs = {
+    ...sched.add(subjectWithMultiPrereqs),
+    startedAt: undefined,
+  }
+  all[subjectWithMultiPrereqs.id] = assignmentWithMultiPrereqs
+
+  const assignmentB = sched.add(sB)
+  all[sB.id] = assignmentB
+
+  assert(
+    !sched.filterLearnable(
+      subjectWithMultiPrereqs,
+      assignmentWithMultiPrereqs,
+      all,
+    ),
+    'Subject with partially met prerequisites should not be learnable',
+  )
+
+  const passedAssignmentB = { ...assignmentB, passedAt: new Date(), efactor: 2 }
+  all[sB.id] = passedAssignmentB
+
+  assert(
+    sched.filterLearnable(
+      subjectWithMultiPrereqs,
+      assignmentWithMultiPrereqs,
+      all,
+    ),
+    'Subject with all prerequisites met should be learnable',
+  )
 })
 
 Deno.test('update', () => {
