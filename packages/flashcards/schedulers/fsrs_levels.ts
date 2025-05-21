@@ -23,16 +23,16 @@ export const defaultSRS: Record<number, FsrsSrs> = {
     name: 'Default',
     unlocksAt: 0,
     startsAt: 1,
-    passesAt: 5,
-    completesAt: 9,
+    passesAt: 3, // Threshold for "remembers decently well" to unlock content
+    completesAt: 10, // Threshold for "solid retention, unlikely to forget"
   },
   [2]: {
     id: 2,
     name: 'Fast',
     unlocksAt: 0,
     startsAt: 1,
-    passesAt: 4,
-    completesAt: 9,
+    passesAt: 3, // Same threshold as Default for content unlocking
+    completesAt: 8, // Faster completion threshold than Default
     fsrsParams: {
       // deno-fmt-ignore
       w: [
@@ -148,9 +148,9 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
   }
 
   /**
-   * Should filter out subjects that user is not high enough level to see,
-   * have been completed, or are not yet due
-   */
+   /** Should filter out subjects that user is not high enough level to see,
+    * have been completed, or are not yet due
+    */
   override filter(subject: Subject, assignment: Assignment): boolean {
     const { level = 0 } = subject.data as SubjectData
 
@@ -158,8 +158,11 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
     if (level > this.userLevel) return false
     if (assignment?.markedCompleted || assignment?.completedAt) return false
 
-    // Check if it's due
-    if (assignment?.availableAt && assignment.availableAt > getNow()) {
+    // Check if it's due - compare time instead of just date for fractional intervals
+    if (
+      assignment?.availableAt &&
+      assignment.availableAt.getTime() > getNow().getTime()
+    ) {
       return false
     }
 
@@ -178,7 +181,8 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
     if (!this.filter(subject, assignment)) return false
     if (!assignment?.startedAt) return false // Not learned yet, so can't quiz
     if (!assignment?.availableAt) return false // Not available, so can't quiz
-    return assignment.availableAt <= getNow()
+    // Compare time instead of just date to handle fractional day intervals
+    return assignment.availableAt.getTime() <= getNow().getTime()
   }
 
   /** Sort by level, then by due date, then by position within level */
@@ -230,8 +234,10 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
     const srs = this.#srs[srsId]
     if (!srs) throw new Error(`No SRS system defined for ${srsId}`)
 
-    // Ensure rating is between 1-4
-    const boundedRating = Math.min(Math.max(Math.round(rating), 1), 4)
+    const boundedRating = Math.min(
+      Math.max(Math.round(rating), Quality.Again),
+      Quality.Easy,
+    )
 
     const now = getNow()
     const lastStudiedAt = assignment.lastStudiedAt || now
@@ -263,9 +269,9 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
       if (!scheduled || !scheduled.card) return assignment
 
       // Calculate new values
-      // Ensure minimum interval of 1 day for any studied card
-      const newInterval = Math.max(1, Math.round(scheduled.card.scheduled_days))
-      const newRepetition = boundedRating === 1
+      // Use FSRS natural pacing with minimum interval of 6 hours (0.25 days)
+      const newInterval = Math.max(0.25, scheduled.card.scheduled_days)
+      const newRepetition = boundedRating === Quality.Again
         ? 0
         : (assignment.repetition || 0) + 1
 
@@ -273,9 +279,10 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
       const isPassed = newRepetition >= srs.passesAt
       const isCompleted = newRepetition >= srs.completesAt
 
-      // Calculate next available date
-      const nextAvailableDate = new Date(now)
-      nextAvailableDate.setDate(nextAvailableDate.getDate() + newInterval)
+      // Calculate next available date - convert days to milliseconds for more precise intervals
+      const nextAvailableDate = new Date(
+        now.getTime() + (newInterval * 24 * 60 * 60 * 1000),
+      )
 
       return {
         ...assignment,
@@ -291,24 +298,21 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
     } catch (error) {
       console.error('FSRS error:', error)
 
-      // Fallback implementation if FSRS fails
-      const newInterval = boundedRating === 1
-        ? 1
-        : boundedRating === 2
-        ? 3
-        : boundedRating === 3
-        ? 7
-        : Math.max(1, Math.round((assignment.interval || 0) * 2.5))
+      // Fallback implementation if FSRS fails - allow shorter intervals for better pacing
+      let newInterval = Math.max(0.25, (assignment.interval || 0) * 2.5) // easy
+      if (boundedRating === Quality.Again) newInterval = 0.25 // 6 hours
+      else if (boundedRating === Quality.Hard) newInterval = 1 // 1 day
+      else if (boundedRating === Quality.Good) newInterval = 3 // 3 days
 
-      const newRepetition = boundedRating === 1
+      const newRepetition = boundedRating === Quality.Again
         ? 0
         : (assignment.repetition || 0) + 1
       const isPassed = newRepetition >= srs.passesAt
       const isCompleted = newRepetition >= srs.completesAt
 
-      // Calculate next available date
-      const nextAvailableDate = new Date(now)
-      nextAvailableDate.setDate(nextAvailableDate.getDate() + newInterval)
+      const nextAvailableDate = new Date(
+        now.getTime() + (newInterval * 24 * 60 * 60 * 1000),
+      )
 
       return {
         ...assignment,

@@ -36,3 +36,49 @@ A scheduler with statically-tiered due dates. Good for curricula with predefined
 
 - [SM2 Algorithm](https://super-memory.com/english/ol/sm2.htm)
 - [FSRS Algorithm](https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler)
+
+## Levels Schedulers
+
+The Static and FSRS Levels Schedulers are meant to create a more curriculum-focused style of flashcards, with an unlock and completion system. The most important thresholds here are "passesAt", which unlocks dependent content, and "completesAt", which tells us that this content is mastered.
+
+With consistent "Good" (3) responses on card reviews, users can expect the following progression. These timelines represent typical FSRS scheduling intervals and can vary based on individual performance and specific FSRS parameter tuning:
+
+### Default SRS System (passesAt=3, completesAt=10)
+
+| Repetition | Typical Interval | Cumulative Days |
+| ---------- | ---------------- | --------------- |
+| 1          | 0.25 days        | 0.25            |
+| 2          | 1 day            | 1.25            |
+| 3          | 3 days           | 4.25            |
+| 4          | 7 days           | 11.25           |
+| 5          | 14 days          | 25.25           |
+| 6          | 23 days          | 48.25           |
+| 7          | 35 days          | 83.25           |
+| 8          | 50 days          | 133.25          |
+| 9          | 65 days          | 198.25          |
+| 10         | 85 days          | 283.25          |
+
+With the Default SRS:
+
+- **Passing threshold** (3 repetitions): ~4-5 days (unlocks dependent content)
+- **Completion threshold** (10 repetitions): ~283 days (~9.5 months) (indicates mastery)
+
+### Fast SRS System (passesAt=3, completesAt=8)
+
+| Repetition | Typical Interval | Cumulative Days |
+| ---------- | ---------------- | --------------- |
+| 1          | 0.25 days        | 0.25            |
+| 2          | 0.75 days        | 1               |
+| 3          | 2 days           | 3               |
+| 4          | 5 days           | 8               |
+| 5          | 12 days          | 20              |
+| 6          | 25 days          | 45              |
+| 7          | 40 days          | 85              |
+| 8          | 55 days          | 140             |
+
+With the Fast SRS:
+
+- **Passing threshold** (3 repetitions): ~3 days (unlocks dependent content)
+- **Completion threshold** (8 repetitions): ~140 days (~4.7 months) (indicates mastery)
+
+Note: These are estimates based on consistently "Good" responses. "Again" responses will delay progression, while "Easy" responses will accelerate it. The FSRS algorithm automatically adjusts intervals based on user performance to optimize retention.
