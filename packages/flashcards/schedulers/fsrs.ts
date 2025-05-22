@@ -101,6 +101,7 @@ export default class FsrsScheduler extends Scheduler<number> {
    * Only show cards that have a due date today or in the past
    */
   override filter(_subject: Subject, assignment: Assignment): boolean {
+    if (!assignment) return false
     if (assignment?.markedCompleted) return false
     const due = getDueDate(assignment)
     return !due || (due <= getNow())
@@ -113,6 +114,8 @@ export default class FsrsScheduler extends Scheduler<number> {
     [_subjectA, assignmentA]: [Subject, Assignment],
     [_subjectB, assignmentB]: [Subject, Assignment],
   ): number {
+    if (!assignmentA) return -1
+    if (!assignmentB) return 1
     const aDue = getDueDate(assignmentA)
     const bDue = getDueDate(assignmentB)
     if (!aDue && bDue) return -1
