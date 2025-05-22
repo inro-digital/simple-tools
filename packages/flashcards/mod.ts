@@ -96,10 +96,10 @@ export interface FlashcardsState<Quality> {
  * deck.submit('blue')
  * assert(deck.state.assignments['1'].startedAt) // 1
  */
-export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
+export default class Flashcards<Q, A> extends State<FlashcardsState<Q>> {
   #subjects: Record<string, Subject> = {}
   #scheduler: Scheduler<Q>
-  #checkAnswer: (answer: string, subject: Subject, cardType: string) => Q
+  #checkAnswer: (answer: A, subject: Subject, cardType: string) => Q
   #checkSuccess: (quality: Q) => boolean
   #numLearnedToday: number
   #numReviewedToday: number
@@ -117,7 +117,7 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
     subjects: Record<string, Subject> | Subject[]
     scheduler: Scheduler<Q>
     allowRedos?: boolean
-    checkAnswer: (answer: string, subject: Subject, cardType: string) => Q
+    checkAnswer: (answer: A, subject: Subject, cardType: string) => Q
     checkSuccess: (quality: Q) => boolean
     learnLimit?: number | null
     reviewLimit?: number | null
@@ -226,7 +226,7 @@ export default class Flashcards<Q> extends State<FlashcardsState<Q>> {
    * an answer on a Pending card, we will set the card state to Success/Failure,
    * and the answer will be submitted on the next submit.
    */
-  submit(answer: string = ''): void {
+  submit(answer: A): void {
     this.batch((state) => {
       const { currAssignment, currSubject, sessionType, sessionStatus } = state
       if (!currSubject || !sessionType) return

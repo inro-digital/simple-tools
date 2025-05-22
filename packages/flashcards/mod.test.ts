@@ -28,7 +28,7 @@ const assignments = {
 }
 
 Deno.test('learn mode', () => {
-  const deck = new Flashcards<boolean>({
+  const deck = new Flashcards<boolean, void>({
     assignments: {},
     checkAnswer: () => true,
     checkSuccess: () => true,
@@ -50,7 +50,7 @@ Deno.test('learn mode', () => {
 })
 
 Deno.test('quiz mode', () => {
-  const deck = new Flashcards<boolean>({
+  const deck = new Flashcards<boolean, void>({
     assignments,
     allowRedos: true,
     checkAnswer: () => true,
@@ -74,7 +74,7 @@ Deno.test('quiz mode', () => {
 
 Deno.test('max learns', () => {
   const time = new FakeTime(new Date())
-  const deck = new Flashcards<boolean>({
+  const deck = new Flashcards<boolean, void>({
     assignments: {},
     checkAnswer: () => true,
     checkSuccess: () => true,
@@ -94,7 +94,7 @@ Deno.test('max learns', () => {
 })
 
 Deno.test('session management', () => {
-  const deck = new Flashcards<boolean>({
+  const deck = new Flashcards<boolean, void>({
     assignments: {},
     checkAnswer: () => true,
     checkSuccess: () => true,
@@ -123,7 +123,7 @@ Deno.test('session management', () => {
 })
 
 Deno.test('card sorting methods', () => {
-  const pairedDeck = new Flashcards<boolean>({
+  const pairedDeck = new Flashcards<boolean, void>({
     assignments: {},
     checkAnswer: () => true,
     checkSuccess: () => true,
@@ -139,7 +139,7 @@ Deno.test('card sorting methods', () => {
     assertEquals(first[0], second[0], 'paired: first 2 have matching subject')
   }
 
-  const sequentialDeck = new Flashcards<boolean>({
+  const sequentialDeck = new Flashcards<boolean, void>({
     assignments: {},
     checkAnswer: () => true,
     checkSuccess: () => true,
@@ -167,7 +167,7 @@ Deno.test('card sorting methods', () => {
   }
 
   // Test Sequential without cardSortOrder
-  const sequentialDeckNoOrder = new Flashcards<boolean>({
+  const sequentialDeckNoOrder = new Flashcards<boolean, void>({
     assignments: {},
     checkAnswer: () => true,
     checkSuccess: () => true,
@@ -239,7 +239,7 @@ Deno.test('scheduler sorting methods', () => {
     }
   }
 
-  const learnDeck = new Flashcards<boolean>({
+  const learnDeck = new Flashcards<boolean, void>({
     assignments: {},
     checkAnswer: () => true,
     checkSuccess: () => true,
@@ -270,7 +270,7 @@ Deno.test('scheduler sorting methods', () => {
     }
   }
 
-  const quizDeck = new Flashcards<boolean>({
+  const quizDeck = new Flashcards<boolean, void>({
     assignments: quizAssignments,
     checkAnswer: () => true,
     checkSuccess: () => true,
