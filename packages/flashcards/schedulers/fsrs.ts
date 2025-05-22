@@ -108,7 +108,7 @@ export default class FsrsScheduler extends Scheduler<number> {
   }
 
   /**
-   * Sort by due date (oldest first). If same day, sort randomly
+   * Sort by due date (oldest first). If same day, sort randomly.
    */
   override sort(
     [_subjectA, assignmentA]: [Subject, Assignment],

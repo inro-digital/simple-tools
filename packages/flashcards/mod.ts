@@ -182,8 +182,10 @@ export default class Flashcards<Q, A> extends State<FlashcardsState<Q>> {
     return Object.keys(this.#subjects)
       .map((id) => {
         const { lastStudiedAt, startedAt } = this.state.assignments[id] || {}
-        if (isToday(startedAt)) this.#numLearnedToday++
-        else if (isToday(lastStudiedAt)) this.#numReviewedToday++
+        if (startedAt && isToday(startedAt)) this.#numLearnedToday++
+        else if (lastStudiedAt && isToday(lastStudiedAt)) {
+          this.#numReviewedToday++
+        }
         return this.#subjects[id]
       })
   }
