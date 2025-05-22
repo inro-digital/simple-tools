@@ -4,8 +4,8 @@
  * properties like the static scheduler. This combines features of both the
  * static and FSRS schedulers.
  */
-import { FSRS } from 'ts-fsrs'
-import { getNow } from '../../utils/datetime.ts'
+import { FSRS, State } from 'ts-fsrs'
+import { DAY_MS, getNow } from '../../utils/datetime.ts'
 import Scheduler from '../scheduler.ts'
 import type { Assignment, Subject } from '../types.ts'
 import { defaultParams, type Params, Quality } from './fsrs.ts'
@@ -31,16 +31,17 @@ export const defaultSRS: Record<number, FsrsSrs> = {
     name: 'Fast',
     unlocksAt: 0,
     startsAt: 1,
-    passesAt: 3, // Same threshold as Default for content unlocking
-    completesAt: 8, // Faster completion threshold than Default
+    passesAt: 3,
+    completesAt: 8,
     fsrsParams: {
       // deno-fmt-ignore
       w: [
-        0.3, 0.5, 2.0, 5.0, 4.5, 0.9, 0.8, 0.01, 1.3,
-        0.14, 0.9, 2.0, 0.05, 0.3, 1.2, 0.25, 2.5
+        0.1, 0.2, 0.8, 2.5, 2.0, 0.4, 0.5, 0.01, 0.7,
+        0.1, 0.5, 1.0, 0.05, 0.2, 0.8, 0.2, 1.0
       ],
-      requestRetention: 0.85,
-      maximumInterval: 36500,
+      requestRetention: 0.70, // Lower retention for faster initial intervals
+      maximumInterval: 36500, // Keep original high maximum interval
+      enableShortTerm: true,
     },
   },
 }
@@ -108,7 +109,7 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
   constructor({ srs, userLevel, fsrsParams }: Partial<{
     srs: Record<number, FsrsSrs>
     userLevel: number
-    fsrsParams: Params
+    fsrsParams: Partial<Params>
   }> = {}) {
     super()
     this.#srs = srs || this.#srs || defaultSRS
@@ -141,6 +142,8 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
       lastStudiedAt: now,
       interval: 0,
       repetition: 0,
+      steps: 0,
+      state: State.New,
       unlockedAt: now,
       availableAt: now,
       startedAt: now,
@@ -252,7 +255,7 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
    * 4 = Easy
    */
   override update(
-    rating: number,
+    rating: Quality,
     subject: Subject,
     assignment: Assignment,
   ): Assignment {
@@ -260,44 +263,40 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
     const srs = this.#srs[srsId]
     if (!srs) throw new Error(`No SRS system defined for ${srsId}`)
 
-    const boundedRating = Math.min(
-      Math.max(Math.round(rating), Quality.Again),
-      Quality.Easy,
-    )
-
     const now = getNow()
     const lastStudiedAt = assignment.lastStudiedAt || now
     const fsrs = this.#fsrsInstances[srsId]
 
-    // Create card input for FSRS
-    const card = {
-      due: assignment.availableAt || now,
-      stability: assignment.stability || 0,
-      difficulty: assignment.difficulty || 0.3,
-      elapsed_days: (now.getTime() - lastStudiedAt.getTime()) /
-        (1000 * 60 * 60 * 24),
-      scheduled_days: assignment.interval || 0,
-      reps: assignment.repetition || 0,
-      lapses: 0,
-      state: assignment.repetition === 0 ? 0 : 2, // 0 = New, 2 = Review
-      learning_steps: 0,
-    }
+    const {
+      lapses = 0,
+      interval = 0,
+      repetition = 0,
+      stability = 0,
+      difficulty = 0.3,
+    } = assignment
 
     try {
-      // Get scheduling information from FSRS
-      // deno-lint-ignore no-explicit-any
-      const result = fsrs.repeat(card, now) as any
+      const result = fsrs.repeat({
+        due: assignment.availableAt || now,
+        stability,
+        difficulty,
+        elapsed_days: (now.getTime() - lastStudiedAt.getTime()) / DAY_MS,
+        scheduled_days: interval,
+        reps: repetition + lapses,
+        lapses,
+        last_review: assignment.lastStudiedAt,
+        state: assignment.state as State ||
+          (repetition === 0 ? State.New : State.Review),
+        learning_steps: assignment.steps || 0,
+      }, now)[rating]
 
-      // Extract the result based on the rating
-      // deno-lint-ignore no-explicit-any
-      const scheduled = result[boundedRating.toString()] as any
+      if (!result.card) return assignment
 
-      if (!scheduled || !scheduled.card) return assignment
+      const newInterval = Math.max(0.5, result.card.scheduled_days)
+      // Calculate next available date - convert days to milliseconds for more precise intervals
+      const nextAvailableDate = new Date(now.getTime() + (newInterval * DAY_MS))
 
-      // Calculate new values
-      // Use FSRS natural pacing with minimum interval of 6 hours (0.25 days)
-      const newInterval = Math.max(0.25, scheduled.card.scheduled_days)
-      const newRepetition = boundedRating === Quality.Again
+      const newRepetition = rating === Quality.Again
         ? 0
         : (assignment.repetition || 0) + 1
 
@@ -305,18 +304,21 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
       const isPassed = newRepetition >= srs.passesAt
       const isCompleted = newRepetition >= srs.completesAt
 
-      // Calculate next available date - convert days to milliseconds for more precise intervals
-      const nextAvailableDate = new Date(
-        now.getTime() + (newInterval * 24 * 60 * 60 * 1000),
-      )
+      const isOld = assignment.startedAt &&
+        ((getNow().getTime() - assignment.startedAt.getTime()) > (DAY_MS * 20))
 
       return {
         ...assignment,
-        stability: scheduled.card.stability,
-        difficulty: scheduled.card.difficulty,
-        lastStudiedAt: now,
+        state: (repetition > 5)
+          ? State.Review
+          : (isOld ? State.Learning : State.Relearning),
+        stability: result.card.stability,
+        difficulty: result.card.difficulty,
         interval: newInterval,
+        lastStudiedAt: now,
+        lapses: (rating < Quality.Good) ? (lapses + 1) : lapses,
         repetition: newRepetition,
+        steps: result.card.learning_steps,
         availableAt: nextAvailableDate,
         passedAt: isPassed && !assignment.passedAt ? now : assignment.passedAt,
         completedAt: isCompleted ? now : assignment.completedAt,
@@ -324,32 +326,54 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
     } catch (error) {
       console.error('FSRS error:', error)
 
-      // Fallback implementation if FSRS fails - allow shorter intervals for better pacing
+      // Fallback implementation if FSRS fails
       let newInterval = Math.max(0.25, (assignment.interval || 0) * 2.5) // easy
-      if (boundedRating === Quality.Again) newInterval = 0.25 // 6 hours
-      else if (boundedRating === Quality.Hard) newInterval = 1 // 1 day
-      else if (boundedRating === Quality.Good) newInterval = 3 // 3 days
+      if (rating === Quality.Again) newInterval = 0.25 // 6 hours
+      else if (rating === Quality.Hard) newInterval = 1 // 1 day
+      else if (rating === Quality.Good) newInterval = 3 // 3 days
 
-      const newRepetition = boundedRating === Quality.Again
+      // Fallback for Fast SRS (id 2)
+      // Use more aggressive fallback intervals for early learning
+      if (srsId === 2) {
+        const isNew = (assignment.repetition || 0) < 3
+        if (rating === Quality.Again) {
+          newInterval = 0.25 // 6 hours
+        } else if (rating === Quality.Hard) {
+          newInterval = isNew ? 0.5 : 0.75 // 12 hours early, 18 hours later
+        } else if (rating === Quality.Good) {
+          // Cap at 1 day for early learning, otherwise use standard formula
+          newInterval = isNew
+            ? Math.min(1, newInterval)
+            : Math.max(newInterval, 1)
+        } else if (rating === Quality.Easy) {
+          // Cap at 1.5 days for early learning, otherwise standard
+          newInterval = isNew
+            ? Math.min(1.5, newInterval)
+            : Math.max(newInterval, 1.5)
+        }
+      }
+
+      const newRepetition = rating === Quality.Again
         ? 0
         : (assignment.repetition || 0) + 1
       const isPassed = newRepetition >= srs.passesAt
       const isCompleted = newRepetition >= srs.completesAt
 
       const nextAvailableDate = new Date(
-        now.getTime() + (newInterval * 24 * 60 * 60 * 1000),
+        now.getTime() + (newInterval * DAY_MS),
       )
 
       return {
         ...assignment,
-        stability: (assignment.stability || 0) + (boundedRating - 1),
+        stability: stability + (rating - 1),
         difficulty: Math.max(
           0.1,
           Math.min(
             1.0,
-            (assignment.difficulty || 0.3) - (0.1 * (boundedRating - 3)),
+            difficulty - (0.1 * (rating - 3)),
           ),
         ),
+        lapses: (rating < Quality.Good) ? (lapses + 1) : lapses,
         lastStudiedAt: now,
         interval: newInterval,
         repetition: newRepetition,

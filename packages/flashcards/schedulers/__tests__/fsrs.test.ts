@@ -1,9 +1,11 @@
 import { assert, assertEquals } from '@std/assert'
-import { getNow } from '../../../utils/datetime.ts'
+import { assertSnapshot } from '@std/testing/snapshot'
+import { getNow, setMockTime } from '../../../utils/datetime.ts'
 import type { Subject } from '../../types.ts'
 import FsrsScheduler, { Quality } from '../fsrs.ts'
+import type { Assignment } from '../../mod.ts'
 
-const { Good, Again } = Quality
+const { Good, Easy, Again, Hard } = Quality
 
 Deno.test('FsrsScheduler.add - initializes a new assignment correctly', () => {
   const fsrs = new FsrsScheduler()
@@ -137,4 +139,99 @@ Deno.test('FsrsScheduler.sort - sorts by due date with oldest first', () => {
     true,
     'Card due yesterday should come before card due tomorrow',
   )
+})
+
+Deno.test('FsrsScheduler.update - intervals', async (t) => {
+  try {
+    const testDate = new Date()
+    setMockTime(testDate)
+
+    const fsrs = new FsrsScheduler()
+    const subject: Subject = {
+      id: 'test-subject',
+      learnCards: [],
+      quizCards: [],
+      data: {},
+    }
+
+    let assignment: Assignment = fsrs.add(subject)
+
+    const intervals = [assignment.interval]
+    ;[
+      Hard,
+      Again,
+      Good,
+      Good,
+      Hard,
+      Hard,
+      Hard,
+      Good,
+      Easy,
+      Easy,
+      Easy,
+      Easy,
+      Easy,
+      Again,
+      Easy,
+      Easy,
+    ].forEach(
+      (grade) => {
+        assignment = fsrs.update(grade, subject, assignment)
+        intervals.push(assignment.interval)
+        const advanceDays = assignment.interval! + (10 / (24 * 60))
+
+        testDate.setDate(testDate.getDate() + Math.floor(advanceDays))
+        testDate.setHours(
+          testDate.getHours() + Math.floor((advanceDays % 1) * 24),
+        )
+      },
+    )
+    await assertSnapshot(t, intervals, 'intervals')
+  } finally {
+    setMockTime(null)
+  }
+})
+
+Deno.test('FsrsScheduler.update - Good/Easy intervals', async (t) => {
+  try {
+    const testDate = new Date('2024-01-01')
+    setMockTime(testDate)
+
+    const fsrs = new FsrsScheduler()
+    const subject1: Subject = {
+      id: 'test-subject',
+      learnCards: [],
+      quizCards: [],
+      data: {},
+    }
+    const subject2: Subject = {
+      id: 'test-subject',
+      learnCards: [],
+      quizCards: [],
+      data: {},
+    }
+
+    let assignment1: Assignment = fsrs.add(subject1)
+    let assignment2: Assignment = fsrs.add(subject2)
+
+    const intervals1 = [assignment1.interval]
+    const intervals2 = [assignment2.interval]
+    for (let i = 0; i < 3; i++) {
+      assignment1 = fsrs.update(Good, subject1, assignment1)
+      assignment2 = fsrs.update(Easy, subject2, assignment2)
+      intervals1.push(assignment1.interval)
+      intervals2.push(assignment2.interval)
+      const maxTime = Math.max(assignment1.interval!, assignment2.interval!)
+      const advanceDays = maxTime + (10 / (24 * 60))
+      testDate.setDate(testDate.getDate() + Math.floor(advanceDays))
+      testDate.setHours(
+        testDate.getHours() + Math.floor((advanceDays % 1) * 24),
+      )
+      setMockTime(testDate)
+    }
+    await assertSnapshot(t, intervals1, 'good')
+    await assertSnapshot(t, intervals2, 'easy')
+  } finally {
+    setMockTime(null)
+  }
 })

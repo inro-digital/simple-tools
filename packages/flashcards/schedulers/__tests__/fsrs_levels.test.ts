@@ -1,6 +1,7 @@
 import { assert, assertEquals } from '@std/assert'
 import type { Assignment, Subject } from '../../types.ts'
 import FsrsLevelsScheduler, { Quality } from '../fsrs_levels.ts'
+import { assertSnapshot } from '@std/testing/snapshot'
 
 const subjects: Subject[] = [
   {
@@ -72,11 +73,13 @@ Deno.test('FsrsLevelsScheduler - filter by level', () => {
   assertEquals(scheduler.filter(subjects[2], assignment3), true, 'lvl2 visible')
 })
 
-Deno.test('FsrsLevelsScheduler - update assignment with Default SRS', () => {
+Deno.test('FsrsLevelsScheduler - update assignment with Default SRS', async (t) => {
   const scheduler = new FsrsLevelsScheduler({ userLevel: 2 })
   const assignment = scheduler.add(subjects[0])
+  const intervals = []
 
-  const updated = scheduler.update(Quality.Good, subjects[0], assignment)
+  let updated = scheduler.update(Quality.Good, subjects[0], assignment)
+  intervals.push(updated.interval)
   assertEquals(updated.subjectId, 'subject-1')
   assertEquals(updated.repetition, 1, '1 rep')
   assertEquals(updated.startedAt instanceof Date, true)
@@ -88,59 +91,63 @@ Deno.test('FsrsLevelsScheduler - update assignment with Default SRS', () => {
   assertEquals(updated?.interval && updated?.interval > 0, true)
 
   // Study to reach passesAt threshold (3 repetitions)
-  const updated2 = scheduler.update(Quality.Good, subjects[0], updated)
-  const updated3 = scheduler.update(Quality.Good, subjects[0], updated2)
+  updated = scheduler.update(Quality.Good, subjects[0], updated)
+  intervals.push(updated.interval)
+  updated = scheduler.update(Quality.Good, subjects[0], updated)
+  intervals.push(updated.interval)
 
-  assertEquals(updated3.repetition, 3, '3 reps')
-  assertEquals(updated3.passedAt instanceof Date, true, 'passed after 3 reps')
-  assertEquals(updated3.completedAt, undefined, 'not completed (needs 10 reps)')
+  assertEquals(updated.repetition, 3, '3 reps')
+  assertEquals(updated.passedAt instanceof Date, true, 'passed after 3 reps')
+  assertEquals(updated.completedAt, undefined, 'not completed (needs 10 reps)')
 
-  // Study to reach completesAt threshold (10 repetitions)
-  const updated4 = scheduler.update(Quality.Good, subjects[0], updated3)
-  const updated5 = scheduler.update(Quality.Good, subjects[0], updated4)
-  const updated6 = scheduler.update(Quality.Good, subjects[0], updated5)
-  const updated7 = scheduler.update(Quality.Good, subjects[0], updated6)
-  const updated8 = scheduler.update(Quality.Good, subjects[0], updated7)
-  const updated9 = scheduler.update(Quality.Good, subjects[0], updated8)
-  const updated10 = scheduler.update(Quality.Good, subjects[0], updated9)
+  // Study to reach completesAt threshold
+  for (let i = 0; i < 7; i++) {
+    updated = scheduler.update(Quality.Good, subjects[0], updated)
+    intervals.push(updated.interval)
+  }
 
-  assertEquals(updated10.repetition, 10, '10 reps')
+  assertEquals(updated.repetition, 10, '10 reps')
   assertEquals(
-    updated10.completedAt instanceof Date,
+    updated.completedAt instanceof Date,
     true,
     'completed after 10 reps',
   )
+  await assertSnapshot(t, intervals)
 })
 
-Deno.test('FsrsLevelsScheduler - update assignment with Fast SRS', () => {
+Deno.test('FsrsLevelsScheduler - update assignment with Fast SRS', async (t) => {
   const scheduler = new FsrsLevelsScheduler({ userLevel: 2 })
   const assignment = scheduler.add(subjects[2]) // Using subject with srsId: 2 (Fast)
+  const intervals = []
 
-  const updated = scheduler.update(Quality.Good, subjects[2], assignment)
+  let updated = scheduler.update(Quality.Good, subjects[2], assignment)
+  intervals.push(updated.interval)
   assertEquals(updated.repetition, 1, '1 rep')
   assertEquals(updated.passedAt, undefined, 'not passed, needs 3 reps')
 
   // Study to reach passesAt threshold (3 repetitions)
-  const updated2 = scheduler.update(Quality.Good, subjects[2], updated)
-  const updated3 = scheduler.update(Quality.Good, subjects[2], updated2)
+  updated = scheduler.update(Quality.Good, subjects[2], updated)
+  intervals.push(updated.interval)
+  updated = scheduler.update(Quality.Good, subjects[2], updated)
+  intervals.push(updated.interval)
 
-  assertEquals(updated3.repetition, 3, '3 reps')
-  assertEquals(updated3.passedAt instanceof Date, true, 'passed after 3 reps')
-  assertEquals(updated3.completedAt, undefined, 'not completed (needs 8 reps)')
+  assertEquals(updated.repetition, 3, '3 reps')
+  assertEquals(updated.passedAt instanceof Date, true, 'passed after 3 reps')
+  assertEquals(updated.completedAt, undefined, 'not completed (needs 8 reps)')
 
   // Continue studying to reach completesAt threshold (8 repetitions)
-  const updated4 = scheduler.update(Quality.Good, subjects[2], updated3)
-  const updated5 = scheduler.update(Quality.Good, subjects[2], updated4)
-  const updated6 = scheduler.update(Quality.Good, subjects[2], updated5)
-  const updated7 = scheduler.update(Quality.Good, subjects[2], updated6)
-  const updated8 = scheduler.update(Quality.Good, subjects[2], updated7)
+  for (let i = 0; i < 5; i++) {
+    updated = scheduler.update(Quality.Good, subjects[2], updated)
+    intervals.push(updated.interval)
+  }
 
-  assertEquals(updated8.repetition, 8, '8 reps')
+  assertEquals(updated.repetition, 8, '8 reps')
   assertEquals(
-    updated8.completedAt instanceof Date,
+    updated.completedAt instanceof Date,
     true,
     'completed after 8 reps',
   )
+  await assertSnapshot(t, intervals)
 })
 
 Deno.test('FsrsLevelsScheduler - failed card resets repetition', () => {
@@ -196,7 +203,6 @@ Deno.test('FsrsLevelsScheduler - sort works correctly', () => {
     'earlier due date with equal everything else',
   )
 })
-
 Deno.test('FsrsLevelsScheduler - fractional day intervals', () => {
   const scheduler = new FsrsLevelsScheduler({ userLevel: 2 })
   const assignment = scheduler.add(subjects[0])

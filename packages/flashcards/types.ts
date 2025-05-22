@@ -32,6 +32,8 @@ export interface Assignment {
   efactor?: number
   /** number represeting time until next study; usually seconds or days */
   interval?: number
+  /** number represeting times user remembered incorrectly */
+  lapses?: number
   /** last datetime the card was updated */
   lastStudiedAt?: Date
   /** user has manually marked subject as completed; reversible */
@@ -44,6 +46,10 @@ export interface Assignment {
   subjectId: string
   /** stability factor for FSRS algorithm */
   stability?: number
+  /** eg New, Learning, Review, Relearning */
+  state?: number | string
+  /** Keeps track of the current step during the (re)learning stages */
+  steps?: number
   /** user has learned the subject */
   startedAt?: Date
   /** subject is available to be learned */
