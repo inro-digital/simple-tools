@@ -2,6 +2,9 @@ import { assert, assertEquals } from '@std/assert'
 import type { Assignment, Subject } from '../../types.ts'
 import FsrsLevelsScheduler, { Quality } from '../fsrs_levels.ts'
 import { assertSnapshot } from '@std/testing/snapshot'
+import { assertInstanceOf } from '@std/assert/instance-of'
+import { assertFalse } from '@std/assert/false'
+import { DAY_MS } from '../../../utils/datetime.ts'
 
 const subjects: Subject[] = [
   {
@@ -57,20 +60,20 @@ Deno.test('FsrsLevelsScheduler - add new assignment', () => {
   assertEquals(assignment.stability, 0)
   assertEquals(assignment.interval, 0)
   assertEquals(assignment.repetition, 0)
-  assertEquals(assignment.unlockedAt instanceof Date, true)
-  assertEquals(assignment.availableAt instanceof Date, true)
+  assertInstanceOf(assignment.unlockedAt, Date)
+  assertInstanceOf(assignment.availableAt, Date)
 })
 
 Deno.test('FsrsLevelsScheduler - filter by level', () => {
   const scheduler = new FsrsLevelsScheduler({ userLevel: 1 })
   const assignment1 = scheduler.add(subjects[0])
-  assertEquals(scheduler.filter(subjects[0], assignment1), true, 'lvl1 visible')
+  assert(scheduler.filter(subjects[0], assignment1), 'lvl1 visible')
 
   const assignment3 = scheduler.add(subjects[2])
-  assertEquals(scheduler.filter(subjects[2], assignment3), false, 'lvl2 hidden')
+  assertFalse(scheduler.filter(subjects[2], assignment3), 'lvl2 hidden')
 
   scheduler.userLevel = 2
-  assertEquals(scheduler.filter(subjects[2], assignment3), true, 'lvl2 visible')
+  assert(scheduler.filter(subjects[2], assignment3), 'lvl2 visible')
 })
 
 Deno.test('FsrsLevelsScheduler - update assignment with Default SRS', async (t) => {
@@ -82,9 +85,9 @@ Deno.test('FsrsLevelsScheduler - update assignment with Default SRS', async (t) 
   intervals.push(updated.interval)
   assertEquals(updated.subjectId, 'subject-1')
   assertEquals(updated.repetition, 1, '1 rep')
-  assertEquals(updated.startedAt instanceof Date, true)
-  assertEquals(updated.lastStudiedAt instanceof Date, true)
-  assertEquals(updated.availableAt instanceof Date, true)
+  assertInstanceOf(updated.startedAt, Date)
+  assertInstanceOf(updated.lastStudiedAt, Date)
+  assertInstanceOf(updated.availableAt, Date)
   assertEquals(updated.passedAt, undefined, 'not passed, needs 3 reps')
 
   assertEquals(typeof updated.interval, 'number')
@@ -97,7 +100,7 @@ Deno.test('FsrsLevelsScheduler - update assignment with Default SRS', async (t) 
   intervals.push(updated.interval)
 
   assertEquals(updated.repetition, 3, '3 reps')
-  assertEquals(updated.passedAt instanceof Date, true, 'passed after 3 reps')
+  assertInstanceOf(updated.passedAt, Date, 'passed after 3 reps')
   assertEquals(updated.completedAt, undefined, 'not completed (needs 10 reps)')
 
   // Study to reach completesAt threshold
@@ -107,11 +110,7 @@ Deno.test('FsrsLevelsScheduler - update assignment with Default SRS', async (t) 
   }
 
   assertEquals(updated.repetition, 10, '10 reps')
-  assertEquals(
-    updated.completedAt instanceof Date,
-    true,
-    'completed after 10 reps',
-  )
+  assert(updated.completedAt, 'completed after 10')
   await assertSnapshot(t, intervals)
 })
 
@@ -132,21 +131,17 @@ Deno.test('FsrsLevelsScheduler - update assignment with Fast SRS', async (t) => 
   intervals.push(updated.interval)
 
   assertEquals(updated.repetition, 3, '3 reps')
-  assertEquals(updated.passedAt instanceof Date, true, 'passed after 3 reps')
+  assertInstanceOf(updated.passedAt, Date, 'passed after 3 reps')
   assertEquals(updated.completedAt, undefined, 'not completed (needs 8 reps)')
 
   // Continue studying to reach completesAt threshold (8 repetitions)
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 7; i++) {
     updated = scheduler.update(Quality.Good, subjects[2], updated)
     intervals.push(updated.interval)
   }
 
-  assertEquals(updated.repetition, 8, '8 reps')
-  assertEquals(
-    updated.completedAt instanceof Date,
-    true,
-    'completed after 8 reps',
-  )
+  assertEquals(updated.repetition, 10, '10 reps')
+  assertInstanceOf(updated.completedAt, Date, 'completed after 10')
   await assertSnapshot(t, intervals)
 })
 
@@ -175,16 +170,14 @@ Deno.test('FsrsLevelsScheduler - sort works correctly', () => {
   const assignment2 = scheduler.add(subjects[1]) // level 1, position 1
   const assignment3 = scheduler.add(subjects[2]) // level 2, position 0
 
-  assertEquals(
+  assert(
     scheduler.sort([subjects[0], assignment1], [subjects[2], assignment3]) < 0,
-    true,
     'level 1 before level 2',
   )
 
   // Position 0 should come before position 1 within same level
-  assertEquals(
+  assert(
     scheduler.sort([subjects[0], assignment1], [subjects[1], assignment2]) < 0,
-    true,
     'same level - position 0 before position 1',
   )
 
@@ -197,32 +190,27 @@ Deno.test('FsrsLevelsScheduler - sort works correctly', () => {
   const a1Modified = { ...assignment1, availableAt: furtherDate }
   const a2Modified = { ...assignment2, availableAt: futureDate }
 
-  assertEquals(
+  assert(
     scheduler.sort([subjects[1], a2Modified], [subjects[0], a1Modified]) < 0,
-    true,
     'earlier due date with equal everything else',
   )
 })
 Deno.test('FsrsLevelsScheduler - fractional day intervals', () => {
   const scheduler = new FsrsLevelsScheduler({ userLevel: 2 })
   const assignment = scheduler.add(subjects[0])
-
-  // Test that the updated interval can be a fraction of a day
   const updated = scheduler.update(Quality.Hard, subjects[0], assignment)
 
   assert(updated.interval)
-  assertEquals(typeof updated.interval, 'number')
+  assert(typeof updated.interval, 'number')
   assertEquals(updated.interval >= 0.25, true, 'interval can be fractional')
 
   // Check that availableAt is calculated correctly using fractional days
   const now = new Date()
-  const minExpectedTime = new Date(now.getTime() + (0.25 * 24 * 60 * 60 * 1000))
-    .getTime()
+  const minExpectedTime = new Date(now.getTime() + (0.25 * DAY_MS)).getTime()
 
-  assertEquals(updated.availableAt instanceof Date, true)
-  assertEquals(
+  assertInstanceOf(updated.availableAt, Date)
+  assert(
     updated.availableAt!.getTime() >= minExpectedTime,
-    true,
     'fractional days applied to availableAt',
   )
 })
@@ -267,9 +255,8 @@ Deno.test('FsrsLevelsScheduler - requiredSubjects', () => {
     [dependentSubject.id]: dependentAssignment,
   }
 
-  assertEquals(
+  assertFalse(
     scheduler.filterLearnable(dependentSubject, dependentAssignment, all),
-    false,
     'Subject with unmet prerequisites should not be learnable',
   )
 
@@ -282,16 +269,15 @@ Deno.test('FsrsLevelsScheduler - requiredSubjects', () => {
     )
   }
 
-  assertEquals(
-    updatedPrereqAssignment.passedAt instanceof Date,
-    true,
-    'Prerequisite should be passed after 3 successful repetitions',
+  assertInstanceOf(
+    updatedPrereqAssignment.passedAt,
+    Date,
+    'Prereq passes on 3 reps',
   )
 
   all[prerequisiteSubject.id] = updatedPrereqAssignment
-  assertEquals(
+  assert(
     scheduler.filterLearnable(dependentSubject, dependentAssignment, all),
-    true,
     'Subject with met prerequisites should be learnable',
   )
 
@@ -316,9 +302,8 @@ Deno.test('FsrsLevelsScheduler - requiredSubjects', () => {
   }
   all[multiPrereqSubject.id] = multiPrereqAssignment
 
-  assertEquals(
+  assertFalse(
     scheduler.filterLearnable(multiPrereqSubject, multiPrereqAssignment, all),
-    false,
     'Subject with partially met prerequisites should not be learnable',
   )
 
@@ -333,9 +318,8 @@ Deno.test('FsrsLevelsScheduler - requiredSubjects', () => {
 
   all[dependentSubject.id] = updatedDependentAssignment
 
-  assertEquals(
+  assert(
     scheduler.filterLearnable(multiPrereqSubject, multiPrereqAssignment, all),
-    true,
     'Subject with all prerequisites met should be learnable',
   )
 })

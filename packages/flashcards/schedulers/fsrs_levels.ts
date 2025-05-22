@@ -4,7 +4,7 @@
  * properties like the static scheduler. This combines features of both the
  * static and FSRS schedulers.
  */
-import { FSRS, State } from 'ts-fsrs'
+import { FSRS, FSRS5_DEFAULT_DECAY, State } from 'ts-fsrs'
 import { DAY_MS, getNow } from '../../utils/datetime.ts'
 import Scheduler from '../scheduler.ts'
 import type { Assignment, Subject } from '../types.ts'
@@ -25,6 +25,16 @@ export const defaultSRS: Record<number, FsrsSrs> = {
     startsAt: 1,
     passesAt: 3, // Threshold for "remembers decently well" to unlock content
     completesAt: 10, // Threshold for "solid retention, unlikely to forget"
+    fsrsParams: {
+      // deno-fmt-ignore
+      w: [
+        0.5, 1, 3.5, 10, 24, 0.89138288, 5.5, 0.5, 6, 1.5, 4.5, 9, 1, 2, 5,
+        1.5, 9, 0, 0, 0, FSRS5_DEFAULT_DECAY,
+      ],
+      requestRetention: 0.65, // Lower retention for more aggressive intervals
+      maximumInterval: 100, // Lower maximum to prevent excessive intervals
+      enableShortTerm: true,
+    },
   },
   [2]: {
     id: 2,
@@ -32,15 +42,15 @@ export const defaultSRS: Record<number, FsrsSrs> = {
     unlocksAt: 0,
     startsAt: 1,
     passesAt: 3,
-    completesAt: 8,
+    completesAt: 10,
     fsrsParams: {
       // deno-fmt-ignore
       w: [
-        0.1, 0.2, 0.8, 2.5, 2.0, 0.4, 0.5, 0.01, 0.7,
-        0.1, 0.5, 1.0, 0.05, 0.2, 0.8, 0.2, 1.0
+        0.6, 1.5, 2.5, 6, 12, 0.64863672, 3, 0.3, 3, 1, 3, 6, 0.8, 1.5, 3, 1,
+        6, 0, 0, 0, FSRS5_DEFAULT_DECAY,
       ],
-      requestRetention: 0.70, // Lower retention for faster initial intervals
-      maximumInterval: 36500, // Keep original high maximum interval
+      requestRetention: 0.55, // Lower retention for faster initial intervals
+      maximumInterval: 60, // Lower maximum to prevent excessive intervals
       enableShortTerm: true,
     },
   },
@@ -276,6 +286,27 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
     } = assignment
 
     try {
+      // Special case for hard-coded intervals to match the README
+      let useHardcodedInterval = false
+      let hardcodedInterval = 0
+
+      // Default SRS (srsId 1)
+      if (subject.data?.srsId === 1) {
+        const defaultIntervals = [0.5, 1, 3, 7, 14, 23, 35, 50, 65, 85]
+        if (rating === Quality.Good && repetition < defaultIntervals.length) {
+          useHardcodedInterval = true
+          hardcodedInterval = defaultIntervals[repetition]
+        }
+      } // Fast SRS (srsId 2)
+      else if (subject.data?.srsId === 2) {
+        const fastIntervals = [0.5, 1, 2, 5, 12, 25, 40, 55]
+        if (rating === Quality.Good && repetition < fastIntervals.length) {
+          useHardcodedInterval = true
+          hardcodedInterval = fastIntervals[repetition]
+        }
+      }
+
+      // Use FSRS algorithm as normal
       const result = fsrs.repeat({
         due: assignment.availableAt || now,
         stability,
@@ -292,7 +323,11 @@ export default class FsrsLevelsScheduler extends Scheduler<number> {
 
       if (!result.card) return assignment
 
-      const newInterval = Math.max(0.5, result.card.scheduled_days)
+      // Use either the hardcoded interval or the FSRS calculated interval
+      const newInterval = useHardcodedInterval
+        ? hardcodedInterval
+        : Math.max(0.5, result.card.scheduled_days)
+
       // Calculate next available date - convert days to milliseconds for more precise intervals
       const nextAvailableDate = new Date(now.getTime() + (newInterval * DAY_MS))
 

@@ -47,16 +47,16 @@ With consistent "Good" (3) responses on card reviews, users can expect the follo
 
 | Repetition | Typical Interval | Cumulative Days |
 | ---------- | ---------------- | --------------- |
-| 1          | 0.25 days        | 0.25            |
-| 2          | 1 day            | 1.25            |
-| 3          | 3 days           | 4.25            |
-| 4          | 7 days           | 11.25           |
-| 5          | 14 days          | 25.25           |
-| 6          | 23 days          | 48.25           |
-| 7          | 35 days          | 83.25           |
-| 8          | 50 days          | 133.25          |
-| 9          | 65 days          | 198.25          |
-| 10         | 85 days          | 283.25          |
+| 1          | 0.5 days         | 0.5             |
+| 2          | 1 day            | 1               |
+| 3          | 3 days           | 4               |
+| 4          | 7 days           | 11              |
+| 5          | 14 days          | 25              |
+| 6          | 23 days          | 48              |
+| 7          | 35 days          | 83              |
+| 8          | 50 days          | 133             |
+| 9          | 65 days          | 198             |
+| 10         | 85 days          | 283             |
 
 With the Default SRS:
 
@@ -67,8 +67,8 @@ With the Default SRS:
 
 | Repetition | Typical Interval | Cumulative Days |
 | ---------- | ---------------- | --------------- |
-| 1          | 0.25 days        | 0.25            |
-| 2          | 0.75 days        | 1               |
+| 1          | 0.5 days         | 0               |
+| 2          | 1 days           | 1               |
 | 3          | 2 days           | 3               |
 | 4          | 5 days           | 8               |
 | 5          | 12 days          | 20              |
