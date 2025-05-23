@@ -39,6 +39,7 @@ Deno.test('FsrsScheduler.filter - filters out completed cards', () => {
     markedCompleted: true,
     interval: 0,
     repetition: 0,
+    startedAt: new Date(),
   }
 
   assertEquals(fsrs.filter(subject, assignment), false)
@@ -60,6 +61,7 @@ Deno.test('FsrsScheduler.filter - includes cards due today or earlier', () => {
     lastStudiedAt: new Date(now.getTime() - 24 * 60 * 60 * 1000), // yesterday
     interval: 1,
     repetition: 1,
+    startedAt: new Date(),
   }
 
   assertEquals(fsrs.filter(subject, yesterdayAssignment), true)

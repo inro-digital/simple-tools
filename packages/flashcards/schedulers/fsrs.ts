@@ -97,14 +97,24 @@ export default class FsrsScheduler extends Scheduler<number> {
     }
   }
 
+  /** Only show cards that haven't been started */
+  override filterLearnable(_subject: Subject, assignment: Assignment): boolean {
+    if (assignment?.startedAt) return false
+    return true
+  }
+
   /**
    * Only show cards that have a due date today or in the past
    */
-  override filter(_subject: Subject, assignment: Assignment): boolean {
-    if (!assignment) return true
+  override filterQuizzable(_subject: Subject, assignment: Assignment): boolean {
+    if (!assignment?.startedAt) return false
     if (assignment?.markedCompleted) return false
     const due = getDueDate(assignment)
     return !due || (due <= getNow())
+  }
+
+  override filter(subject: Subject, assignment: Assignment): boolean {
+    return this.filterQuizzable(subject, assignment)
   }
 
   /**
