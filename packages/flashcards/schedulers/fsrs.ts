@@ -97,6 +97,11 @@ export default class FsrsScheduler extends Scheduler<number> {
     }
   }
 
+  override filter(subject: Subject, assignment: Assignment): boolean {
+    return this.filterLearnable(subject, assignment) ||
+      this.filterQuizzable(subject, assignment)
+  }
+
   /** Only show cards that haven't been started */
   override filterLearnable(_subject: Subject, assignment: Assignment): boolean {
     if (assignment?.startedAt) return false
@@ -111,10 +116,6 @@ export default class FsrsScheduler extends Scheduler<number> {
     if (assignment?.markedCompleted) return false
     const due = getDueDate(assignment)
     return !due || (due <= getNow())
-  }
-
-  override filter(subject: Subject, assignment: Assignment): boolean {
-    return this.filterQuizzable(subject, assignment)
   }
 
   /**
