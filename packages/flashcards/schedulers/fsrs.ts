@@ -187,7 +187,7 @@ export default class FsrsScheduler extends Scheduler<number> {
           : (isOld ? State.Learning : State.Relearning),
         stability: result.card.stability,
         difficulty: result.card.difficulty,
-        interval: result.card.scheduled_days,
+        interval: Math.max(0.5, result.card.scheduled_days),
         lapses: (rating < Quality.Good) ? lapses + 1 : lapses,
         lastStudiedAt: now,
         repetition: (rating === 1) ? 0 : repetition + 1,
@@ -213,7 +213,7 @@ export default class FsrsScheduler extends Scheduler<number> {
         ),
         lapses: (rating < Quality.Good) ? lapses + 1 : lapses,
         lastStudiedAt: now,
-        interval: newInterval,
+        interval: Math.max(0.5, newInterval),
         repetition: (rating === 1) ? 0 : repetition + 1,
       }
     }
