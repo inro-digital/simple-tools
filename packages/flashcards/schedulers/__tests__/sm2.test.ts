@@ -1,8 +1,8 @@
 import { assert, assertEquals, assertNotEquals } from '@std/assert'
 import { FakeTime } from '@std/testing/time'
-import Sm2Scheduler, { Quality } from '../sm2.ts'
+import { Sm2Quality, Sm2Scheduler } from '../sm2.ts'
 
-const { BarelyCorrect, Blackout, Correct, AlmostCorrect, Perfect } = Quality
+const { BarelyCorrect, Blackout, Correct, AlmostCorrect, Perfect } = Sm2Quality
 
 const ms = 1500000000000
 const oneDayMS = 86_400_000

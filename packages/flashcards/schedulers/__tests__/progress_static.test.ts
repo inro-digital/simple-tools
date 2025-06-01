@@ -1,6 +1,10 @@
 import { assert, assertEquals } from '@std/assert'
 import type { Assignment, Subject } from '../../types.ts'
-import StaticScheduler, { type Srs } from '../static.ts'
+import {
+  type Srs,
+  StaticProgressScheduler,
+  StaticQuality,
+} from '../progress_static.ts'
 
 const srs: Record<number, Srs> = {
   [1]: {
@@ -57,7 +61,7 @@ const sC = {
 }
 
 Deno.test('init', () => {
-  const sched = new StaticScheduler({ srs, userLevel: 2 })
+  const sched = new StaticProgressScheduler({ srs, userLevel: 2 })
   const assignment = sched.add(sA)
   assert(assignment.availableAt, 'should be available')
   assertEquals(assignment.efactor, 0, 'should start at efactor 0')
@@ -65,7 +69,7 @@ Deno.test('init', () => {
 })
 
 Deno.test('filter', () => {
-  const sched = new StaticScheduler({ srs, userLevel: 2 })
+  const sched = new StaticProgressScheduler({ srs, userLevel: 2 })
   let aA = { ...sched.add(sA), markedCompleted: true }
   assert(sched.filter(sA, aA) === false, 'false if marked complete')
 
@@ -77,7 +81,7 @@ Deno.test('filter', () => {
 })
 
 Deno.test('sort', () => {
-  const sched = new StaticScheduler({ srs, userLevel: 2 })
+  const sched = new StaticProgressScheduler({ srs, userLevel: 2 })
   const aA = sched.add(sA)
   const aB = sched.add(sB)
   const aC = sched.add(sC)
@@ -89,7 +93,7 @@ Deno.test('sort', () => {
 })
 
 Deno.test('requiredSubjects', () => {
-  const sched = new StaticScheduler({ srs, userLevel: 10 })
+  const sched = new StaticProgressScheduler({ srs, userLevel: 10 })
 
   const subjectWithPrereq: Subject = {
     id: 'subject-with-prereq',
@@ -172,17 +176,17 @@ Deno.test('requiredSubjects', () => {
 })
 
 Deno.test('update', () => {
-  const sched = new StaticScheduler({ srs, userLevel: 2 })
+  const sched = new StaticProgressScheduler({ srs, userLevel: 2 })
 
-  const success = sched.update(true, sA, sched.add(sA))
+  const success = sched.update(StaticQuality.Correct, sA, sched.add(sA))
   assertEquals(success.efactor, 1, 'on success: efactor++')
   assertEquals(success.interval, srs[1].intervals[1], 'on success: interval')
 
-  const success2 = sched.update(true, sA, success)
+  const success2 = sched.update(StaticQuality.Correct, sA, success)
   assertEquals(success2.efactor, 2, 'on success: efactor++')
   assertEquals(success2.interval, srs[1].intervals[2], 'on success: interval')
 
-  const failure = sched.update(false, sA, success2)
+  const failure = sched.update(StaticQuality.Incorrect, sA, success2)
   assertEquals(failure.efactor, 1, 'on fail: efactor--')
   assertEquals(failure.interval, srs[1].intervals[1], 'on fail: interval')
 })

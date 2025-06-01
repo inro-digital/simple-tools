@@ -7,16 +7,7 @@ export * from './calculator/mod.ts'
 
 export { default as Flashcards } from './flashcards/mod.ts'
 export * from './flashcards/mod.ts'
-export { default as Basic } from './flashcards/schedulers/basic.ts'
-export { default as Sm2 } from './flashcards/schedulers/sm2.ts'
-export { default as Static } from './flashcards/schedulers/static.ts'
-export * from './flashcards/schedulers/static.ts'
-export { default as Fsrs } from './flashcards/schedulers/fsrs.ts'
-export * from './flashcards/schedulers/fsrs.ts'
-export { default as FsrsLevels } from './flashcards/schedulers/fsrs_levels.ts'
-export * from './flashcards/schedulers/fsrs_levels.ts'
 
-export * from './flashcards/mod.ts'
 export { default as Countdown } from './timers/countdown.ts'
 export * from './timers/countdown.ts'
 export { default as Stopwatch } from './timers/stopwatch.ts'
@@ -27,6 +18,8 @@ export * from './todolist/mod.ts'
 
 export { default as Storage } from './utils/storage.ts'
 export * from './utils/storage.ts'
+
+export { default as IdbStorage } from './utils/storage/index_db_storage.ts'
 export { default as LocalStorage } from './utils/storage/local_storage.ts'
 export { default as DenoFsStorage } from './utils/storage/deno_fs_storage.ts'
 

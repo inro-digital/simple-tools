@@ -1,19 +1,18 @@
 import { assert, assertEquals } from '@std/assert'
 import type { Assignment, Subject } from '../../types.ts'
-import StaticProgressScheduler from '../static_progress.ts'
-import FsrsProgressScheduler, {
-  Quality as FsrsQuality,
-} from '../fsrs_progress.ts'
-import Sm2ProgressScheduler, { Quality as Sm2Quality } from '../sm2_progress.ts'
-import ProgressScheduler from '../progress_scheduler.ts'
-import StaticIntervalScheduler from '../static_intervals.ts'
-import FsrsScheduler from '../fsrs.ts'
-import Sm2Scheduler from '../sm2.ts'
 import {
-  efactorExtractor,
+  FsrsProgressScheduler,
+  FsrsQuality,
+  FsrsScheduler,
+  ProgressScheduler,
   type ProgressThresholds,
-  repetitionExtractor,
-} from '../../utils/progress.ts'
+  Sm2ProgressScheduler,
+  Sm2Quality,
+  Sm2Scheduler,
+  StaticProgressScheduler,
+  StaticQuality,
+  StaticScheduler,
+} from '../mod.ts'
 
 const testSubject: Subject = {
   id: 'test-subject',
@@ -39,31 +38,27 @@ const customThresholds: ProgressThresholds = {
 }
 
 Deno.test('Composable System - Any scheduler can be wrapped with progress', () => {
-  // Wrap pure FSRS with progress tracking
   const fsrsWithProgress = new ProgressScheduler({
     scheduler: new FsrsScheduler(),
     userLevel: 1,
     thresholds: customThresholds,
-    progressExtractor: repetitionExtractor,
+    progressExtractor: (assignment) => assignment?.repetition || 0,
   })
 
-  // Wrap pure SM2 with progress tracking
   const sm2WithProgress = new ProgressScheduler({
     scheduler: new Sm2Scheduler(),
     userLevel: 1,
     thresholds: customThresholds,
-    progressExtractor: repetitionExtractor,
+    progressExtractor: (assignment) => assignment?.repetition || 0,
   })
 
-  // Wrap static intervals with progress tracking
   const staticWithProgress = new ProgressScheduler({
-    scheduler: new StaticIntervalScheduler(),
+    scheduler: new StaticScheduler(),
     userLevel: 1,
     thresholds: customThresholds,
-    progressExtractor: efactorExtractor,
+    progressExtractor: (assignment) => assignment?.efactor || 0,
   })
 
-  // All should create assignments with progress data
   const fsrsAssignment = fsrsWithProgress.add(testSubject)
   const sm2Assignment = sm2WithProgress.add(testSubject)
   const staticAssignment = staticWithProgress.add(testSubject)
@@ -72,7 +67,6 @@ Deno.test('Composable System - Any scheduler can be wrapped with progress', () =
   assert(sm2Assignment.unlockedAt, 'SM2 assignment has unlock date')
   assert(staticAssignment.unlockedAt, 'Static assignment has unlock date')
 
-  // All should respect level filtering
   const higherLevelSubject = {
     ...testSubject,
     data: { ...testSubject.data, level: 5 },
@@ -97,7 +91,7 @@ Deno.test('Composable System - Different progress extractors work correctly', ()
     scheduler: new FsrsScheduler(),
     userLevel: 1,
     thresholds: customThresholds,
-    progressExtractor: repetitionExtractor,
+    progressExtractor: (assignment) => assignment?.repetition || 0,
   })
 
   let fsrsAssignment = fsrsScheduler.add(testSubject)
@@ -115,15 +109,23 @@ Deno.test('Composable System - Different progress extractors work correctly', ()
 
   // Test efactor-based progress (Static)
   const staticScheduler = new ProgressScheduler({
-    scheduler: new StaticIntervalScheduler(),
+    scheduler: new StaticScheduler(),
     userLevel: 1,
     thresholds: customThresholds,
-    progressExtractor: efactorExtractor,
+    progressExtractor: (assignment) => assignment?.efactor || 0,
   })
 
   let staticAssignment = staticScheduler.add(testSubject)
-  staticAssignment = staticScheduler.update(true, testSubject, staticAssignment)
-  staticAssignment = staticScheduler.update(true, testSubject, staticAssignment)
+  staticAssignment = staticScheduler.update(
+    StaticQuality.Correct,
+    testSubject,
+    staticAssignment,
+  )
+  staticAssignment = staticScheduler.update(
+    StaticQuality.Correct,
+    testSubject,
+    staticAssignment,
+  )
   assert(staticAssignment.passedAt, 'Static assignment passed after efactor 2')
 })
 
@@ -174,7 +176,7 @@ Deno.test('Composable System - Progress states work across all schedulers', () =
 
   for (let i = 0; i < 3; i++) {
     staticAssignment = staticScheduler.update(
-      true,
+      StaticQuality.Correct,
       testSubject,
       staticAssignment,
     )
@@ -191,7 +193,7 @@ Deno.test('Composable System - Progress states work across all schedulers', () =
 
   for (let i = 0; i < 7; i++) {
     staticAssignment = staticScheduler.update(
-      true,
+      StaticQuality.Correct,
       testSubject,
       staticAssignment,
     )
@@ -341,7 +343,7 @@ Deno.test('Composable System - Required subjects work across all schedulers', ()
   let staticUpdatedPrereq = staticPrereqAssignment
   for (let i = 0; i < 3; i++) {
     staticUpdatedPrereq = staticScheduler.update(
-      true,
+      StaticQuality.Correct,
       prerequisiteSubject,
       staticUpdatedPrereq,
     )
@@ -440,7 +442,7 @@ Deno.test('Composable System - Required subjects work across all schedulers', ()
 })
 
 Deno.test('Composable System - Pure schedulers work without progress', () => {
-  const pureStatic = new StaticIntervalScheduler()
+  const pureStatic = new StaticScheduler()
   const pureFsrs = new FsrsScheduler()
   const pureSm2 = new Sm2Scheduler()
 
@@ -450,7 +452,7 @@ Deno.test('Composable System - Pure schedulers work without progress', () => {
     learnCards: ['q'],
     quizCards: ['a'],
     data: {
-      intervalSystemId: 1,
+      srsId: 1,
       q: 'Question?',
       a: 'Answer',
     },
@@ -466,7 +468,11 @@ Deno.test('Composable System - Pure schedulers work without progress', () => {
   assertEquals(sm2Assignment.unlockedAt, undefined)
 
   // Should still be updatable
-  const updatedStatic = pureStatic.update(true, simpleSubject, staticAssignment)
+  const updatedStatic = pureStatic.update(
+    StaticQuality.Correct,
+    simpleSubject,
+    staticAssignment,
+  )
   const updatedFsrs = pureFsrs.update(
     FsrsQuality.Good,
     simpleSubject,

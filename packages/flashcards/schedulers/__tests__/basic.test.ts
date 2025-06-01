@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertNotEquals } from '@std/assert'
-import BasicScheduler from '../basic.ts'
+import { BasicScheduler } from '../basic.ts'
 import type { Assignment, Subject } from '../../types.ts'
 
 const subjectA = {

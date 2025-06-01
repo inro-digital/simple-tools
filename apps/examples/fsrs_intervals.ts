@@ -1,10 +1,11 @@
 import { FSRS } from 'ts-fsrs'
 import { DAY_MS, getNow } from '../../packages/utils/datetime.ts'
-import FsrsLevelsScheduler, {
-  defaultSRS,
-  Quality,
-} from '@inro/simple-tools/flashcards/schedulers/fsrs-levels'
-import type { Subject } from '@inro/simple-tools/flashcards'
+import {
+  defaultFsrsThresholds,
+  FsrsProgressScheduler,
+  FsrsQuality,
+  type Subject,
+} from '@inro/simple-tools/flashcards'
 
 // Create a test subject
 const subject: Subject = {
@@ -43,22 +44,22 @@ function main() {
   console.log('=== Testing Default SRS Progression ===')
   console.log('Expected intervals: [0.5, 1, 3, 7, 14, 23, 35, 50, 65, 85]')
 
-  const defaultScheduler = new FsrsLevelsScheduler({ userLevel: 1 })
+  const defaultScheduler = new FsrsProgressScheduler({ userLevel: 1 })
   let assignment = defaultScheduler.add(subject)
   const defaultIntervals = []
 
   // Simulate 15 repetitions to see the progression
   for (let i = 0; i < 15; i++) {
-    assignment = defaultScheduler.update(Quality.Good, subject, assignment)
+    assignment = defaultScheduler.update(FsrsQuality.Good, subject, assignment)
     defaultIntervals.push(assignment.interval)
 
     console.log(`Repetition ${i + 1}: Interval = ${assignment.interval} days`)
 
-    if (i + 1 === defaultSRS[1].passesAt) {
+    if (i + 1 === defaultFsrsThresholds[1].passesAt) {
       console.log(`  * Passed threshold reached at repetition ${i + 1}`)
     }
 
-    if (i + 1 === defaultSRS[1].completesAt) {
+    if (i + 1 === defaultFsrsThresholds[1].completesAt) {
       console.log(`  * Completion threshold reached at repetition ${i + 1}`)
     }
   }
@@ -66,14 +67,14 @@ function main() {
   console.log('\n=== Testing Fast SRS Progression ===')
   console.log('Expected intervals: [0.5, 1, 2, 5, 12, 25, 40, 55]')
 
-  const fastScheduler = new FsrsLevelsScheduler({ userLevel: 1 })
+  const fastScheduler = new FsrsProgressScheduler({ userLevel: 1 })
   let fastAssignment = fastScheduler.add(fastSubject)
   const fastIntervals = []
 
   // Simulate 12 repetitions for Fast SRS
   for (let i = 0; i < 12; i++) {
     fastAssignment = fastScheduler.update(
-      Quality.Good,
+      FsrsQuality.Good,
       fastSubject,
       fastAssignment,
     )
@@ -83,11 +84,11 @@ function main() {
       `Repetition ${i + 1}: Interval = ${fastAssignment.interval} days`,
     )
 
-    if (i + 1 === defaultSRS[2].passesAt) {
+    if (i + 1 === defaultFsrsThresholds[2].passesAt) {
       console.log(`  * Passed threshold reached at repetition ${i + 1}`)
     }
 
-    if (i + 1 === defaultSRS[2].completesAt) {
+    if (i + 1 === defaultFsrsThresholds[2].completesAt) {
       console.log(`  * Completion threshold reached at repetition ${i + 1}`)
     }
   }
@@ -109,7 +110,7 @@ function main() {
  * Test using FSRS directly without the scheduler
  */
 function testDirectFsrs(srsId: number) {
-  const srs = defaultSRS[srsId]
+  const srs = defaultFsrsThresholds[srsId]
   const fsrs = new FSRS(srs.fsrsParams!)
   const now = getNow()
 
@@ -129,7 +130,7 @@ function testDirectFsrs(srsId: number) {
   const intervals = []
 
   for (let i = 0; i < (srsId === 1 ? 15 : 12); i++) {
-    const result = fsrs.repeat(state, now)[Quality.Good]
+    const result = fsrs.repeat(state, now)[FsrsQuality.Good]
 
     if (!result.card) {
       console.log(`No card returned for repetition ${i + 1}`)

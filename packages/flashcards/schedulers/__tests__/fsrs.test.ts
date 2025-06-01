@@ -2,10 +2,10 @@ import { assert, assertEquals } from '@std/assert'
 import { assertSnapshot } from '@std/testing/snapshot'
 import { getNow, setMockTime } from '../../../utils/datetime.ts'
 import type { Subject } from '../../types.ts'
-import FsrsScheduler, { Quality } from '../fsrs.ts'
+import { FsrsQuality, FsrsScheduler } from '../fsrs.ts'
 import type { Assignment } from '../../mod.ts'
 
-const { Good, Easy, Again, Hard } = Quality
+const { Good, Easy, Again, Hard } = FsrsQuality
 
 Deno.test('FsrsScheduler.add - initializes a new assignment correctly', () => {
   const fsrs = new FsrsScheduler()

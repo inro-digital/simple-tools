@@ -6,8 +6,40 @@
 import Scheduler from '../scheduler.ts'
 import type { Assignment, Subject } from '../types.ts'
 
-/** A basic scheduler to demonstrate usage */
-export default class BasicScheduler extends Scheduler<number> {
+/** Quality levels for FSRS */
+export enum BasicQuality {
+  Correct = 1,
+  Incorrect = 0,
+}
+
+export interface BasicParams {
+  repetitionsToComplete?: number
+}
+
+export const defaultBasicParams: BasicParams = {
+  repetitionsToComplete: 3,
+}
+
+/**
+ * A basic scheduler that shows a subject a few times
+ *  * @example
+ * ```
+ *   import { BasicScheduler, BasicQuality } from '@inro/simple-tools/flashcards'
+ *   const scheduler = new BasicScheduler()
+ *
+ *   const scheduler = new BasicScheduler({ repetitionsToComplete: 2 })
+ *   const assignment = scheduler.add(subject)
+ *   const updated = scheduler.update(BasicQuality.Correct, subject, assignment)
+ * ```
+ */
+export class BasicScheduler extends Scheduler<BasicQuality> {
+  #repetitionsToComplete: number
+
+  constructor({ repetitionsToComplete = 3 }: BasicParams = defaultBasicParams) {
+    super()
+    this.#repetitionsToComplete = repetitionsToComplete
+  }
+
   /** Ensure that repetition is an int */
   override add(subject: Subject): Assignment {
     return { markedCompleted: false, repetition: 0, subjectId: subject.id }
@@ -16,7 +48,7 @@ export default class BasicScheduler extends Scheduler<number> {
   /** If answered correctly 3 times, skip it! */
   override filter(_subject: Subject, assignment: Assignment): boolean {
     if (assignment?.markedCompleted) return false
-    return (assignment?.repetition ?? 0) < 3
+    return (assignment?.repetition ?? 0) < this.#repetitionsToComplete
   }
 
   /** Sort by least-repeated. If they are the same, then sort randomly! */
@@ -34,7 +66,7 @@ export default class BasicScheduler extends Scheduler<number> {
    * If answered incorrectly, decrement the repetition
    */
   override update(
-    qualityInput: number,
+    qualityInput: BasicQuality,
     _subject: Subject,
     assignment: Assignment,
   ): Assignment {

@@ -1,7 +1,10 @@
-import FsrsLevelsScheduler from '@inro/simple-tools/flashcards/schedulers/fsrs-levels'
-import type { Assignment, Subject } from '@inro/simple-tools/flashcards'
+import {
+  type Assignment,
+  FsrsProgressScheduler,
+  type Subject,
+} from '@inro/simple-tools/flashcards'
 
-const scheduler = new FsrsLevelsScheduler({
+const scheduler = new FsrsProgressScheduler({
   srs: {
     '1': {
       id: 1,

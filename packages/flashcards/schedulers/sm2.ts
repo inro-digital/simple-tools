@@ -13,7 +13,7 @@ const defaultRepetition = 0
 const defaultInterval = 0
 
 /** Quality levels for SM2 */
-export enum Quality {
+export enum Sm2Quality {
   Blackout = 0,
   Incorrect = 1,
   AlmostCorrect = 2,
@@ -26,13 +26,13 @@ export enum Quality {
  * Supermemo2 Algorithm
  * @example
  * ```
- *   import Sm2, { Quality } from '@inro/simple-tools/flashcards/schedulers/sm2'
+ *   import { Sm2Scheduler, Sm2Quality } from '@inro/simple-tools/flashcards'
  *   const scheduler = new Sm2Scheduler()
  *   const assignment = scheduler.add(subject)
- *   const updatedAssignment = scheduler.update(Quality.Correct, subject, assignment)
+ *   const updatedAssignment = scheduler.update(Sm2Quality.Correct, subject, assignment)
  * ```
  */
-export default class Sm2 extends Scheduler<number> {
+export class Sm2Scheduler extends Scheduler<Sm2Quality> {
   /**
    * 1. Ensures repetition and interval start at 0.
    * 2. Ensures that EF starts at 2.5
@@ -84,7 +84,7 @@ export default class Sm2 extends Scheduler<number> {
    * item from the beginning without changing the E-Factor
    */
   override update(
-    qualityInput: number,
+    qualityInput: Sm2Quality,
     _subject: Subject,
     assignment: Assignment,
   ): Assignment {

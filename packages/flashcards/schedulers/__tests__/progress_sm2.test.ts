@@ -1,6 +1,6 @@
 import { assert, assertEquals } from '@std/assert'
 import type { Assignment, Subject } from '../../types.ts'
-import Sm2ProgressScheduler, { Quality } from '../sm2_progress.ts'
+import { Sm2ProgressScheduler, Sm2Quality } from '../progress_sm2.ts'
 import { assertInstanceOf } from '@std/assert/instance-of'
 import { assertFalse } from '@std/assert/false'
 
@@ -75,19 +75,19 @@ Deno.test('Sm2ProgressScheduler - SM2 algorithm with progress tracking', () => {
   let assignment = scheduler.add(subjects[0])
 
   // First correct answer - should go to interval 1
-  assignment = scheduler.update(Quality.Correct, subjects[0], assignment)
+  assignment = scheduler.update(Sm2Quality.Correct, subjects[0], assignment)
   assertEquals(assignment.repetition, 1)
   assertEquals(assignment.interval, 1)
   assertEquals(assignment.passedAt, undefined, 'not passed yet (needs 3 reps)')
 
   // Second correct answer - should go to interval 6
-  assignment = scheduler.update(Quality.Correct, subjects[0], assignment)
+  assignment = scheduler.update(Sm2Quality.Correct, subjects[0], assignment)
   assertEquals(assignment.repetition, 2)
   assertEquals(assignment.interval, 6)
   assertEquals(assignment.passedAt, undefined, 'not passed yet (needs 3 reps)')
 
   // Third correct answer - should reach passed state
-  assignment = scheduler.update(Quality.Correct, subjects[0], assignment)
+  assignment = scheduler.update(Sm2Quality.Correct, subjects[0], assignment)
   assertEquals(assignment.repetition, 3)
   assertInstanceOf(assignment.passedAt, Date, 'passed after 3 reps')
   assertEquals(
@@ -98,7 +98,7 @@ Deno.test('Sm2ProgressScheduler - SM2 algorithm with progress tracking', () => {
 
   // Continue to completion (10 reps total)
   for (let i = 0; i < 7; i++) {
-    assignment = scheduler.update(Quality.Correct, subjects[0], assignment)
+    assignment = scheduler.update(Sm2Quality.Correct, subjects[0], assignment)
   }
 
   assertEquals(assignment.repetition, 10)
@@ -110,12 +110,12 @@ Deno.test('Sm2ProgressScheduler - incorrect answer resets repetition', () => {
   let assignment = scheduler.add(subjects[0])
 
   // Build up some repetitions
-  assignment = scheduler.update(Quality.Correct, subjects[0], assignment)
-  assignment = scheduler.update(Quality.Correct, subjects[0], assignment)
+  assignment = scheduler.update(Sm2Quality.Correct, subjects[0], assignment)
+  assignment = scheduler.update(Sm2Quality.Correct, subjects[0], assignment)
   assertEquals(assignment.repetition, 2)
 
   // Fail the card
-  assignment = scheduler.update(Quality.Incorrect, subjects[0], assignment)
+  assignment = scheduler.update(Sm2Quality.Incorrect, subjects[0], assignment)
   assertEquals(assignment.repetition, 0, 'repetition resets on failure')
   // Note: SM2 sets interval to 0 if studied today, 1 otherwise. Since we're testing immediately, it's 0.
   assertEquals(
@@ -192,7 +192,7 @@ Deno.test('Sm2ProgressScheduler - required subjects', () => {
   let updatedPrereqAssignment = prerequisiteAssignment
   for (let i = 0; i < 3; i++) {
     updatedPrereqAssignment = scheduler.update(
-      Quality.Correct,
+      Sm2Quality.Correct,
       prerequisiteSubject,
       updatedPrereqAssignment,
     )
@@ -229,7 +229,7 @@ Deno.test('Sm2ProgressScheduler - filterLearnable vs filterQuizzable', () => {
 
   // After updating, should not be learnable anymore (has repetitions)
   const updatedAssignment = scheduler.update(
-    Quality.Correct,
+    Sm2Quality.Correct,
     subjects[0],
     assignment,
   )

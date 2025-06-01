@@ -1,206 +1,150 @@
-/**
- * @module
- * A scheduler with statically-tiered due-dates
- */
 import { getNow } from '../../utils/datetime.ts'
 import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
 
-/** Srs defines the intervals used, and cutoffs */
-export interface Srs {
-  /** Identifier for the srs system */
+/** Quality levels for FSRS */
+export enum StaticQuality {
+  Correct = 1,
+  Incorrect = 0,
+}
+
+/** Static interval system configuration */
+export interface StaticIntervals {
+  /** Identifier for the interval system */
   id: number
-  /** Display name for the srs system */
+  /** Display name for the interval system */
   name: string
-  /**
-   * Once this interval is reached, an assignment is "unlocked".
-   * This generally means that an assignement is available to the user.
-   */
-  unlocksAt: number
-  /**
-   * Once this interval is reached, an assignment is "started".
-   * This generally means that a user has seen/learned the assignment.
-   */
-  startsAt: number
-  /**
-   * Once this interval is reached, an assignment is "passed".
-   * This generally means that dependent assignments become unlocked.
-   */
-  passesAt: number
-  /**
-   * Once this interval is reached, an assignment is complete.
-   * This generally means that a user has demonstrated "mastery", and this that
-   * this assignment no longer needs to be shown.
-   */
-  completesAt: number
   /** An array of seconds, indicating how long to wait between intervals */
   intervals: number[]
 }
 
-/**
- * Data that is necessary to include in the subject's `data` property, in order
- * for this scheduler to function.
- */
-export interface SubjectData {
-  /** Level that a subject is unlocked */
-  level: number
-  /** Represents which srs interval to use */
+/** Data that subjects need in their `data` property for static intervals */
+export interface StaticSubjectData {
+  /** Represents which interval system to use */
   srsId: number
-  /** An array of subject ids that need to be passed before this subject is unlocked */
-  requiredSubjects?: string[]
-  /** Order in which the subject is displayed */
-  position?: number
 }
 
-/**
- * A scheduler that utilizes static interval definitions
- */
-export default class StaticScheduler extends Scheduler<boolean> {
-  #srs: Record<number, Srs> = {}
-  /** A user's level. They should start at 1; 0 just means not initialized */
-  userLevel: number = 0
+/** Default interval systems */
+export const defaultStaticIntervals: Record<number, StaticIntervals> = {
+  1: {
+    id: 1,
+    name: 'Default',
+    // deno-fmt-ignore 0s, 1d, 3d, 1w, 2w, 23d, 35d, 50d, 65d, 85d
+    intervals: [ 0, 86400, 259200, 604800, 1209600, 1987200, 3024000, 4320000, 5616000, 7344000],
+  },
+  2: {
+    id: 2,
+    name: 'Fast',
+    // 0s, 12h, 2d, 5d, 12d, 25d, 40d, 55d
+    intervals: [0, 43200, 172800, 432000, 1036800, 2160000, 3456000, 4752000],
+  },
+}
 
-  /** Initialize with user level and srs interval definitions */
-  constructor({ srs, userLevel }: Partial<{
-    srs: Record<number, Srs>
-    userLevel: number
-  }> = {}) {
+/** A scheduler that uses static, predefined intervals for scheduling reviews */
+export class StaticScheduler extends Scheduler<StaticQuality> {
+  #intervalSystems: Record<number, StaticIntervals> = defaultStaticIntervals
+
+  /** Initialize with interval system definitions */
+  constructor(
+    { intervalSystems }: {
+      intervalSystems?: Record<number, StaticIntervals>
+    } = {},
+  ) {
     super()
-    this.#srs = srs || this.#srs
-    this.userLevel = userLevel || this.userLevel
+    this.#intervalSystems = intervalSystems || this.#intervalSystems
   }
 
-  /** Ensure that repetition is an int */
+  /** Create a new assignment with initial interval */
   override add(subject: Subject): Assignment {
-    const { srsId } = subject.data as SubjectData
-    const srs = this.#srs[srsId]
-    if (!srs) throw new Error(`No SRS srs defined for ${srsId}`)
+    const { srsId } = subject.data as StaticSubjectData
+    const system = this.#intervalSystems[srsId]
+    if (!system) {
+      throw new Error(`No interval system defined for ${srsId}`)
+    }
 
     return {
-      availableAt: getNow(srs.intervals[0]),
-      efactor: 0,
-      markedCompleted: false,
       subjectId: subject.id,
-      interval: srs.intervals[0],
-      startedAt: getNow(),
-      unlockedAt: getNow(),
+      markedCompleted: false,
+      efactor: 0, // Using efactor as stage/index into intervals array
+      interval: system.intervals[0],
+      availableAt: getNow(system.intervals[0]),
+      lastStudiedAt: getNow(),
     }
   }
 
-  /**
-   * Should filter out subjects that user is not high enough level to see, or
-   * have been completed
-   */
-  override filter(subject: Subject, assignment: Assignment): boolean {
-    const { level = 0 } = subject.data as SubjectData
-    if (level > this.userLevel) return false
-    if (assignment?.markedCompleted || assignment?.completedAt) return false
-    return true
-  }
-
-  /**
-   * Filters out subjects that have already been learned or have unmet requirements
-   * @param subject The subject to check
-   * @param assignment The assignment for the subject
-   * @param allAssignments Optional map of all assignments by subjectId to check requirements
-   */
-  override filterLearnable(
-    subject: Subject,
-    assignment: Assignment,
-    allAssignments?: Record<string, Assignment>,
-  ): boolean {
-    if (!this.filter(subject, assignment)) return false
-    if (assignment?.startedAt) return false // Already learned
-
-    const { requiredSubjects = [] } = subject.data as SubjectData
-    if (requiredSubjects.length > 0 && allAssignments) {
-      const allRequiredPassed = requiredSubjects.every((reqSubjectId) => {
-        const reqAssignment = allAssignments[reqSubjectId]
-        return reqAssignment && reqAssignment.passedAt !== undefined
-      })
-      if (!allRequiredPassed) return false
-    }
-
-    return true
-  }
-
-  /**
-   * Filters out subjects that haven't already been learned or aren't due yet
-   * @param subject The subject to check
-   * @param assignment The assignment for the subject
-   */
-  override filterQuizzable(
-    subject: Subject,
-    assignment: Assignment,
-  ): boolean {
-    if (!this.filter(subject, assignment)) return false
-    if (!assignment?.startedAt) return false // Not learned yet, so can't quiz.
-    if (!assignment?.availableAt) return false // Not available, so can't quiz
+  /** Filter out assignments that aren't due yet */
+  override filter(_subject: Subject, assignment: Assignment): boolean {
+    if (assignment?.markedCompleted) return false
+    if (!assignment?.availableAt) return true
     return assignment.availableAt <= getNow()
   }
 
-  /** Sort by level, and then sort by position within level */
-  override sort(
-    [subjectA, _assignmentA]: [Subject, Assignment],
-    [subjectB, _assignmentB]: [Subject, Assignment],
-  ): number {
-    const dataA = subjectA.data as SubjectData
-    const dataB = subjectB.data as SubjectData
-    if (dataA?.level && !dataB?.level) return -1
-    if (dataB?.level && !dataA?.level) return 1
-    if (dataA?.level !== dataB?.level) return dataA.level - dataB.level
-    return (dataA.position ?? 0) - (dataB.position ?? 0)
+  /** Only show items that haven't been started */
+  override filterLearnable(_subject: Subject, assignment: Assignment): boolean {
+    if (assignment?.startedAt) return false
+    return this.filter(_subject, assignment)
+  }
+
+  /** Only show items that have been started and are due */
+  override filterQuizzable(_subject: Subject, assignment: Assignment): boolean {
+    if (!assignment?.startedAt) return false
+    return this.filter(_subject, assignment)
+  }
+
+  /** Sort randomly by default */
+  override sort(): number {
+    return Math.random() - 0.5
   }
 
   /**
-   * quality - true means a user was correct, false is incorrect
-   * efactor - the `stage` that the assignment is on. On update, the lowest
-   * stage we can get is 1. Stage 0 is reserved for new subjects, and should
-   * default to being immediately available.
+   * Update assignment based on quality (correct/incorrect)
+   * @param isCorrect true if answer was correct, false if incorrect
    */
   override update(
-    isCorrect: boolean,
+    isCorrect: StaticQuality,
     subject: Subject,
     assignment: Assignment,
   ): Assignment {
-    const { srsId } = subject.data as SubjectData
-    const srs = this.#srs[srsId]
-    if (!srs) throw new Error(`No SRS srs defined for ${srsId}`)
+    const { srsId } = subject.data as StaticSubjectData
+    const system = this.#intervalSystems[srsId]
+    if (!system) throw new Error(`No interval system defined for ${srsId}`)
+
     if (isCorrect) {
-      const { efactor: prevEfactor = 0, passedAt } = assignment
-      const efactor = prevEfactor + 1
-      const isPassed = efactor >= srs.passesAt
+      const { efactor: prevStage = 0 } = assignment
+      const efactor = prevStage + 1
       const interval = this.#getInterval(srsId, efactor)
+
       return {
         ...assignment,
-        availableAt: getNow(interval),
+        availableAt: interval !== undefined ? getNow(interval) : undefined,
         efactor,
         interval,
-        passedAt: passedAt || (isPassed ? getNow() : undefined),
+        lastStudiedAt: getNow(),
       }
     } else {
+      // Move back one stage, but minimum stage is 1 (not 0)
       const efactor = Math.max(1, (assignment?.efactor || 1) - 1)
       const interval = this.#getInterval(srsId, efactor)
-      const intervalDate = getNow(interval)
+      const intervalDate = interval !== undefined ? getNow(interval) : undefined
       const tomorrow = getNow(86_400) // 1-day do-over to recover lost stage
 
       return {
         ...assignment,
-        availableAt: interval
-          ? intervalDate < tomorrow ? intervalDate : tomorrow
-          : undefined,
+        availableAt:
+          interval !== undefined && intervalDate && intervalDate < tomorrow
+            ? intervalDate
+            : tomorrow,
         efactor,
         interval,
-        subjectId: subject.id,
+        lastStudiedAt: getNow(),
       }
     }
   }
 
-  #getInterval(srsId: number, efactor: number): number | undefined {
-    const system = this.#srs[srsId]
-    if (!system) throw new Error('No srs system found')
-    const interval = system.intervals[efactor]
-    if (interval == null) return undefined
+  #getInterval(srsId: number, stage: number): number | undefined {
+    const system = this.#intervalSystems[srsId]
+    if (!system) throw new Error('No interval system found')
+    const interval = system.intervals[stage]
     return interval
   }
 }

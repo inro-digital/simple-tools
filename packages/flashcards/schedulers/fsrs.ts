@@ -16,7 +16,7 @@ import Scheduler from '../scheduler.ts'
 import type { Assignment, Subject } from '../types.ts'
 
 /** Quality levels for FSRS */
-export enum Quality {
+export enum FsrsQuality {
   /** Complete failure to recall */
   Again = 1,
   /** Recalled with significant difficulty */
@@ -28,7 +28,7 @@ export enum Quality {
 }
 
 /** Custom Adjustments to the algorithm */
-export interface Params {
+export interface FsrsParams {
   /** Weights affet things like initial intervale length, growth rate, impact of difficulty, etc */
   w: readonly number[]
   /** Target retention rate (85% == aims for you to remember 85% of the cards) */
@@ -39,7 +39,7 @@ export interface Params {
 }
 
 /** Default parameters of the Fsrs scheduler */
-export const defaultParams: Params = {
+export const defaultFsrsParams: FsrsParams = {
   w: default_w,
   requestRetention: default_request_retention,
   maximumInterval: default_maximum_interval,
@@ -63,14 +63,14 @@ export const defaultParams: Params = {
  *   const updatedAssignment = scheduler.update(Quality.Good, subject, assignment)
  * ```
  */
-export default class FsrsScheduler extends Scheduler<number> {
+export class FsrsScheduler extends Scheduler<number> {
   private fsrs: FSRS
 
   /** Initialize with fsrs params */
-  constructor(params: Partial<Params> = defaultParams) {
+  constructor(params: Partial<FsrsParams> = defaultFsrsParams) {
     super()
     this.fsrs = new FSRS({
-      ...defaultParams,
+      ...defaultFsrsParams,
       w: params.w,
       request_retention: params.requestRetention,
       enable_short_term: params.enableShortTerm,
@@ -149,7 +149,10 @@ export default class FsrsScheduler extends Scheduler<number> {
     _subject: Subject,
     assignment: Assignment,
   ): Assignment {
-    const rating: Quality = Math.min(Math.max(Math.round(ratingValue), 1), 4)
+    const rating: FsrsQuality = Math.min(
+      Math.max(Math.round(ratingValue), 1),
+      4,
+    )
 
     const now = getNow()
     const lastStudiedAt = assignment.lastStudiedAt || now
@@ -188,7 +191,7 @@ export default class FsrsScheduler extends Scheduler<number> {
         stability: result.card.stability,
         difficulty: result.card.difficulty,
         interval: Math.max(0.5, result.card.scheduled_days),
-        lapses: (rating < Quality.Good) ? lapses + 1 : lapses,
+        lapses: (rating < FsrsQuality.Good) ? lapses + 1 : lapses,
         lastStudiedAt: now,
         repetition: (rating === 1) ? 0 : repetition + 1,
         steps: result.card.learning_steps,
@@ -197,9 +200,9 @@ export default class FsrsScheduler extends Scheduler<number> {
       console.error('FSRS error:', error)
       // Fallback implementation if FSRS fails
       let newInterval = Math.max(0.25, interval * 2.5) // easy
-      if (rating === Quality.Again) newInterval = 0.25 // 6 hours
-      else if (rating === Quality.Hard) newInterval = 1 // 1 day
-      else if (rating === Quality.Good) newInterval = 3 // 3 days
+      if (rating === FsrsQuality.Again) newInterval = 0.25 // 6 hours
+      else if (rating === FsrsQuality.Hard) newInterval = 1 // 1 day
+      else if (rating === FsrsQuality.Good) newInterval = 3 // 3 days
 
       return {
         ...assignment,
@@ -211,7 +214,7 @@ export default class FsrsScheduler extends Scheduler<number> {
             difficulty - (0.1 * (rating - 3)),
           ),
         ),
-        lapses: (rating < Quality.Good) ? lapses + 1 : lapses,
+        lapses: (rating < FsrsQuality.Good) ? lapses + 1 : lapses,
         lastStudiedAt: now,
         interval: Math.max(0.5, newInterval),
         repetition: (rating === 1) ? 0 : repetition + 1,
