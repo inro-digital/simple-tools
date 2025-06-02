@@ -35,6 +35,7 @@ export interface FsrsParams {
   requestRetention: number
   /** maximum interval between reviews  */
   maximumInterval: number
+  /** Allows for within-the-day scheduling */
   enableShortTerm: boolean
 }
 
@@ -78,9 +79,7 @@ export class FsrsScheduler extends Scheduler<number> {
     })
   }
 
-  /**
-   * Initializes a new assignment with default FSRS values
-   */
+  /** Initializes a new assignment with default FSRS values */
   override add(subject: Subject): Assignment {
     return {
       subjectId: subject.id,
@@ -97,6 +96,7 @@ export class FsrsScheduler extends Scheduler<number> {
     }
   }
 
+  /** Show cards that are either learnable or quizzable */
   override filter(subject: Subject, assignment: Assignment): boolean {
     return this.filterLearnable(subject, assignment) ||
       this.filterQuizzable(subject, assignment)

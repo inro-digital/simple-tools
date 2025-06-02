@@ -2,7 +2,7 @@ import { getNow } from '../../utils/datetime.ts'
 import type { Assignment, Subject } from '../types.ts'
 import Scheduler from '../scheduler.ts'
 
-/** Quality levels for FSRS */
+/** Answers can be Correct or Incorrect */
 export enum StaticQuality {
   Correct = 1,
   Incorrect = 0,

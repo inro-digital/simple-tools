@@ -6,16 +6,19 @@
 import Scheduler from '../scheduler.ts'
 import type { Assignment, Subject } from '../types.ts'
 
-/** Quality levels for FSRS */
+/** Answers can be Correct or Incorrect */
 export enum BasicQuality {
   Correct = 1,
   Incorrect = 0,
 }
 
+/** Options for scheduler behavior */
 export interface BasicParams {
+  /** Number of repetitions until an assignment is not shown */
   repetitionsToComplete?: number
 }
 
+/** Defaults for scheduler behavior */
 export const defaultBasicParams: BasicParams = {
   repetitionsToComplete: 3,
 }
@@ -35,6 +38,7 @@ export const defaultBasicParams: BasicParams = {
 export class BasicScheduler extends Scheduler<BasicQuality> {
   #repetitionsToComplete: number
 
+  /** Initialize with BasicParmas */
   constructor({ repetitionsToComplete = 3 }: BasicParams = defaultBasicParams) {
     super()
     this.#repetitionsToComplete = repetitionsToComplete

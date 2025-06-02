@@ -42,6 +42,7 @@ export interface Sm2ProgressSubjectData {
  * ```
  */
 export class Sm2ProgressScheduler extends ProgressScheduler<Sm2Quality> {
+  /** Initialize with user level and thresholds */
   constructor({ userLevel, thresholds }: Partial<{
     userLevel: number
     thresholds: ProgressThresholds

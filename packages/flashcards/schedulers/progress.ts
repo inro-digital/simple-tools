@@ -190,6 +190,7 @@ export class ProgressScheduler<Quality> extends Scheduler<Quality> {
   private baseScheduler: Scheduler<Quality>
   private progressTracker: ProgressTracker
 
+  /** Initialize with the wrapped scheduler, and progress params */
   constructor({
     scheduler,
     userLevel = 0,
