@@ -1,8 +1,5 @@
-import {
-  type Assignment,
-  FsrsProgressScheduler,
-  type Subject,
-} from '@inro/simple-tools/flashcards'
+import { FsrsProgressScheduler } from '@inro/simple-tools/flashcards/schedulers'
+import type { Assignment, Subject } from '@inro/simple-tools/flashcards'
 
 const scheduler = new FsrsProgressScheduler({
   srs: {

@@ -7,6 +7,7 @@ export * from './calculator/mod.ts'
 
 export { default as Flashcards } from './flashcards/mod.ts'
 export * from './flashcards/mod.ts'
+export * from './flashcards/schedulers/mod.ts'
 
 export { default as Countdown } from './timers/countdown.ts'
 export * from './timers/countdown.ts'

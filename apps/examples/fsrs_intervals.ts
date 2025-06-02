@@ -4,8 +4,8 @@ import {
   defaultFsrsThresholds,
   FsrsProgressScheduler,
   FsrsQuality,
-  type Subject,
-} from '@inro/simple-tools/flashcards'
+} from '@inro/simple-tools/flashcards/schedulers'
+import type { Subject } from '@inro/simple-tools/flashcards'
 
 // Create a test subject
 const subject: Subject = {

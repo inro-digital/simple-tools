@@ -24,7 +24,7 @@ export interface Sm2ProgressSubjectData {
  * A scheduler that combines SM2 algorithm with progress tracking
  * @example
  * ```ts
- * import { Sm2ProgressScheduler, Sm2Quality } from '@inro/simple-tools/flashcards'
+ * import { Sm2ProgressScheduler, Sm2Quality } from '@inro/simple-tools/flashcards/schedulers'
  * const scheduler = new Sm2ProgressScheduler({ userLevel: 1 })
  * const subject = {
  *   id: 'vocab-1',

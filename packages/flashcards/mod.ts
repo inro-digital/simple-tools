@@ -18,7 +18,6 @@ import {
 } from './types.ts'
 
 export { Scheduler }
-export * from './schedulers/mod.ts'
 export * from './types.ts'
 
 const { Learn, Quiz } = SessionType
